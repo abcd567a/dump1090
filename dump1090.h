@@ -245,6 +245,7 @@ typedef enum {
 #include "cpr.h"
 #include "icao_filter.h"
 #include "convert.h"
+#include "libbladeRF.h"
 
 //======================== structure declarations =========================
 
@@ -293,6 +294,41 @@ struct {                             // Internal state
     int           freq;
     int           ppm_error;
 
+	// bladeRF
+	void                **buffers;      /* Transmit buffers */
+    size_t              num_buffers;    /* Number of buffers */
+    size_t              samples_per_buffer; /* Number of samples per buffer */
+    unsigned int        idx;            /* The next one that needs to go out */
+    bladerf_module      module;         /* Direction */
+    ssize_t             samples_left;   /* Number of samples left */
+	struct bladerf_stream *bladerfStream;
+
+    struct bladerf *bladerf_dev;
+    pthread_mutex_t *dev_lock;
+
+    struct adsb_params *p;
+    pthread_t thread;
+    int status;
+
+    const char      *device_str;
+    unsigned int    samplerate;
+    unsigned int    frequency;
+    bladerf_loopback loopback;
+
+    const char      *fpga_image;
+    const char      *fx3_image;
+
+    unsigned int    tx_repetitions;
+    uint64_t        rx_count;
+    unsigned int    block_size;
+
+    unsigned int    num_xfers;
+    unsigned int    stream_buffer_count;
+    unsigned int    stream_buffer_size;    /* Units of samples */
+    unsigned int    timeout_ms;
+    unsigned int    bladerf_gain;
+    unsigned int    bandwidth;
+
     // Networking
     char           aneterr[ANET_ERR_LEN];
     struct net_service *services;    // Active services
@@ -312,6 +348,7 @@ struct {                             // Internal state
     int   nfix_crc;                  // Number of crc bit error(s) to correct
     int   check_crc;                 // Only display messages with good CRC
     int   raw;                       // Raw output format
+	int bladerf;
     int   mode_ac;                   // Enable decoding of SSR Modes A & C
     int   mode_ac_auto;              // allow toggling of A/C by Beast commands
     int   debug;                     // Debugging mode

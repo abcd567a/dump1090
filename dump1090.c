@@ -48,6 +48,7 @@
 //   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dump1090.h"
+#include "libbladeRF.h"
 
 #include <rtl-sdr.h>
 
@@ -258,6 +259,149 @@ static void convert_samples(void *iq,
 }
 
 //
+// =============================== bladeRF handling ==========================
+//
+
+static int cal_lms_adsb(struct bladerf *dev)
+{
+        struct bladerf_lms_dc_cals lms_cals = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+    int status;
+
+        //runs the calibration on the lpf stage "cal lms rxlpf"
+        status = bladerf_calibrate_dc(dev, BLADERF_DC_CAL_RX_LPF);
+
+        //Print out calibration
+        status = bladerf_lms_get_dc_cals(dev, &lms_cals);
+        if (status != 0) {
+                return -1;
+        } else {
+                printf("    LPF tuning module: %d\n\n", lms_cals.lpf_tuning);
+                printf("    TX LPF I filter: %d\n", lms_cals.tx_lpf_i);
+                printf("    TX LPF Q filter: %d\n\n", lms_cals.tx_lpf_q);
+                printf("    RX LPF I filter: %d\n", lms_cals.rx_lpf_i);
+                printf("    RX LPF Q filter: %d\n\n", lms_cals.rx_lpf_q);
+                printf("    RX VGA2 DC reference module: %d\n", lms_cals.dc_ref);
+                printf("    RX VGA2 stage 1, I channel: %d\n", lms_cals.rxvga2a_i);
+                printf("    RX VGA2 stage 1, Q channel: %d\n", lms_cals.rxvga2a_q);
+                printf("    RX VGA2 stage 2, I channel: %d\n", lms_cals.rxvga2b_i);
+                printf("    RX VGA2 stage 2, Q channel: %d\n\n", lms_cals.rxvga2b_q);
+        }
+        return 0;
+}
+
+void *bladerf_callback(struct bladerf *dev, struct bladerf_stream *stream,
+                      struct bladerf_metadata *metadata, void *samples,
+                      size_t num_samples, void *user_data)
+{
+
+
+};
+
+int modesInitBLADERF(void) {
+	Modes.frequency = 1086 * 1000000;
+	Modes.samplerate = 16000000;
+    Modes.rx_count = 0; // 0 is infinte samples
+    Modes.block_size = MODES_MAG_BUF_SAMPLES; // block_size is number of samples.
+    Modes.device_str = NULL;
+    Modes.stream_buffer_size = Modes.block_size*2*2; // block_size number of samples * 2 bytes per sample * 2 (for both I and Q)
+    Modes.stream_buffer_count = 16;
+    Modes.num_xfers = 14;
+	Modes.timeout_ms = 10000;
+    Modes.gain = 30;
+    Modes.bandwidth = 14 * 1000000;
+    Modes.loopback = BLADERF_LB_NONE;
+    Modes.fpga_image = "fax40.rbf";
+    Modes.fx3_image = "bladeRF_fw.img";
+
+        int status = bladerf_open(&Modes.bladerf_dev, Modes.device_str);
+        if (status != 0) {
+                printf("Failed to open device: %s\n", bladerf_strerror(status));
+                return 0;
+        }
+
+        printf("Loading fpga...\n");
+        status = bladerf_load_fpga(Modes.bladerf_dev, Modes.fpga_image);
+        if (status) {
+                        fprintf(stderr, "Error: failed to load FPGA: %s\n", bladerf_strerror(status));
+                        goto initialize_device_out;
+        } else {
+                printf("Done loading image %s.\n", Modes.fpga_image);
+        }
+
+        const char *m_str = "RX";
+        unsigned int samplerate_actual;
+        unsigned int frequency_actual;
+        unsigned int bw_actual;
+
+        status = bladerf_set_sample_rate(Modes.bladerf_dev, BLADERF_MODULE_RX, Modes.samplerate, &samplerate_actual);
+        if (status != 0) {
+                printf("Failed to set %s samplerate: %s\n", m_str, bladerf_strerror(status));
+                return status;
+        }
+
+        status = bladerf_set_frequency(Modes.bladerf_dev, BLADERF_MODULE_RX, Modes.frequency);
+        if (status != 0) {
+                printf("Failed to set %s frequency: %s\n", m_str, bladerf_strerror(status));
+                return status;
+        }
+
+        status = bladerf_get_frequency(Modes.bladerf_dev, BLADERF_MODULE_RX, &frequency_actual);
+        if (status != 0) {
+                printf("Failed to read back %s frequency: %s\n", m_str, bladerf_strerror(status));
+                return status;
+        }
+
+    status = bladerf_set_lna_gain(Modes.bladerf_dev, BLADERF_LNA_GAIN_MAX);
+    status = bladerf_set_lpf_mode(Modes.bladerf_dev, BLADERF_MODULE_RX, BLADERF_LPF_NORMAL);
+    status = bladerf_set_bandwidth(Modes.bladerf_dev, BLADERF_MODULE_RX, Modes.bandwidth, &bw_actual);
+    bladerf_set_txvga1(Modes.bladerf_dev, -35);
+    bladerf_set_txvga2(Modes.bladerf_dev, 0);
+    bladerf_set_rxvga1(Modes.bladerf_dev, Modes.gain);
+    bladerf_set_rxvga2(Modes.bladerf_dev, Modes.gain); // It turns out that we get more messages with this set high
+    printf("%s Frequency = %u, %s Samplerate = %u actual bw=%u\n", m_str, frequency_actual, m_str, samplerate_actual, bw_actual);
+
+        if (status != 0) {
+                printf("Failed to init RX module: %s\n",bladerf_strerror(status));
+        goto initialize_device_out;
+    }
+
+        status = bladerf_set_loopback(Modes.bladerf_dev, Modes.loopback);
+        if (status != 0) {
+                printf("Failed to set loopback mode: %s\n",
+                bladerf_strerror(status));
+        } else {
+                printf("Set loopback to %d\n", Modes.loopback);
+        }
+
+	/* Initialize the stream */
+	status = bladerf_init_stream(
+		&Modes.bladerfStream,
+		Modes.bladerf_dev,
+		bladerf_callback,
+		&Modes.buffers,
+		Modes.num_buffers,
+		BLADERF_FORMAT_SC16_Q11,
+		Modes.samples_per_buffer,
+		Modes.num_buffers,
+		NULL
+	);
+
+        initialize_device_out:
+        if (status != 0) {
+                bladerf_close(Modes.bladerf_dev);
+                return 0;
+        }
+
+        //LMS receiver calibration
+        status = cal_lms_adsb(Modes.bladerf_dev);
+
+        printf("BladeRF Intialized\n");
+
+        return 1;
+
+};
+
+//
 // =============================== RTLSDR handling ==========================
 //
 int modesInitRTLSDR(void) {
@@ -389,8 +533,12 @@ void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx) {
     // Lock the data buffer variables before accessing them
     pthread_mutex_lock(&Modes.data_mutex);
     if (Modes.exit) {
-        rtlsdr_cancel_async(Modes.dev); // ask our caller to exit
-    }
+		if (Modes.bladerf) {
+			//bladerf_deinit_stream(Modes.bladerfStream);
+		} else {
+			rtlsdr_cancel_async(Modes.dev); // ask our caller to exit
+    		}
+	}
 
     next_free_buffer = (Modes.first_free_buffer + 1) % MODES_MAG_BUFFERS;
     outbuf = &Modes.mag_buffers[Modes.first_free_buffer];
@@ -467,6 +615,7 @@ void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx) {
     pthread_cond_signal(&Modes.data_cond);
     pthread_mutex_unlock(&Modes.data_mutex);
 }
+
 //
 //=========================================================================
 //
@@ -585,28 +734,36 @@ void *readerThreadEntryPoint(void *arg) {
 
     start_cpu_timing(&reader_thread_start); // we accumulate in rtlsdrCallback() or readDataFromFile()
 
-    if (Modes.filename == NULL) {
-        while (!Modes.exit) {
-            rtlsdr_read_async(Modes.dev, rtlsdrCallback, NULL,
-                              MODES_RTL_BUFFERS,
-                              MODES_RTL_BUF_SIZE);
+	if (Modes.filename == NULL) {
+		while (!Modes.exit) {
+			if (Modes.bladerf) {
+				bladerf_stream (Modes.bladerfStream, BLADERF_MODULE_RX);
 
-            if (!Modes.exit) {
-                log_with_timestamp("Warning: lost the connection to the RTLSDR device.");
-                rtlsdr_close(Modes.dev);
-                Modes.dev = NULL;
+				if (!Modes.exit) {
+					bladerf_deinit_stream(Modes.bladerfStream);
+				}
+			} else {
+				rtlsdr_read_async(Modes.dev, rtlsdrCallback, NULL,
+					MODES_RTL_BUFFERS,
+					MODES_RTL_BUF_SIZE);
 
-                do {
-                    sleep(5);
-                    log_with_timestamp("Trying to reconnect to the RTLSDR device..");
-                } while (!Modes.exit && modesInitRTLSDR() < 0);
-            }
-        }
+				if (!Modes.exit) {
+					log_with_timestamp("Warning: lost the connection to the RTLSDR device.");
+					rtlsdr_close(Modes.dev);
+					Modes.dev = NULL;
 
-        if (Modes.dev != NULL) {
-            rtlsdr_close(Modes.dev);
-            Modes.dev = NULL;
-        }
+					do {
+						sleep(5);
+						log_with_timestamp("Trying to reconnect to the RTLSDR device..");
+					} while (!Modes.exit && modesInitRTLSDR() < 0);
+				}
+			}
+		}
+
+		if (Modes.dev != NULL) {
+			rtlsdr_close(Modes.dev);
+			Modes.dev = NULL;
+		}
     } else {
         readDataFromFile();
     }
@@ -953,6 +1110,8 @@ int main(int argc, char **argv) {
             Modes.mode_ac_auto = 0;
         } else if (!strcmp(argv[j],"--no-modeac-auto")) {
             Modes.mode_ac_auto = 0;
+	} else if (!strcmp(argv[j],"--bladerf")) {
+		Modes.bladerf = 1;
         } else if (!strcmp(argv[j],"--net-beast")) {
             fprintf(stderr, "--net-beast ignored, use --net-bo-port to control where Beast output is generated\n");
         } else if (!strcmp(argv[j],"--net-only")) {
@@ -1092,9 +1251,13 @@ int main(int argc, char **argv) {
     if (Modes.net_only) {
         fprintf(stderr,"Net-only mode, no RTL device or file open.\n");
     } else if (Modes.filename == NULL) {
-        if (modesInitRTLSDR() < 0) {
-            exit(1);
-        }
+        if (Modes.bladerf) {
+		modesInitBLADERF();
+	} else {
+		if (modesInitRTLSDR() < 0) {
+			exit(1);
+		}
+	}
     } else {
         if (Modes.filename[0] == '-' && Modes.filename[1] == '\0') {
             Modes.fd = STDIN_FILENO;
