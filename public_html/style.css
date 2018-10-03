@@ -6,7 +6,7 @@ html, body {
 
 #layout_container { 
     display: flex;
-    height: calc(100% - 60px);;
+    height: calc(100% - 60px);
 }
 
 #selected_infoblock {
