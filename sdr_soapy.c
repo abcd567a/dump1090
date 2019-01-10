@@ -131,7 +131,7 @@ bool soapyOpen(void)
     }
         
     
-    SOAPY.converter = init_converter(INPUT_SC16Q11,
+    SOAPY.converter = init_converter(INPUT_SC16,
                                      Modes.sample_rate,
                                      Modes.dc_filter,
                                      &SOAPY.converter_state);
@@ -169,7 +169,7 @@ void soapyRun()
     while (!Modes.exit) {
         int flags;
         long long timeNs;
-        int sample_count = SoapySDRDevice_readStream(SOAPY.dev, SOAPY.stream, buffers, buffer_elements, &flags, &timeNs, 50000);
+        int sample_count = SoapySDRDevice_readStream(SOAPY.dev, SOAPY.stream, buffers, buffer_elements, &flags, &timeNs, 5000000);
         if (sample_count <= 0) {
             fprintf(stderr, "soapy: readStream failed: %s\n", SoapySDRDevice_lastError());
             return;
