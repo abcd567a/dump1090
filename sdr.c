@@ -28,6 +28,8 @@
 #  include "sdr_bladerf.h"
 #endif
 
+#include "sdr_soapy.h"
+
 typedef struct {
     const char *name;
     sdr_type_t sdr_type;
@@ -85,6 +87,7 @@ static sdr_handler sdr_handlers[] = {
     { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, bladeRFClose },
 #endif
 
+    { "soapy", SDR_SOAPY, soapyInitConfig, soapyShowHelp, soapyHandleOption, soapyOpen, soapyRun, soapyClose },
     { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, ifileClose },
     { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noClose },
 

@@ -35,6 +35,10 @@ ifeq ($(BLADERF), yes)
   LIBS_SDR += $(shell pkg-config --libs libbladeRF)
 endif
 
+SDR_OBJ += sdr_soapy.o
+CFLAGS += $(shell pkg-config --cflags SoapySDR)
+LIBS_SDR += $(shell pkg-config --libs SoapySDR)
+
 all: dump1090 view1090
 
 %.o: %.c *.h
