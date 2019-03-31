@@ -44,7 +44,7 @@ Binaries are built in the source directory; you will need to arrange to
 install them (and a method for starting them) yourself.
 
 "make BLADERF=no" will disable bladeRF support and remove the dependency on
-libbladeRF.
+libbladeRF. This may be required on some platforms (e.g. MacOS).
 
 "make RTLSDR=no" will disable rtl-sdr support and remove the dependency on
 librtlsdr.
