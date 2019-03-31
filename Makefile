@@ -6,8 +6,29 @@ BLADERF ?= yes
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
-CFLAGS += $(DIALECT) -O2 -g -Wall -Werror -W -D_DEFAULT_SOURCE
-LIBS = -lpthread -lm -lrt
+CFLAGS += $(DIALECT) -O2 -g -Wall -Werror -W
+LIBS = -lpthread -lm
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+  LIBS += -lrt
+  CFLAGS += -D_DEFAULT_SOURCE
+endif
+
+ifeq ($(UNAME), Darwin)
+  ifneq ($(shell sw_vers -productVersion | egrep '^10\.([0-9]|1[01])\.'),) # Mac OS X ver <= 10.11
+    CFLAGS += -DMISSING_GETTIME
+    COMPAT += compat/clock_gettime/clock_gettime.o
+  endif
+  CFLAGS += -DMISSING_NANOSLEEP
+  COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+endif
+
+ifeq ($(UNAME), OpenBSD)
+  CFLAGS += -DMISSING_NANOSLEEP
+  COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+endif
 
 ifeq ($(RTLSDR), yes)
   SDR_OBJ += sdr_rtlsdr.o
