@@ -3,8 +3,16 @@
 
 #include <mach/mach_time.h> // Apple-only, but this isn't inclued on other BSDs
 
+#ifdef __OpenBSD__
 #ifdef _CLOCKID_T_DEFINED_
 #define CLOCKID_T
+#endif
+#endif
+
+#ifdef __APPLE__
+#ifdef CLOCK_MONOTONIC
+#define CLOCKID_T
+#endif
 #endif
 
 #ifndef CLOCKID_T
