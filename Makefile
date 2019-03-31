@@ -1,8 +1,5 @@
 PROGNAME=dump1090
 
-RTLSDR ?= yes
-BLADERF ?= yes
-
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
@@ -12,8 +9,9 @@ LIBS = -lpthread -lm
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
-  LIBS += -lrt
   CFLAGS += -D_DEFAULT_SOURCE
+  LIBS += -lrt
+  LIBS_USB += -lusb-1.0
 endif
 
 ifeq ($(UNAME), Darwin)
@@ -23,12 +21,26 @@ ifeq ($(UNAME), Darwin)
   endif
   CFLAGS += -DMISSING_NANOSLEEP
   COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+  LIBS_USB += -lusb-1.0
+  BLADERF ?= no
 endif
 
 ifeq ($(UNAME), OpenBSD)
   CFLAGS += -DMISSING_NANOSLEEP
   COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+  LIBS_USB += -lusb-1.0
+  BLADERF ?= no
 endif
+
+ifeq ($(UNAME), FreeBSD)
+  CFLAGS += -D_DEFAULT_SOURCE
+  LIBS += -lrt
+  LIBS_USB += -lusb
+  BLADERF ?= no
+endif
+
+RTLSDR ?= yes
+BLADERF ?= yes
 
 ifeq ($(RTLSDR), yes)
   SDR_OBJ += sdr_rtlsdr.o
@@ -38,14 +50,14 @@ ifeq ($(RTLSDR), yes)
     CPPFLAGS += -I$(RTLSDR_PREFIX)/include
     LDFLAGS += -L$(RTLSDR_PREFIX)/lib
   else
-    CFLAGS += $(shell pkg-config --cflags librtlsdr)
+    CFLAGS += $(shell pkg-config --cflags-only-I librtlsdr)
     LDFLAGS += $(shell pkg-config --libs-only-L librtlsdr)
   endif
 
   ifeq ($(STATIC), yes)
-    LIBS_SDR += -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic -lusb-1.0
+    LIBS_SDR += -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic $(LIBS_USB)
   else
-    LIBS_SDR += -lrtlsdr -lusb-1.0
+    LIBS_SDR += -lrtlsdr $(LIBS_USB)
   endif
 endif
 
