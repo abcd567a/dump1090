@@ -38,18 +38,54 @@ This file contains dump1090's list of recently seen aircraft. The keys are:
  * messages: the total number of Mode S messages processed since dump1090 started.
  * aircraft: an array of JSON objects, one per known aircraft. Each aircraft has the following keys. Keys will be omitted if data is not available.
    * hex: the 24-bit ICAO identifier of the aircraft, as 6 hex digits. The identifier may start with '~', this means that the address is a non-ICAO address (e.g. from TIS-B).
-   * squawk: the 4-digit squawk (octal representation)
+   * type: 
    * flight: the flight name / callsign
-   * lat, lon: the aircraft position in decimal degrees
-   * nucp: the NUCp (navigational uncertainty category) reported for the position
-   * seen_pos: how long ago (in seconds before "now") the position was last updated
-   * altitude: the aircraft altitude in feet, or "ground" if it is reporting it is on the ground
-   * vert_rate: vertical rate in feet/minute
+   * alt_baro: the aircraft barometric altitude in either feet or meters
+   * alt_geom: geometric (GNSS / INS) altitude in either feet or meters
+   * gs: ground speed in knots
+   * ias: indicated air speed in knots
+   * tas: true air speed in knots
+   * mach: mach number
    * track: true track over ground in degrees (0-359)
-   * speed: reported speed in kt. This is usually speed over ground, but might be IAS - you can't tell the difference here, sorry!
+   * track_rate: Rate of change of track, degrees/second
+   * roll: Roll, degrees, negative is left roll
+   * mag_heading: Heading, degrees clockwise from magnetic north
+   * true_heading: Heading, degrees clockwise from true north
+   * baro_rate: Rate of change of barometric altitude, feet/minute
+   * geom_rate: Rate of change of geometric (GNSS / INS) altitude, feet/minute
+   * squawk: identity (Squawk), encoded as 4 hex digits
+   * emergency: provide asdditional information regarding aircraft status (2.2.3.2.7.8.1.1)
+   * category: emitter category to identify particular aircraft or vehicle types (values A0 - D7) (2.2.3.2.5.2)
+     - Set A: Light, Small, Large, High Vortex Large, High Performance, Rotorcraft
+     - Set B: Glider, Lighter than Air, Parachutist, Ultralight, Unmanned Areal Vehicel, Space/Transatmospheric vehicle
+     - Set C: Emergency Vehicle, Service Vehicle, Obstruction
+     - Set D: Reserved
+   * nav_qnh: altimeter setting (QFE or QNH/QNE), millibars
+   * nav_altitude: selected altitude
+   * nav_heading: selected heading
+   * nav_modes: ['autopilot', 'vnav', 'althold', 'approach', 'lnav', 'tcas']
+   * lat, lon: the aircraft position in decimal degrees
+   * nic: Navigation Integrity Category (2.2.3.2.7.2.6)
+   * rc: Radius of Containment in meters 
+   * seen_pos: how long ago (in seconds before "now") the position was last updated
+   * version: ADS-B Version Number 0, 1, 2 (3-7 are reserved) (2.2.3.2.7.5)
+   * nic_baro: Navigation Integrity Category for Barometric Altitude (2.2.5.1.35)
+   * nac_p: Navigation Accuracy for Position (2.2.5.1.35)
+   * nac_v: Navigation Accuracy for Velocity (2.2.5.1.19)
+   * sil: Source Integity Level (2.2.5.1.40)
+   * sil_type: unknown, perHour, perSample
+   * gva: Geometric Vertical Accuracy  (2.2.3.2.7.2.8)
+   * sda: System Design Assurance (2.2.3.2.7.2.4.6)
+   * mlat: list of fields based on MLAT e.g. ['lat', 'lon', 'nic', 'rc', 'nac_v']
+   * tisb: ??? list of fields based on TIS-B ???
    * messages: total number of Mode S messages received from this aircraft
    * seen: how long ago (in seconds before "now") a message was last received from this aircraft
    * rssi: recent average RSSI (signal power), in dbFS; this will always be negative.
+
+   removed fields:
+    * vert_rate: vertical rate in feet/minute
+    * speed: reported speed in kt. This is usually speed over ground, but might be IAS - you can't tell the difference here, sorry!
+    * nucp: the NUCp (navigational uncertainty category) reported for the position
    
 ## history_0.json, history_1.json, ..., history_119.json
 
