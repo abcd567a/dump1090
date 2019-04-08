@@ -1550,7 +1550,7 @@ char *generateStatsJson(const char *url_path, int *len) {
     p = appendStatsJson(p, end, &add, "total");
     p = safe_snprintf(p, end, "\n}\n");
 
-    assert(p <= end);
+    assert(p < end);
 
     *len = p-buf;
     return buf;
@@ -1908,7 +1908,7 @@ static void writeFATSVPositionUpdate(float lat, float lon, float alt)
     --p; // remove last tab
     p = safe_snprintf(p, end, "\n");
 
-    if (p <= end)
+    if (p < end)
         completeWrite(&Modes.fatsv_out, p);
     else
         fprintf(stderr, "fatsv: output too large (max %d, overran by %d)\n", TSV_MAX_PACKET_SIZE, (int) (p - end));
@@ -1935,7 +1935,7 @@ static void writeFATSVEventMessage(struct modesMessage *mm, const char *datafiel
     }
     p = safe_snprintf(p, end, "\n");
 
-    if (p <= end)
+    if (p < end)
         completeWrite(&Modes.fatsv_out, p);
     else
         fprintf(stderr, "fatsv: output too large (max %d, overran by %d)\n", TSV_MAX_PACKET_SIZE, (int) (p - end));
@@ -2256,7 +2256,7 @@ static void writeFATSV()
         --p; // remove last tab
         p = safe_snprintf(p, end, "\n");
 
-        if (p <= end)
+        if (p < end)
             completeWrite(&Modes.fatsv_out, p);
         else
             fprintf(stderr, "fatsv: output too large (max %d, overran by %d)\n", TSV_MAX_PACKET_SIZE, (int) (p - end));
