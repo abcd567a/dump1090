@@ -12,9 +12,11 @@ It is designed to build as a Debian package.
 
 You will need a build of libbladeRF. You can build packages from source:
 
+```bash
 $ git clone https://github.com/Nuand/bladeRF.git
 $ cd bladeRF
 $ dpkg-buildpackage -b
+```
 
 Or Nuand has some build/install instructions including an Ubuntu PPA
 at https://github.com/Nuand/bladeRF/wiki/Getting-Started:-Linux
@@ -43,8 +45,8 @@ You can probably just run "make" after installing the required dependencies.
 Binaries are built in the source directory; you will need to arrange to
 install them (and a method for starting them) yourself.
 
-"make BLADERF=no" will disable bladeRF support and remove the dependency on
+``make BLADERF=no`` will disable bladeRF support and remove the dependency on
 libbladeRF.
 
-"make RTLSDR=no" will disable rtl-sdr support and remove the dependency on
+``make RTLSDR=no`` will disable rtl-sdr support and remove the dependency on
 librtlsdr.
