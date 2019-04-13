@@ -568,9 +568,9 @@ int decodeModesMessage(struct modesMessage *mm, unsigned char *msg)
         mm->CC = getbit(msg, 7);
     }
 
-    // CF (Control field)
+    // CF (Control field, see Figure 2-2 ADS-B Message BaselineFormat Structure)
     if (mm->msgtype == 18) {
-        mm->CF = getbits(msg, 5, 8);
+        mm->CF = getbits(msg, 6, 8);
     }
 
     // DR (Downlink Request)
