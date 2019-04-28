@@ -6,6 +6,14 @@ customized for use within [FlightAware](http://flightaware.com)'s
 
 It is designed to build as a Debian package.
 
+## Building under stretch
+
+```bash
+$ sudo apt-get install build-essential debhelper librtlsdr-dev pkg-config dh-systemd libncurses5-dev libbladerf-dev
+$ dpkg-buildpackage -b
+```
+
+
 ## Building under jessie
 
 ### Dependencies - bladeRF
