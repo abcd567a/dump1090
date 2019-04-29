@@ -15,16 +15,20 @@ ifeq ($(RTLSDR), yes)
 
   ifdef RTLSDR_PREFIX
     CPPFLAGS += -I$(RTLSDR_PREFIX)/include
-    LDFLAGS += -L$(RTLSDR_PREFIX)/lib
+    ifeq ($(STATIC), yes)
+      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic -lusb-1.0
+    else
+      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -lrtlsdr -lusb-1.0
+    endif
   else
     CFLAGS += $(shell pkg-config --cflags librtlsdr)
-    LDFLAGS += $(shell pkg-config --libs-only-L librtlsdr)
-  endif
-
-  ifeq ($(STATIC), yes)
-    LIBS_SDR += -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic -lusb-1.0
-  else
-    LIBS_SDR += -lrtlsdr -lusb-1.0
+    # some packaged .pc files are massively broken, try to handle it
+    RTLSDR_LFLAGS := $(shell pkg-config --libs-only-L librtlsdr)
+    ifeq ($(RTLSDR_LFLAGS),-L)
+      LIBS_SDR += $(shell pkg-config --libs-only-l --libs-only-other librtlsdr)
+    else
+      LIBS_SDR += $(shell pkg-config --libs librtlsdr)
+    endif
   endif
 endif
 

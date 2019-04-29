@@ -6,6 +6,14 @@ customized for use within [FlightAware](http://flightaware.com)'s
 
 It is designed to build as a Debian package.
 
+## Building under stretch
+
+```bash
+$ sudo apt-get install build-essential debhelper librtlsdr-dev pkg-config dh-systemd libncurses5-dev libbladerf-dev
+$ dpkg-buildpackage -b
+```
+
+
 ## Building under jessie
 
 ### Dependencies - bladeRF
@@ -44,8 +52,8 @@ You can probably just run "make" after installing the required dependencies.
 Binaries are built in the source directory; you will need to arrange to
 install them (and a method for starting them) yourself.
 
-"make BLADERF=no" will disable bladeRF support and remove the dependency on
+``make BLADERF=no`` will disable bladeRF support and remove the dependency on
 libbladeRF.
 
-"make RTLSDR=no" will disable rtl-sdr support and remove the dependency on
+``make RTLSDR=no`` will disable rtl-sdr support and remove the dependency on
 librtlsdr.
