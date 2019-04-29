@@ -12,8 +12,9 @@ It is designed to build as a Debian package.
 
 You will need a build of libbladeRF. You can build packages from source:
 
-$ git clone https://github.com/Nuand/bladeRF.git
-$ cd bladeRF
+$ git clone https://github.com/Nuand/bladeRF.git  
+$ cd bladeRF  
+$ git checkout 2017.12-rc1  
 $ dpkg-buildpackage -b
 
 Or Nuand has some build/install instructions including an Ubuntu PPA
