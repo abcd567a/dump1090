@@ -1569,6 +1569,8 @@ static const char *commb_format_to_string(commb_format_t format) {
     switch (format) {
     case COMMB_EMPTY_RESPONSE:
         return "empty response";
+    case COMMB_AMBIGUOUS:
+        return "ambiguous format";
     case COMMB_DATALINK_CAPS:
         return "BDS1,0 Datalink capabilities";
     case COMMB_GICB_CAPS:
