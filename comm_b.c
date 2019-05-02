@@ -296,7 +296,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
             score += 13;
         } else {
             // unlikely altitude
-            score -= 2;
+            return 0;
         }
     } else if (!mcp_valid && mcp_raw == 0) {
         score += 1;
@@ -311,7 +311,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
             score += 13;
         } else {
             // unlikely altitude
-            score -= 2;
+            return 0;
         }
     } else if (!fms_valid && fms_raw == 0) {
         score += 1;
@@ -326,7 +326,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
             score += 13;
         } else {
             // unlikely pressure setting
-            score -= 2;
+            return 0;
         }
     } else if (!baro_valid && baro_raw == 0) {
         score += 1;
@@ -475,7 +475,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
         if (roll >= -40 && roll < 40) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!roll_valid && roll_raw == 0 && !roll_sign) {
         score += 1;
@@ -503,7 +503,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
         if (gs >= 50 && gs <= 700) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!gs_valid && gs_raw == 0) {
         score += 1;
@@ -521,7 +521,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
         if (track_rate >= -10.0 && track_rate <= 10.0) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!track_rate_valid && track_rate_raw == 0 && !track_rate_sign) {
         score += 1;
@@ -536,7 +536,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
         if (tas >= 50 && tas <= 700) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!tas_valid && tas_raw == 0) {
         score += 1;
@@ -646,7 +646,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
         if (ias >= 50 && ias <= 700) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!ias_valid && ias_raw == 0) {
         score += 1;
@@ -660,7 +660,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
         if (mach >= 0.1 && mach <= 0.9) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!mach_valid && mach_raw == 0) {
         score += 1;
@@ -678,7 +678,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
         if (baro_rate >= -6000 && baro_rate <= 6000) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!baro_rate_valid && baro_rate_raw == 0) {
         score += 1;
@@ -696,7 +696,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
         if (inertial_rate >= -6000 && inertial_rate <= 6000) {
             score += 11;
         } else {
-            score -= 5;
+            return 0;
         }
     } else if (!inertial_rate_valid && inertial_rate_raw == 0) {
         score += 1;
