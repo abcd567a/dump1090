@@ -301,7 +301,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
     } else if (!mcp_valid && mcp_raw == 0) {
         score += 1;
     } else {
-        score -= 130;
+        return 0;
     }
 
     unsigned fms_alt = 0;
@@ -316,7 +316,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
     } else if (!fms_valid && fms_raw == 0) {
         score += 1;
     } else {
-        score -= 130;
+        return 0;
     }
 
     float baro_setting = 0;
@@ -331,11 +331,11 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
     } else if (!baro_valid && baro_raw == 0) {
         score += 1;
     } else {
-        score -= 130;
+        return 0;
     }
 
     if (reserved_1 != 0) {
-        score -= 80;
+        return 0;
     }
 
     if (mode_valid) {
@@ -343,11 +343,11 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
     } else if (!mode_valid && mode_raw == 0) {
         score += 1;
     } else {
-        score -= 40;
+        return 0;
     }
 
     if (reserved_2 != 0) {
-        score -= 20;
+        return 0;
     }
 
     if (source_valid) {
@@ -355,7 +355,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store)
     } else if (!source_valid && source_raw == 0) {
         score += 1;
     } else {
-        score -= 30;
+        return 0;
     }
 
     // small bonuses for consistent data
@@ -480,7 +480,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
     } else if (!roll_valid && roll_raw == 0 && !roll_sign) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     float track = 0;
@@ -493,7 +493,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
     } else if (!track_valid && track_raw == 0 && !track_sign) {
         score += 1;
     } else {
-        score -= 120;
+        return 0;
     }
 
     unsigned gs = 0;
@@ -508,7 +508,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
     } else if (!gs_valid && gs_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     float track_rate = 0;
@@ -526,7 +526,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
     } else if (!track_rate_valid && track_rate_raw == 0 && !track_rate_sign) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     unsigned tas = 0;
@@ -541,7 +541,7 @@ static int decodeBDS50(struct modesMessage *mm, bool store)
     } else if (!tas_valid && tas_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     // small bonuses for consistent data
@@ -637,7 +637,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
     } else if (!heading_valid && heading_raw == 0 && !heading_sign) {
         score += 1;
     } else {
-        score -= 120;
+        return 0;
     }
 
     unsigned ias = 0;
@@ -651,7 +651,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
     } else if (!ias_valid && ias_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     float mach = 0;
@@ -665,7 +665,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
     } else if (!mach_valid && mach_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     int baro_rate = 0;
@@ -683,7 +683,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
     } else if (!baro_rate_valid && baro_rate_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     int inertial_rate = 0;
@@ -701,7 +701,7 @@ static int decodeBDS60(struct modesMessage *mm, bool store)
     } else if (!inertial_rate_valid && inertial_rate_raw == 0) {
         score += 1;
     } else {
-        score -= 110;
+        return 0;
     }
 
     // small bonuses for consistent data
