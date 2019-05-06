@@ -67,7 +67,7 @@ This file contains dump1090's list of recently seen aircraft. The keys are:
    * nav_qnh: altimeter setting (QFE or QNH/QNE), hPa
    * nav_altitude_mcp: selected altitude from the Mode Control Panel / Flight Control Unit (MCP/FCU) or equivalent equipment
    * nav_altitude_fms: selected altitude from the Flight Manaagement System (FMS) (2.2.3.2.7.1.3.3)
-   * nav_heading: selected heading (True or Magnetic is not defined in DO-260B, mostly Magnetic as that is the de facto standart) (2.2.3.2.7.1.3.7)
+   * nav_heading: selected heading (True or Magnetic is not defined in DO-260B, mostly Magnetic as that is the de facto standard) (2.2.3.2.7.1.3.7)
    * nav_modes: set of engaged automation modes: 'autopilot', 'vnav', 'althold', 'approach', 'lnav', 'tcas'
    * lat, lon: the aircraft position in decimal degrees
    * nic: Navigation Integrity Category (2.2.3.2.7.2.6)
