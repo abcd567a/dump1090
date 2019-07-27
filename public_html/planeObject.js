@@ -136,7 +136,7 @@ PlaneObject.prototype.isFiltered = function() {
 
 // Appends data to the running track so we can get a visual tail on the plane
 // Only useful for a long running browser session.
-PlaneObject.prototype.updateTrack = function(estimate_time) {
+PlaneObject.prototype.updateTrack = function(receiver_timestamp, last_timestamp) {
         if (!this.position)
                 return false;
         if (this.prev_position && this.position[0] == this.prev_position[0] && this.position[1] == this.prev_position[1])
@@ -172,9 +172,20 @@ PlaneObject.prototype.updateTrack = function(estimate_time) {
         }
 
         var lastseg = this.track_linesegs[this.track_linesegs.length - 1];
-        var elapsed = (this.last_position_time - prev_time);
-        
-        var est_track = (elapsed > estimate_time);
+
+        // Determine if track data are intermittent/stale
+        // Time difference between two position updates should not be much
+        // greater than the difference between data inputs
+        // MLAT data are given some more leeway
+
+        var time_difference = (this.last_position_time - prev_time) - (receiver_timestamp - last_timestamp);
+        var stale_timeout = (this.position_from_mlat ? 30 : 5);
+        var est_track = (time_difference > stale_timeout);
+
+        // Also check if the position was already stale when it was exported by dump1090
+        // Makes stale check more accurate for history points spaced 30 seconds apart
+        est_track = est_track || ((receiver_timestamp - this.last_position_time) > stale_timeout);
+
         var ground_track = (this.altitude === "ground");
         
         if (est_track) {
@@ -557,7 +568,7 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
 	} else {
                 if (this.position !== null && (this.selected || this.seen_pos < 60)) {
 			this.visible = true;
-			if (this.updateTrack(receiver_timestamp - last_timestamp + (this.position_from_mlat ? 30 : 5))) {
+			if (this.updateTrack(receiver_timestamp, last_timestamp)) {
                                 this.updateLines();
                                 this.updateMarker(true);
                         } else { 
