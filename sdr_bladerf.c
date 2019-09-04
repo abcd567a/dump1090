@@ -24,7 +24,7 @@
 #include <inttypes.h>
 
 // Polyfill for the older bladerf API
-#if defined(LIBBLADERF_API_VERSION) && (LIBBLADERF_API_VERSION < 0x02000000)
+#if !defined(LIBBLADERF_API_VERSION) || (LIBBLADERF_API_VERSION < 0x02000000)
 typedef unsigned int bladerf_frequency;
 #endif
 
