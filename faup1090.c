@@ -207,8 +207,9 @@ int main(int argc, char **argv) {
 
     // Run it until we've lost either connection
     while (!Modes.exit && beast_input->connections && fatsv_output->connections) {
+        struct timespec r = { 0, 100 * 1000 * 1000};
         backgroundTasks();
-        usleep(100000);
+        nanosleep(&r, NULL);
     }
 
     return 0;

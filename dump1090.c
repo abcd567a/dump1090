@@ -660,12 +660,13 @@ int main(int argc, char **argv) {
     if (Modes.sdr_type == SDR_NONE) {
         while (!Modes.exit) {
             struct timespec start_time;
+            struct timespec slp = { 0, 100 * 1000 * 1000};
 
             start_cpu_timing(&start_time);
             backgroundTasks();
             end_cpu_timing(&start_time, &Modes.stats_current.background_cpu);
 
-            usleep(100000);
+            nanosleep(&slp, NULL);
         }
     } else {
         int watchdogCounter = 10; // about 1 second
