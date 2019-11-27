@@ -1307,6 +1307,8 @@ static void trackRemoveStaleAircraft(uint64_t now)
             // These are likely to be due to messages with bad addresses.
             if (a->messages == 1)
                 Modes.stats_current.single_message_aircraft++;
+            if (!a->reliable)
+                Modes.stats_current.unreliable_aircraft++;
 
             // Remove the element from the linked list, with care
             // if we are removing the first element
