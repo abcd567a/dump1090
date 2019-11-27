@@ -206,7 +206,7 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    sendBeastSettings(c, "Cd"); // Beast binary format, no filters
+    sendBeastSettings(c, "CdV"); // Beast binary format, no filters, verbatim mode on
     sendBeastSettings(c, Modes.mode_ac ? "J" : "j");  // Mode A/C on or off
     sendBeastSettings(c, Modes.check_crc ? "f" : "F");  // CRC checks on or off
 

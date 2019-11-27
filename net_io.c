@@ -72,6 +72,8 @@ static int handleBeastCommand(struct client *c, char *p);
 static int decodeBinMessage(struct client *c, char *p);
 static int decodeHexMessage(struct client *c, char *hex);
 
+static void moveNetClient(struct client *c, struct net_service *new_service);
+
 static void send_raw_heartbeat(struct net_service *service);
 static void send_beast_heartbeat(struct net_service *service);
 static void send_sbs_heartbeat(struct net_service *service);
@@ -145,17 +147,14 @@ struct client *createGenericClient(struct net_service *service, int fd)
         exit(1);
     }
 
-    c->service    = service;
+    c->service    = NULL;
     c->next       = Modes.clients;
     c->fd         = fd;
     c->buflen     = 0;
     c->modeac_requested = 0;
     Modes.clients = c;
 
-    ++service->connections;
-    if (service->writer && service->connections == 1) {
-        service->writer->lastWrite = mstime(); // suppress heartbeat initially
-    }
+    moveNetClient(c, service);
 
     return c;
 }
@@ -257,6 +256,7 @@ void modesInitNet(void) {
     serviceListen(s, Modes.net_bind_address, Modes.net_output_raw_ports);
 
     // we maintain two output services, one producing a stream of verbatim messages, one producing a stream of cooked messages
+    // and switch clients between them if they request a change in mode
     Modes.beast_cooked_service = serviceInit("Beast TCP output (cooked mode)", &Modes.beast_cooked_out, send_beast_heartbeat, READ_MODE_BEAST_COMMAND, NULL, handleBeastCommand);
     Modes.beast_verbatim_service = serviceInit("Beast TCP output (verbatim mode)", &Modes.beast_verbatim_out, send_beast_heartbeat, READ_MODE_BEAST_COMMAND, NULL, handleBeastCommand);
 
@@ -873,6 +873,29 @@ void sendBeastSettings(struct client *c, const char *settings)
     anetWrite(c->fd, buf, len);
 }
 
+// Move a network client to a new service
+static void moveNetClient(struct client *c, struct net_service *new_service)
+{
+    if (c->service == new_service)
+        return;
+
+    if (c->service) {
+        // Flush to ensure correct message framing
+        if (c->service->writer)
+            flushWrites(c->service->writer);
+        --c->service->connections;
+    }
+
+    if (new_service) {
+        // Flush to ensure correct message framing
+        if (new_service->writer)
+            flushWrites(new_service->writer);
+        ++new_service->connections;
+    }
+
+    c->service = new_service;
+}
+
 //
 // Handle a Beast command message.
 // Currently, we just look for the Mode A/C command message
@@ -887,13 +910,20 @@ static int handleBeastCommand(struct client *c, char *p) {
     switch (p[1]) {
     case 'j':
         c->modeac_requested = 0;
+        autoset_modeac();
         break;
     case 'J':
         c->modeac_requested = 1;
+        autoset_modeac();
+        break;
+    case 'v':
+        moveNetClient(c, Modes.beast_cooked_service);
+        break;
+    case 'V':
+        moveNetClient(c, Modes.beast_verbatim_service);
         break;
     }
 
-    autoset_modeac();
     return 0;
 }
 
