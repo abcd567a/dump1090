@@ -150,6 +150,9 @@ void interactiveShowData(void) {
                                         pSig[4] + pSig[5] + pSig[6] + pSig[7]) / 8.0;
 
                 strMode[0] = 'S';
+                if (a->adsb_version >= 0) {
+                    strMode[1] = '0' + a->adsb_version;
+                }
                 if (a->modeA_hit) {strMode[2] = 'a';}
                 if (a->modeC_hit) {strMode[3] = 'c';}
 
