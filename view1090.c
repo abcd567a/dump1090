@@ -120,9 +120,9 @@ void showHelp(void) {
   "--lon <longitude>        Reference/receiver longitude for surface posn (opt)\n"
   "--max-range <distance>   Absolute maximum range for position decoding (in nm, default: 300)\n"
   "--no-crc-check           Disable messages with broken CRC (discouraged)\n"
-  "--no-fix                 Disable single-bits error correction using CRC\n"
   "--fix                    Enable single-bits error correction using CRC\n"
-  "--aggressive             More CPU for more messages (two bits fixes, ...)\n"
+  "                         (specify twice for two-bit error correction)\n"
+  "--no-fix                 Disable error correction using CRC\n"
   "--metric                 Use metric units (meters, km/h, ...)\n"
   "--show-only <addr>       Show only messages from the given ICAO on stdout\n"
   "--help                   Show this help\n",
@@ -171,11 +171,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--no-crc-check")) {
             Modes.check_crc = 0;
         } else if (!strcmp(argv[j],"--fix")) {
-            Modes.nfix_crc = 1;
+            ++Modes.nfix_crc;
         } else if (!strcmp(argv[j],"--no-fix")) {
             Modes.nfix_crc = 0;
-        } else if (!strcmp(argv[j],"--aggressive")) {
-            Modes.nfix_crc = MODES_MAX_BITERRORS;
         } else if (!strcmp(argv[j],"--max-range") && more) {
             Modes.maxRange = atof(argv[++j]) * 1852.0; // convert to metres
         } else if (!strcmp(argv[j],"--help")) {
@@ -193,6 +191,9 @@ int main(int argc, char **argv) {
     if (!Modes.quiet) {showCopyright();}
 #define MSG_DONTWAIT 0
 #endif
+
+    if (Modes.nfix_crc > MODES_MAX_BITERRORS)
+        Modes.nfix_crc = MODES_MAX_BITERRORS;
 
     // Initialization
     view1090Init();
