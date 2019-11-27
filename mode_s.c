@@ -465,6 +465,7 @@ int decodeModesMessage(struct modesMessage *mm, unsigned char *msg)
             }
         }
         mm->source = SOURCE_MODE_S_CHECKED;
+        mm->reliable = (mm->IID == 0 && mm->correctedbits == 0);
         break;
 
     case 17:   // Extended squitter
@@ -493,6 +494,7 @@ int decodeModesMessage(struct modesMessage *mm, unsigned char *msg)
         }
 
         mm->source = SOURCE_ADSB; // TIS-B decoding will override this if needed
+        mm->reliable = (mm->correctedbits == 0);
         break;
     }
 
@@ -1442,6 +1444,8 @@ static void decodeExtendedSquitter(struct modesMessage *mm)
         break;
 
     default:
+        // Dubious.
+        mm->reliable = 0;
         break;
     }
 }
@@ -1877,6 +1881,9 @@ void displayModesMessage(struct modesMessage *mm) {
                    esTypeName(mm->metype, mm->mesub),
                    mm->metype);
         }
+    }
+    if (mm->reliable) {
+        printf(" (reliable)");
     }
     printf("\n");
 

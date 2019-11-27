@@ -410,6 +410,7 @@ struct modesMessage {
     int           remote;                         // If set this message is from a remote station
     double        signalLevel;                    // RSSI, in the range [0..1], as a fraction of full-scale power
     int           score;                          // Scoring from scoreModesMessage, if used
+    int           reliable;                       // is this a "reliable" message (uncorrected DF11/DF17/DF18)?
 
     datasource_t  source;                         // Characterizes the overall message source
 

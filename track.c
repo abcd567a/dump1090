@@ -927,6 +927,26 @@ struct aircraft *trackUpdateFromMessage(struct modesMessage *mm)
     a->seen      = messageNow();
     a->messages++;
 
+    // count reliable messages we receive; use them as a metric to
+    // decide when this is a real aircraft, not noise
+    if (mm->msgtype == 11 && mm->reliable) {
+        ++a->reliableDF11;
+    }
+
+    if (mm->msgtype == 17 && mm->reliable) {
+        ++a->reliableDF17;
+    }
+
+    if (a->reliableDF11 >= TRACK_RELIABLE_DF11_MESSAGES || a->reliableDF17 >= TRACK_RELIABLE_DF17_MESSAGES || a->messages >= TRACK_RELIABLE_ANY_MESSAGES) {
+        a->reliable = 1;
+    }
+
+    if (!mm->reliable && !a->reliable) {
+        // no further update from this message as we don't trust it
+        ++a->discarded;
+        return a;
+    }
+
     // update addrtype, we only ever go towards "more direct" types
     if (mm->addrtype < a->addrtype)
         a->addrtype = mm->addrtype;
@@ -1282,8 +1302,7 @@ static void trackRemoveStaleAircraft(uint64_t now)
     struct aircraft *prev = NULL;
 
     while(a) {
-        if ((now - a->seen) > TRACK_AIRCRAFT_TTL ||
-            (a->messages == 1 && (now - a->seen) > TRACK_AIRCRAFT_ONEHIT_TTL)) {
+        if ((now - a->seen) > TRACK_AIRCRAFT_TTL || (!a->reliable && (now - a->seen) > TRACK_AIRCRAFT_UNRELIABLE_TTL)) {
             // Count aircraft where we saw only one message before reaping them.
             // These are likely to be due to messages with bad addresses.
             if (a->messages == 1)
