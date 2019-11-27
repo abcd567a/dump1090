@@ -324,10 +324,14 @@ struct {                             // Internal state
     struct net_service *services;    // Active services
     struct client *clients;          // Our clients
 
-    struct net_writer raw_out;       // Raw output
-    struct net_writer beast_out;     // Beast-format output
-    struct net_writer sbs_out;       // SBS-format output
-    struct net_writer fatsv_out;     // FATSV-format output
+    struct net_service *beast_verbatim_service;  // Beast-format output service, verbatim mode
+    struct net_service *beast_cooked_service;    // Beast-format output service, "cooked" mode
+
+    struct net_writer raw_out;                   // AVR-format output
+    struct net_writer beast_verbatim_out;        // Beast-format output, verbatim mode
+    struct net_writer beast_cooked_out;          // Beast-format output, "cooked" mode
+    struct net_writer sbs_out;                   // SBS-format output
+    struct net_writer fatsv_out;                 // FATSV-format output
 
 #ifdef _WIN32
     WSADATA        wsaData;          // Windows socket initialisation
@@ -353,7 +357,7 @@ struct {                             // Internal state
     char *net_output_beast_ports;    // List of Beast output TCP ports
     char *net_bind_address;          // Bind address
     int   net_sndbuf_size;           // TCP output buffer size (64Kb * 2^n)
-    int   net_verbatim;              // if true, send the original message, not the CRC-corrected one
+    int   net_verbatim;              // if true, Beast output connections default to verbatim mode
     int   forward_mlat;              // allow forwarding of mlat messages to output ports
     int   quiet;                     // Suppress stdout
     uint32_t show_only;              // Only show messages from this ICAO

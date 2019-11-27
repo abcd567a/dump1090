@@ -389,12 +389,10 @@ static void decodeExtendedSquitter(struct modesMessage *mm);
 
 int decodeModesMessage(struct modesMessage *mm, unsigned char *msg)
 {
+    // Preserve the original uncorrected copy for later forwarding
+    memcpy(mm->verbatim, msg, MODES_LONG_MSG_BYTES);
     // Work on our local copy.
     memcpy(mm->msg, msg, MODES_LONG_MSG_BYTES);
-    if (Modes.net_verbatim) {
-        // Preserve the original uncorrected copy for later forwarding
-        memcpy(mm->verbatim, msg, MODES_LONG_MSG_BYTES);
-    }
     msg = mm->msg;
 
     // don't accept all-zeros messages
