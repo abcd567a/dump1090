@@ -390,7 +390,7 @@ static void modesSendBeastVerbatimOutput(struct modesMessage *mm, struct aircraf
         return;
 
     // Do verbatim output for all messages
-    writeBeastMessage(&Modes.beast_verbatim_out, mm->timestampMsg, mm->signalLevel, mm->msg, mm->msgbits / 8);
+    writeBeastMessage(&Modes.beast_verbatim_out, mm->timestampMsg, mm->signalLevel, mm->verbatim, mm->msgbits / 8);
 }
 
 static void modesSendBeastCookedOutput(struct modesMessage *mm, struct aircraft *a) {
@@ -407,7 +407,7 @@ static void modesSendBeastCookedOutput(struct modesMessage *mm, struct aircraft 
     if ((a && !a->reliable) && !mm->reliable)
         return;
 
-    writeBeastMessage(&Modes.beast_cooked_out, mm->timestampMsg, mm->signalLevel, mm->verbatim, mm->msgbits / 8);
+    writeBeastMessage(&Modes.beast_cooked_out, mm->timestampMsg, mm->signalLevel, mm->msg, mm->msgbits / 8);
 }
 
 static void writeBeastMessage(struct net_writer *writer, uint64_t timestamp, double signalLevel, unsigned char *msg, int msgLen) {
