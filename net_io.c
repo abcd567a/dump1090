@@ -1301,7 +1301,7 @@ char *generateAircraftJson(const char *url_path, int *len) {
                        Modes.stats_current.messages_total + Modes.stats_alltime.messages_total);
 
     for (a = Modes.aircrafts; a; a = a->next) {
-        if (a->messages < 2) { // basic filter for bad decodes
+        if (!a->reliable) {
             continue;
         }
 
@@ -2091,7 +2091,7 @@ static void writeFATSV()
     next_update = now + 1000;
 
     for (a = Modes.aircrafts; a; a = a->next) {
-        if (a->messages < 2)  // basic filter for bad decodes
+        if (!a->reliable)
             continue;
 
         // don't emit if it hasn't updated since last time
