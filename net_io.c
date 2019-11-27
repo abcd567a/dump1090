@@ -376,7 +376,20 @@ static void completeWrite(struct net_writer *writer, void *endptr) {
 //
 // Write raw output in Beast Binary format with Timestamp to TCP clients
 //
-static void modesSendBeastOutput(struct modesMessage *mm) {
+static void modesSendBeastOutput(struct modesMessage *mm, struct aircraft *a) {
+    // Don't forward mlat messages, unless --forward-mlat is set
+    if (mm->source == SOURCE_MLAT && !Modes.forward_mlat)
+        return;
+
+    // Filter some messages from cooked output
+    // Don't forward 2-bit-corrected messages
+    if (!Modes.net_verbatim && mm->correctedbits >= 2)
+        return;
+
+    // Don't forward unreliable messages
+    if (!Modes.net_verbatim && (a && !a->reliable) && !mm->reliable)
+        return;
+
     int  msgLen = mm->msgbits / 8;
     char *p = prepareWrite(&Modes.beast_out, 2 + 2 * (7 + msgLen));
     char ch;
@@ -448,12 +461,22 @@ static void send_beast_heartbeat(struct net_service *service)
 //
 // Write raw output to TCP clients
 //
-static void modesSendRawOutput(struct modesMessage *mm) {
-    int  msgLen = mm->msgbits / 8;
-    char *p = prepareWrite(&Modes.raw_out, msgLen*2 + 15);
-    int j;
-    unsigned char *msg = (Modes.net_verbatim ? mm->verbatim : mm->msg);
+static void modesSendRawOutput(struct modesMessage *mm, struct aircraft *a) {
+    // Don't ever forward mlat messages via raw output.
+    if (mm->source == SOURCE_MLAT)
+        return;
 
+    // Filter some messages
+    // Don't forward 2-bit-corrected messages
+    if (mm->correctedbits >= 2)
+        return;
+
+    // Don't forward unreliable messages
+    if ((a && !a->reliable) && !mm->reliable)
+        return;
+
+    int msgLen = mm->msgbits / 8;
+    char *p = prepareWrite(&Modes.raw_out, msgLen*2 + 15);
     if (!p)
         return;
 
@@ -465,7 +488,8 @@ static void modesSendRawOutput(struct modesMessage *mm) {
     } else
         *p++ = '*';
 
-    for (j = 0; j < msgLen; j++) {
+    unsigned char *msg = mm->msg;
+    for (int j = 0; j < msgLen; j++) {
         sprintf(p, "%02X", msg[j]);
         p += 2;
     }
@@ -503,6 +527,22 @@ static void modesSendSBSOutput(struct modesMessage *mm, struct aircraft *a) {
     struct timespec now;
     struct tm    stTime_receive, stTime_now;
     int          msgType;
+
+    // We require a tracked aircraft for SBS output
+    if (!a)
+        return;
+
+    // Don't ever forward 2-bit-corrected messages via SBS output.
+    if (mm->correctedbits >= 2)
+        return;
+
+    // Don't ever forward mlat messages via SBS output.
+    if (mm->source == SOURCE_MLAT)
+        return;
+
+    // Don't ever send unreliable messages via SBS output
+    if (!mm->reliable && !a->reliable)
+        return;
 
     // For now, suppress non-ICAO addresses
     if (mm->addr & MODES_NON_ICAO_ADDRESS)
@@ -721,29 +761,12 @@ static void send_sbs_heartbeat(struct net_service *service)
 //=========================================================================
 //
 void modesQueueOutput(struct modesMessage *mm, struct aircraft *a) {
-    int is_mlat = (mm->source == SOURCE_MLAT);
 
-    if (a && !is_mlat && mm->correctedbits < 2) {
-        // Don't ever forward 2-bit-corrected messages via SBS output.
-        // Don't ever forward mlat messages via SBS output.
-        modesSendSBSOutput(mm, a);
-    }
-
-    if (!is_mlat && (Modes.net_verbatim || mm->correctedbits < 2)) {
-        // Forward 2-bit-corrected messages via raw output only if --net-verbatim is set
-        // Don't ever forward mlat messages via raw output.
-        modesSendRawOutput(mm);
-    }
-
-    if ((!is_mlat || Modes.forward_mlat) && (Modes.net_verbatim || mm->correctedbits < 2)) {
-        // Forward 2-bit-corrected messages via beast output only if --net-verbatim is set
-        // Forward mlat messages via beast output only if --forward-mlat is set
-        modesSendBeastOutput(mm);
-    }
-
-    if (a && !is_mlat) {
-        writeFATSVEvent(mm, a);
-    }
+    // Delegate to the format-specific outputs, each of which makes its own decision about filtering messages
+    modesSendSBSOutput(mm, a);
+    modesSendRawOutput(mm, a);
+    modesSendBeastOutput(mm, a);
+    writeFATSVEvent(mm, a);
 }
 
 // Decode a little-endian IEEE754 float (binary32)
@@ -1950,7 +1973,7 @@ static void writeFATSVEvent(struct modesMessage *mm, struct aircraft *a)
         return; // not enabled or no active connections
     }
 
-    if (a->messages < 2)  // basic filter for bad decodes
+    if (!a || mm->source == SOURCE_MLAT || (!a->reliable && !mm->reliable))
         return;
 
     switch (mm->msgtype) {

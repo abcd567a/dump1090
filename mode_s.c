@@ -2142,23 +2142,9 @@ void useModesMessage(struct modesMessage *mm) {
         displayModesMessage(mm);
     }
 
-    // Feed output clients.
-    // If in --net-verbatim mode, do this for all messages.
-    // Otherwise, apply a sanity-check filter and only
-    // forward messages when we have seen two of them.
-
+    // Feed output clients; modesQueueOutput appropriately filters messages to the different outputs.
     if (Modes.net) {
-        if (Modes.net_verbatim || mm->msgtype == 32 || !a) {
-            // Unconditionally send
-            modesQueueOutput(mm, a);
-        } else if (a->messages > 1) {
-            // Suppress the first message. When we receive a second message,
-            // emit the first two messages.
-            if (a->messages == 2) {
-                modesQueueOutput(&a->first_message, a);
-            }
-            modesQueueOutput(mm, a);
-        }
+        modesQueueOutput(mm, a);
     }
 }
 
