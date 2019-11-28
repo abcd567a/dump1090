@@ -266,8 +266,6 @@ struct aircraft {
     uint64_t      fatsv_last_force_emit;          // time (millis) we last emitted only-on-change data
 
     struct aircraft *next;        // Next aircraft in our linked list
-
-    struct modesMessage first_message;  // A copy of the first message we received for this aircraft.
 };
 
 /* Mode A/C tracking is done separately, not via the aircraft list,

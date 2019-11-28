@@ -93,9 +93,6 @@ struct aircraft *trackCreateAircraft(struct modesMessage *mm) {
     // don't immediately emit, let some data build up
     a->fatsv_last_emitted = a->fatsv_last_force_emit = messageNow();
 
-    // Copy the first message so we can emit it later when a second message arrives.
-    a->first_message = *mm;
-
     // initialize data validity ages
 #define F(f,s,e) do { a->f##_valid.stale_interval = (s) * 1000; a->f##_valid.expire_interval = (e) * 1000; } while (0)
     F(callsign,        60, 70);  // ADS-B or Comm-B
