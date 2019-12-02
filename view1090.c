@@ -130,6 +130,13 @@ void showHelp(void) {
     );
 }
 
+void sendSettings(struct client *c)
+{
+    sendBeastSettings(c, "CdV"); // Beast binary format, no filters, verbatim mode on
+    sendBeastSettings(c, Modes.mode_ac ? "J" : "j");  // Mode A/C on or off
+    sendBeastSettings(c, Modes.check_crc ? "f" : "F");  // CRC checks on or off
+}
+
 //
 //=========================================================================
 //
@@ -206,10 +213,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Failed to connect to %s:%d: %s\n", bo_connect_ipaddr, bo_connect_port, Modes.aneterr);
         exit(1);
     }
-
-    sendBeastSettings(c, "CdV"); // Beast binary format, no filters, verbatim mode on
-    sendBeastSettings(c, Modes.mode_ac ? "J" : "j");  // Mode A/C on or off
-    sendBeastSettings(c, Modes.check_crc ? "f" : "F");  // CRC checks on or off
+    sendSettings(c);
 
     // Keep going till the user does something that stops us
     while (!Modes.exit) {
@@ -225,6 +229,9 @@ int main(int argc, char **argv) {
             // lost input connection, try to reconnect
             sleep(1);
             c = serviceConnect(s, bo_connect_ipaddr, bo_connect_port);
+            if (c) {
+                sendSettings(c);
+            }
             continue;
         }
 
