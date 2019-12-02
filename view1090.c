@@ -100,7 +100,6 @@ void view1090Init(void) {
     modesChecksumInit(Modes.nfix_crc);
     icaoFilterInit();
     modeACInit();
-    interactiveInit();
 }
 
 //
@@ -210,23 +209,25 @@ int main(int argc, char **argv) {
     s = makeBeastInputService();
     c = serviceConnect(s, bo_connect_ipaddr, bo_connect_port);
     if (!c) {
+        interactiveCleanup();
         fprintf(stderr, "Failed to connect to %s:%d: %s\n", bo_connect_ipaddr, bo_connect_port, Modes.aneterr);
         exit(1);
     }
     sendSettings(c);
 
     // Keep going till the user does something that stops us
+    interactiveInit();
     while (!Modes.exit) {
         struct timespec r = { 0, 100 * 1000 * 1000};
         icaoFilterExpire();
         trackPeriodicUpdate();
         modesNetPeriodicWork();
 
-        if (Modes.interactive)
-            interactiveShowData();
+        interactiveShowData();
 
         if (s->connections == 0) {
             // lost input connection, try to reconnect
+            interactiveNoConnection();
             sleep(1);
             c = serviceConnect(s, bo_connect_ipaddr, bo_connect_port);
             if (c) {

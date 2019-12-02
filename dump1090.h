@@ -623,6 +623,7 @@ unsigned modeCToModeA (int modeC);
 void  interactiveInit(void);
 void  interactiveShowData(void);
 void  interactiveCleanup(void);
+void  interactiveNoConnection(void);
 
 // Provided by dump1090.c / view1090.c / faup1090.c
 void receiverPositionChanged(float lat, float lon, float alt);

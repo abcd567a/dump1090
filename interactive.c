@@ -84,15 +84,20 @@ void interactiveInit() {
     initscr();
     clear();
     refresh();
-
-    mvprintw(0, 0, " Hex    Mode  Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   RSSI  Msgs  Ti");
-    mvhline(1, 0, ACS_HLINE, 80);
 }
 
 void interactiveCleanup(void) {
     if (Modes.interactive) {
         endwin();
     }
+}
+
+void interactiveNoConnection(void) {
+    if (!Modes.interactive)
+        return;
+
+    mvprintw(0, 0, "  /!\\ input connection lost /!\\ ");
+    refresh();
 }
 
 void interactiveShowData(void) {
@@ -102,11 +107,17 @@ void interactiveShowData(void) {
     char progress;
     char spinner[4] = "|/-\\";
 
+    if (!Modes.interactive)
+        return;
+
     // Refresh screen every (MODES_INTERACTIVE_REFRESH_TIME) miliseconde
     if (now < next_update)
         return;
 
     next_update = now + MODES_INTERACTIVE_REFRESH_TIME;
+
+    mvprintw(0, 0, " Hex    Mode  Sqwk  Flight   Alt    Spd  Hdg    Lat      Long   RSSI  Msgs  Ti");
+    mvhline(1, 0, ACS_HLINE, 80);
 
     progress = spinner[(now/1000)%4];
     mvaddch(0, 79, progress);
