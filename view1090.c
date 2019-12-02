@@ -226,6 +226,9 @@ int main(int argc, char **argv) {
         interactiveShowData();
 
         if (s->connections == 0) {
+            if (!Modes.interactive)
+                break;
+
             // lost input connection, try to reconnect
             interactiveNoConnection();
             sleep(1);
