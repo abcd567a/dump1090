@@ -1572,7 +1572,7 @@ static char * appendStatsJson(char *p,
                            ",\"altitude_suppressed\":%u"
                            ",\"cpu\":{\"demod\":%llu,\"reader\":%llu,\"background\":%llu}"
                            ",\"tracks\":{\"all\":%u"
-                           ",\"single_message\":%u}"
+                           ",\"single_message\":%u"
                            ",\"unreliable_tracks\":%u}"
                            ",\"messages\":%u}",
                            st->cpr_surface,
