@@ -1113,22 +1113,28 @@ function refreshHighlighted() {
 		infoBox.fadeOut();
 		return;
 	}
-	infoBox.fadeIn(100);
 
 	var mapCanvas = $('#map_canvas');
 	var markerCoordinates = highlighted.marker.getGeometry().getCoordinates();
-    var markerPosition = OLMap.getPixelFromCoordinate(markerCoordinates);
-        var x = markerPosition[0] + 20;
-        var y = markerPosition[1] + 60;
+	var markerPosition = OLMap.getPixelFromCoordinate(markerCoordinates);
+	var x = markerPosition[0];
+	var y = markerPosition[1];
+	if (x < 0 || y < 0 || x > mapCanvas.width() || y > mapCanvas.height()) {
+		infoBox.fadeOut();
+		return;
+	}
+	x = x + 20;
+	y = y + 60;
         var w = infoBox.outerWidth() + 20;
         var h = infoBox.outerHeight();
-        if (x > mapCanvas.width() - w) {
-                x -= w + 20;
-        }
-        if (y > mapCanvas.height() - h) {
-                y -= h;
-        }
-        infoBox.animate({ left: x, top: y }, 500);
+	if (x > mapCanvas.width() - w) {
+		x -= w + 20;
+	}
+	if (y > mapCanvas.height() - h) {
+		y -= h;
+	}
+	infoBox.fadeIn(100);
+	infoBox.animate({ left: x, top: y }, 500);
 
 	if (highlighted.flight !== null && highlighted.flight !== "") {
 		$('#highlighted_callsign').text(highlighted.flight);
