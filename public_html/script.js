@@ -1125,8 +1125,8 @@ function refreshHighlighted() {
 	}
 	x = x + 20;
 	y = y + 60;
-        var w = infoBox.outerWidth() + 20;
-        var h = infoBox.outerHeight();
+	var w = infoBox.outerWidth() + 20;
+	var h = infoBox.outerHeight();
 	if (x > mapCanvas.width() - w) {
 		x -= w + 20;
 	}
