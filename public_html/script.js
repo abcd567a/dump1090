@@ -1136,7 +1136,7 @@ function refreshHighlighted() {
 	if (infoBox.css('visibility', 'visible')) {
 		infoBox.animate({ left: x, top: y }, 500);
 	} else {
-		infoBox.css({ left: x, top: y }, 500);
+		infoBox.css({ left: x, top: y });
 	}
 	infoBox.fadeIn(100);
 
