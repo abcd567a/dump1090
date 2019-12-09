@@ -1133,8 +1133,12 @@ function refreshHighlighted() {
 	if (y > mapCanvas.height() - h) {
 		y -= h;
 	}
+	if (infoBox.css('visibility', 'visible')) {
+		infoBox.animate({ left: x, top: y }, 500);
+	} else {
+		infoBox.css({ left: x, top: y }, 500);
+	}
 	infoBox.fadeIn(100);
-	infoBox.animate({ left: x, top: y }, 500);
 
 	if (highlighted.flight !== null && highlighted.flight !== "") {
 		$('#highlighted_callsign').text(highlighted.flight);
