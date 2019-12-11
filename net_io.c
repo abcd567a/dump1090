@@ -2096,6 +2096,9 @@ static inline float heading_difference(float h1, float h2)
     case SOURCE_TISB:
         sourcetype = "T";
         break;
+    case SOURCE_ADSR:
+        sourcetype = "R";
+        break;
     case SOURCE_ADSB:
         sourcetype = "A";
         break;
