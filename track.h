@@ -195,12 +195,14 @@ struct aircraft {
     unsigned      cpr_even_rc;
 
     data_validity position_valid;
-    double        lat, lon;       // Coordinated obtained from CPR encoded data
+    double        lat, lon;       // Coordinates obtained from CPR encoded data
     unsigned      pos_nic;        // NIC of last computed position
     unsigned      pos_rc;         // Rc of last computed position
 
     // data extracted from opstatus etc
     int           adsb_version;   // ADS-B version (from ADS-B operational status); -1 means no ADS-B messages seen
+    int           adsr_version;   // As above, for ADS-R messages
+    int           tisb_version;   // As above, for TIS-B messages
     heading_type_t adsb_hrd;      // Heading Reference Direction setting (from ADS-B operational status)
     heading_type_t adsb_tah;      // Track Angle / Heading setting (from ADS-B operational status)
 
