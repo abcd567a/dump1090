@@ -57,24 +57,24 @@ bool hackRFHandleOption(int argc, char **argv, int *jptr)
         HackRF.lna_gain = atoi(argv[++j]);
 
         if (HackRF.lna_gain % 8 != 0) {
-            printf("Error: --lna-gain must be multiple of 8\n");
+            fprintf(stderr, "Error: --lna-gain must be multiple of 8\n");
             return false;
         }
 
         if (HackRF.lna_gain > 40 || HackRF.lna_gain < 0) {
-            printf("Error: --lna-gain range is 0 - 42\n");
+            fprintf(stderr, "Error: --lna-gain range is 0 - 42\n");
             return false;
         }
     } else if (!strcmp(argv[j], "--vga-gain") && more) {
         HackRF.vga_gain = atoi(argv[++j]);
 
         if (HackRF.vga_gain % 2 != 0) {
-            printf("Error: --vga-gain must be multiple of 2\n");
+            fprintf(stderr, "Error: --vga-gain must be multiple of 2\n");
             return false;
         }
 
         if (HackRF.vga_gain > 62 || HackRF.vga_gain < 0) {
-            printf("Error: --vga-gain range is 0 - 62\n");
+            fprintf(stderr, "Error: --vga-gain range is 0 - 62\n");
             return false;
         }
 
@@ -82,7 +82,7 @@ bool hackRFHandleOption(int argc, char **argv, int *jptr)
         HackRF.ppm = atoi(argv[++j]);
     } else if (!strcmp(argv[j], "--samplerate") && more) {
         HackRF.rate = atoi(argv[++j]);
-    } else if (!strcmp(argv[j], "--enable-amp") && more) {
+    } else if (!strcmp(argv[j], "--enable-amp")) {
         HackRF.enable_amp = 1;
     } else {
         return false;
@@ -107,11 +107,11 @@ void hackRFShowHelp()
 
 static void show_config()
 {
-    printf("freq : %ld\n", HackRF.freq);
-    printf("lna_gain : %d\n", HackRF.lna_gain);
-    printf("vga_gain : %d\n", HackRF.vga_gain);
-    printf("samplerate : %d\n", HackRF.rate);
-    printf("ppm : %d\n", HackRF.ppm);
+    fprintf(stderr, "freq : %ld\n", HackRF.freq);
+    fprintf(stderr, "lna_gain : %d\n", HackRF.lna_gain);
+    fprintf(stderr, "vga_gain : %d\n", HackRF.vga_gain);
+    fprintf(stderr, "samplerate : %d\n", HackRF.rate);
+    fprintf(stderr, "ppm : %d\n", HackRF.ppm);
 }
 
 bool hackRFOpen()
@@ -130,7 +130,7 @@ bool hackRFOpen()
 
     status = hackrf_init();
     if (status != 0) {
-        printf("HackRF: hackrf_init failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_init failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -138,7 +138,7 @@ bool hackRFOpen()
 
     status = hackrf_open(&HackRF.device);
     if (status != 0) {
-        printf("HackRF: hackrf_open failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_open failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -146,7 +146,7 @@ bool hackRFOpen()
 
     status = hackrf_set_freq(HackRF.device, HackRF.freq);
     if (status != 0) {
-        printf("HackRF: hackrf_set_freq failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_freq failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -154,7 +154,7 @@ bool hackRFOpen()
 
     status = hackrf_set_sample_rate(HackRF.device, HackRF.rate);
     if (status != 0) {
-        printf("HackRF: hackrf_set_sample_rate failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_sample_rate failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -162,7 +162,7 @@ bool hackRFOpen()
 
     status = hackrf_set_amp_enable(HackRF.device, HackRF.enable_amp);
     if (status != 0) {
-        printf("HackRF: hackrf_set_amp_enable failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_amp_enable failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -170,7 +170,7 @@ bool hackRFOpen()
 
     status = hackrf_set_lna_gain(HackRF.device, HackRF.lna_gain);
     if (status != 0) {
-        printf("HackRF: hackrf_set_lna_gain failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_lna_gain failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -178,7 +178,7 @@ bool hackRFOpen()
 
     status = hackrf_set_vga_gain(HackRF.device, HackRF.vga_gain);
     if (status != 0) {
-        printf("HackRF: hackrf_set_vga_gain failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_vga_gain failed with code %d", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -191,7 +191,7 @@ bool hackRFOpen()
                                       Modes.dc_filter,
                                       &HackRF.converter_state);
     if (!HackRF.converter) {
-        printf("HackRF: can't initialize sample converter\n");
+        fprintf(stderr, "HackRF: can't initialize sample converter\n");
         return false;
     }
 
@@ -288,7 +288,7 @@ int handle_hackrf_samples(hackrf_transfer *transfer)
 void hackRFRun()
 {
     if (!HackRF.device) {
-        printf("hackRFRun: HackRF.device = NULL\n");
+        fprintf(stderr, "hackRFRun: HackRF.device = NULL\n");
         return;
     }
 
@@ -297,7 +297,7 @@ void hackRFRun()
     int status = hackrf_start_rx(HackRF.device, &handle_hackrf_samples, NULL);
 
     if (status != 0) { 
-        printf("hackrf_start_rx failed"); 
+        fprintf(stderr, "hackrf_start_rx failed"); 
         hackrf_close(HackRF.device); 
         hackrf_exit(); 
         exit (1); 
@@ -306,10 +306,11 @@ void hackRFRun()
     // hackrf_start_rx does not block so we need to wait until the streaming is finished
     // before returning from the hackRFRun function
     while (hackrf_is_streaming(HackRF.device) == HACKRF_TRUE) {
-        usleep(10000);
+        struct timespec slp = { 0, 100 * 1000 * 1000};
+        nanosleep(&slp, NULL);
     }
 
-    printf("HackRF stopped streaming %d\n", hackrf_is_streaming(HackRF.device));
+    fprintf(stderr, "HackRF stopped streaming %d\n", hackrf_is_streaming(HackRF.device));
 }
 
 void hackRFClose()
