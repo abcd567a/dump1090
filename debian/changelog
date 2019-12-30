@@ -1,4 +1,4 @@
-dump1090-fa (3.8.0) UNRELEASED; urgency=medium
+dump1090-fa (3.8.0) stable; urgency=medium
 
   * general: Added support for building on Buster.
   * general: Replace use of usleep with nanosleep (PR #53)
@@ -35,7 +35,7 @@ dump1090-fa (3.8.0) UNRELEASED; urgency=medium
   * SkyAware: Hide scroll bar when not needed (PR #22)
   * SkyAware: Update aircraft registry to 20191216
 
- -- Oliver Jowett <oliver.jowett@flightaware.com>  Thu, 07 Nov 2019 10:40:10 +0800
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Mon, 30 Dec 2019 22:11:52 +0800
 
 dump1090-fa (3.7.2) stable; urgency=medium
 
