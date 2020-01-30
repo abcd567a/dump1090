@@ -1,3 +1,9 @@
+dump1090-fa (3.8.1~dev) UNRELEASED; urgency=medium
+
+  * in development
+
+ -- Eric Tran <eric.tran@flightaware.com>  Thu, 30 Jan 2020 09:15:00 -6000
+
 dump1090-fa (3.8.0) stable; urgency=medium
 
   * general: Added support for building on Buster.
