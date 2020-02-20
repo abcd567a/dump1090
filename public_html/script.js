@@ -956,6 +956,12 @@ function refreshSelected() {
                 $('#selected_seen').text(selected.seen.toFixed(1) + 's');
         }
 
+        if (selected.seen_pos <= 1) {
+               $('#selected_seen_pos').text('now');
+        } else {
+               $('#selected_seen_pos').text(selected.seen_pos.toFixed(1) + 's');
+        }
+
         $('#selected_country').text(selected.icaorange.country);
         if (ShowFlags && selected.icaorange.flag_image !== null) {
                 $('#selected_flag').removeClass('hidden');
@@ -969,13 +975,8 @@ function refreshSelected() {
                 $('#selected_position').text('n/a');
                 $('#selected_follow').addClass('hidden');
         } else {
-                
-                if (selected.seen_pos > 1) {
-                        $('#selected_position').text(format_latlng(selected.position));
-                } else {
-                        $('#selected_position').text(format_latlng(selected.position));
-				}
-				
+                $('#selected_position').text(format_latlng(selected.position));
+                $('#position_age').text(selected.seen_pos.toFixed(1) + 's');
                 $('#selected_follow').removeClass('hidden');
                 if (FollowSelected) {
                         $('#selected_follow').css('font-weight', 'bold');
