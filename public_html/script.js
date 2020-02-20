@@ -502,16 +502,21 @@ function initialize_map() {
         CenterLon = Number(localStorage['CenterLon']) || DefaultCenterLon;
         ZoomLvl = Number(localStorage['ZoomLvl']) || DefaultZoomLvl;
         MapType = localStorage['MapType'];
+        var groupByDataTypeBox = localStorage.getItem('groupByDataType');
 
         // Set SitePosition, initialize sorting
         if (SiteShow && (typeof SiteLat !==  'undefined') && (typeof SiteLon !==  'undefined')) {
 	        SitePosition = [SiteLon, SiteLat];
-                sortByDistance();
+		if (groupByDataTypeBox === 'deselected') {
+			sortByDistance();
+		}
         } else {
 	        SitePosition = null;
                 PlaneRowTemplate.cells[9].style.display = 'none'; // hide distance column
                 document.getElementById("distance").style.display = 'none'; // hide distance header
-                sortByAltitude();
+                if (groupByDataTypeBox === 'deselected') {
+			sortByAltitude();
+		}
         }
 
         // Maybe hide flag info
@@ -1335,6 +1340,11 @@ function resortTable() {
 }
 
 function sortBy(id,sc,se) {
+        if (id !== 'data_source') {
+                $('#grouptype_checkbox').removeClass('settingsCheckboxChecked');
+		localStorage.setItem('groupByDataType', 'deselected');
+        }
+
         if (id === sortId) {
                 sortAscending = !sortAscending;
                 PlanesOrdered.reverse(); // this correctly flips the order of rows that compare equal
@@ -1464,7 +1474,6 @@ function toggleGroupByDataType(switchToggle) {
 	}
 
 	if (groupByDataType === 'deselected') {
-		sortByDistance();
 		$('#grouptype_checkbox').removeClass('settingsCheckboxChecked');
 	} else {
 		sortByDataSource();
