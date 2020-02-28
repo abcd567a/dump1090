@@ -260,6 +260,21 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
     width: 50px;
 }
 
+.rangeRingsInput {
+    width: 30px;
+    float: right;
+}
+
+.rangeOptions {
+	width: 170px;
+	padding-bottom: 5px;
+	text-indent: 10px;
+}
+
+.set_range_rings_button {
+	padding-top: 5px;
+}
+
 select.error, textarea.error, input.error {
     color: #FF0000;
 }
