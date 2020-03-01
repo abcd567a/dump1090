@@ -24,7 +24,7 @@ var SpecialSquawks = {
 };
 
 // Get current map settings
-var CenterLat, CenterLon, ZoomLvl, MapType;
+var CenterLat, CenterLon, ZoomLvl, MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
 
 var Dump1090Version = "unknown version";
 var RefreshInterval = 1000;
@@ -297,6 +297,27 @@ function initialize() {
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
 
+	$('#range_rings_button').click(onSetRangeRings);
+	$("#range_ring_form").validate({
+            errorPlacement: function(error, element) {
+                return true;
+            },
+            rules: {
+                ringCount: {
+                    number: true,
+		    min: 0
+                },
+                baseRing: {
+                    number: true,
+                    min: 0
+                },
+                ringInterval: {
+                    number: true,
+                    min: 0
+                }
+            }
+        });
+
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
@@ -508,6 +529,9 @@ function initialize_map() {
         CenterLat = Number(localStorage['CenterLat']) || DefaultCenterLat;
         CenterLon = Number(localStorage['CenterLon']) || DefaultCenterLon;
         ZoomLvl = Number(localStorage['ZoomLvl']) || DefaultZoomLvl;
+        SiteCirclesCount = Number(localStorage['SiteCirclesCount']) || DefaultSiteCirclesCount;
+        SiteCirclesBaseDistance = Number(localStorage['SiteCirclesBaseDistance']) || DefaultSiteCirclesBaseDistance;
+        SiteCirclesInterval = Number(localStorage['SiteCirclesInterval']) || DefaultSiteCirclesInterval;
         MapType = localStorage['MapType'];
 
         // Set SitePosition, initialize sorting
@@ -809,8 +833,8 @@ function createSiteCircleFeatures() {
         conversionFactor = 1609.0;
     }
 
-    for (var i=0; i < SiteCirclesDistances.length; ++i) {
-            var distance = SiteCirclesDistances[i] * conversionFactor;
+    for (var i=0; i < SiteCirclesCount; ++i) {
+	    var distance = (SiteCirclesBaseDistance + (SiteCirclesInterval * i)) * conversionFactor;
             var circle = make_geodesic_circle(SitePosition, distance, 360);
             circle.transform('EPSG:4326', 'EPSG:3857');
             var feature = new ol.Feature(circle);
@@ -1493,6 +1517,9 @@ function resetMap() {
         localStorage['CenterLat'] = CenterLat = DefaultCenterLat;
         localStorage['CenterLon'] = CenterLon = DefaultCenterLon;
         localStorage['ZoomLvl']   = ZoomLvl = DefaultZoomLvl;
+        localStorage['SiteCirclesCount'] = SiteCirclesCount = DefaultSiteCirclesCount;
+        localStorage['SiteCirclesBaseDistance'] = SiteCirclesBaseDistance = DefaultSiteCirclesBaseDistance;
+        localStorage['SiteCirclesInterval'] = SiteCirclesInterval = DefaultSiteCirclesInterval;
 
         // Set and refresh
         OLMap.getView().setZoom(ZoomLvl);
@@ -1888,4 +1915,18 @@ function updatePiAwareOrFlightFeeder() {
 		PageName = 'PiAware SkyAware';
 	}
 	refreshPageTitle();
+}
+
+// redraw range rings with form values
+function onSetRangeRings() {
+	SiteCirclesCount = parseFloat($("#range_ring_count").val().trim());
+	SiteCirclesBaseDistance = parseFloat($("#range_ring_base").val().trim());
+	SiteCirclesInterval = parseFloat($("#range_ring_interval").val().trim());
+
+	// Save state to localStorage
+	localStorage.setItem('SiteCirclesCount', SiteCirclesCount);
+	localStorage.setItem('SiteCirclesBaseDistance', SiteCirclesBaseDistance);
+	localStorage.setItem('SiteCirclesInterval', SiteCirclesInterval);
+
+	createSiteCircleFeatures();
 }
