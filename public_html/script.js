@@ -297,26 +297,7 @@ function initialize() {
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
 
-	$('#range_rings_button').click(onSetRangeRings);
-	$("#range_ring_form").validate({
-            errorPlacement: function(error, element) {
-                return true;
-            },
-            rules: {
-                ringCount: {
-                    number: true,
-		    min: 0
-                },
-                baseRing: {
-                    number: true,
-                    min: 0
-                },
-                ringInterval: {
-                    number: true,
-                    min: 0
-                }
-            }
-        });
+        initializeRangeRings();
 
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
@@ -529,9 +510,6 @@ function initialize_map() {
         CenterLat = Number(localStorage['CenterLat']) || DefaultCenterLat;
         CenterLon = Number(localStorage['CenterLon']) || DefaultCenterLon;
         ZoomLvl = Number(localStorage['ZoomLvl']) || DefaultZoomLvl;
-        SiteCirclesCount = Number(localStorage['SiteCirclesCount']) || DefaultSiteCirclesCount;
-        SiteCirclesBaseDistance = Number(localStorage['SiteCirclesBaseDistance']) || DefaultSiteCirclesBaseDistance;
-        SiteCirclesInterval = Number(localStorage['SiteCirclesInterval']) || DefaultSiteCirclesInterval;
         MapType = localStorage['MapType'];
 
         // Set SitePosition, initialize sorting
@@ -1915,6 +1893,39 @@ function updatePiAwareOrFlightFeeder() {
 		PageName = 'PiAware SkyAware';
 	}
 	refreshPageTitle();
+}
+
+// Setup custom range rings
+function initializeRangeRings() {
+        SiteCirclesCount = Number(localStorage['SiteCirclesCount']) || DefaultSiteCirclesCount;
+        SiteCirclesBaseDistance = Number(localStorage['SiteCirclesBaseDistance']) || DefaultSiteCirclesBaseDistance;
+        SiteCirclesInterval = Number(localStorage['SiteCirclesInterval']) || DefaultSiteCirclesInterval;
+
+	// Populate text fields with current values
+	$('#range_ring_count').val(SiteCirclesCount);
+        $('#range_ring_base').val(SiteCirclesBaseDistance);
+        $('#range_ring_interval').val(SiteCirclesInterval);
+
+        $('#range_rings_button').click(onSetRangeRings);
+        $("#range_ring_form").validate({
+            errorPlacement: function(error, element) {
+                return true;
+            },
+            rules: {
+                ringCount: {
+                    number: true,
+		    min: 0
+                },
+                baseRing: {
+                    number: true,
+                    min: 0
+                },
+                ringInterval: {
+                    number: true,
+                    min: 0
+                }
+            }
+        });
 }
 
 // redraw range rings with form values
