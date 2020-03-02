@@ -297,7 +297,28 @@ function initialize() {
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
 
-        initializeRangeRings();
+        setRangeRings();
+
+        $('#range_rings_button').click(onSetRangeRings);
+        $("#range_ring_form").validate({
+            errorPlacement: function(error, element) {
+                return true;
+            },
+            rules: {
+                ringCount: {
+                    number: true,
+		    min: 0
+                },
+                baseRing: {
+                    number: true,
+                    min: 0
+                },
+                ringInterval: {
+                    number: true,
+                    min: 0
+                }
+            }
+        });
 
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
@@ -1495,9 +1516,13 @@ function resetMap() {
         localStorage['CenterLat'] = CenterLat = DefaultCenterLat;
         localStorage['CenterLon'] = CenterLon = DefaultCenterLon;
         localStorage['ZoomLvl']   = ZoomLvl = DefaultZoomLvl;
+
+        // Reset to default range rings
         localStorage['SiteCirclesCount'] = SiteCirclesCount = DefaultSiteCirclesCount;
         localStorage['SiteCirclesBaseDistance'] = SiteCirclesBaseDistance = DefaultSiteCirclesBaseDistance;
         localStorage['SiteCirclesInterval'] = SiteCirclesInterval = DefaultSiteCirclesInterval;
+        setRangeRings();
+        createSiteCircleFeatures();
 
         // Set and refresh
         OLMap.getView().setZoom(ZoomLvl);
@@ -1895,49 +1920,26 @@ function updatePiAwareOrFlightFeeder() {
 	refreshPageTitle();
 }
 
-// Setup custom range rings
-function initializeRangeRings() {
+// Set range ring globals and populate form values
+function setRangeRings() {
         SiteCirclesCount = Number(localStorage['SiteCirclesCount']) || DefaultSiteCirclesCount;
         SiteCirclesBaseDistance = Number(localStorage['SiteCirclesBaseDistance']) || DefaultSiteCirclesBaseDistance;
         SiteCirclesInterval = Number(localStorage['SiteCirclesInterval']) || DefaultSiteCirclesInterval;
 
 	// Populate text fields with current values
-	$('#range_ring_count').val(SiteCirclesCount);
+        $('#range_ring_count').val(SiteCirclesCount);
         $('#range_ring_base').val(SiteCirclesBaseDistance);
         $('#range_ring_interval').val(SiteCirclesInterval);
-
-        $('#range_rings_button').click(onSetRangeRings);
-        $("#range_ring_form").validate({
-            errorPlacement: function(error, element) {
-                return true;
-            },
-            rules: {
-                ringCount: {
-                    number: true,
-		    min: 0
-                },
-                baseRing: {
-                    number: true,
-                    min: 0
-                },
-                ringInterval: {
-                    number: true,
-                    min: 0
-                }
-            }
-        });
 }
 
 // redraw range rings with form values
 function onSetRangeRings() {
-	SiteCirclesCount = parseFloat($("#range_ring_count").val().trim());
-	SiteCirclesBaseDistance = parseFloat($("#range_ring_base").val().trim());
-	SiteCirclesInterval = parseFloat($("#range_ring_interval").val().trim());
-
 	// Save state to localStorage
-	localStorage.setItem('SiteCirclesCount', SiteCirclesCount);
-	localStorage.setItem('SiteCirclesBaseDistance', SiteCirclesBaseDistance);
-	localStorage.setItem('SiteCirclesInterval', SiteCirclesInterval);
+	localStorage.setItem('SiteCirclesCount', parseFloat($("#range_ring_count").val().trim()));
+	localStorage.setItem('SiteCirclesBaseDistance', parseFloat($("#range_ring_base").val().trim()));
+	localStorage.setItem('SiteCirclesInterval', parseFloat($("#range_ring_interval").val().trim()));
+
+	setRangeRings();
 
 	createSiteCircleFeatures();
 }
