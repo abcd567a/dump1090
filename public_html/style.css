@@ -267,12 +267,12 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
 
 .rangeOptions {
 	width: 170px;
-	padding-bottom: 5px;
+	padding-top: 8px;
 	text-indent: 10px;
 }
 
 .set_range_rings_button {
-	padding-top: 5px;
+	padding-top: 8px;
 }
 
 select.error, textarea.error, input.error {

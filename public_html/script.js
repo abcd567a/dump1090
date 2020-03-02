@@ -263,6 +263,7 @@ function initialize() {
 
         // Set initial element visibility
         $("#show_map_button").hide();
+        $("#range_ring_column").hide();
         setColumnVisibility();
 
         // Initialize other controls
@@ -296,29 +297,6 @@ function initialize() {
 
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
-
-        setRangeRings();
-
-        $('#range_rings_button').click(onSetRangeRings);
-        $("#range_ring_form").validate({
-            errorPlacement: function(error, element) {
-                return true;
-            },
-            rules: {
-                ringCount: {
-                    number: true,
-		    min: 0
-                },
-                baseRing: {
-                    number: true,
-                    min: 0
-                },
-                ringInterval: {
-                    number: true,
-                    min: 0
-                }
-            }
-        });
 
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
@@ -745,7 +723,32 @@ function initialize_map() {
                 var feature = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(SitePosition)));
                 feature.setStyle(markerStyle);
                 StaticFeatures.push(feature);
-        
+
+		$('#range_ring_column').show();
+
+                setRangeRings();
+
+                $('#range_rings_button').click(onSetRangeRings);
+                $("#range_ring_form").validate({
+                    errorPlacement: function(error, element) {
+                        return true;
+                    },
+                    rules: {
+                        ringCount: {
+                            number: true,
+		            min: 0
+                        },
+                        baseRing: {
+                            number: true,
+                            min: 0
+                        },
+                        ringInterval: {
+                            number: true,
+                            min: 0
+                        }
+                    }
+                });
+
                 if (SiteCircles) {
                     createSiteCircleFeatures();
                 }
