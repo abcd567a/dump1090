@@ -24,7 +24,7 @@ var SpecialSquawks = {
 };
 
 // Get current map settings
-var CenterLat, CenterLon, ZoomLvl, MapType;
+var CenterLat, CenterLon, ZoomLvl, MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
 
 var Dump1090Version = "unknown version";
 var RefreshInterval = 1000;
@@ -263,6 +263,7 @@ function initialize() {
 
         // Set initial element visibility
         $("#show_map_button").hide();
+        $("#range_ring_column").hide();
         setColumnVisibility();
 
         // Initialize other controls
@@ -720,7 +721,32 @@ function initialize_map() {
                 var feature = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(SitePosition)));
                 feature.setStyle(markerStyle);
                 StaticFeatures.push(feature);
-        
+
+		$('#range_ring_column').show();
+
+                setRangeRings();
+
+                $('#range_rings_button').click(onSetRangeRings);
+                $("#range_ring_form").validate({
+                    errorPlacement: function(error, element) {
+                        return true;
+                    },
+                    rules: {
+                        ringCount: {
+                            number: true,
+		            min: 0
+                        },
+                        baseRing: {
+                            number: true,
+                            min: 0
+                        },
+                        ringInterval: {
+                            number: true,
+                            min: 0
+                        }
+                    }
+                });
+
                 if (SiteCircles) {
                     createSiteCircleFeatures();
                 }
@@ -807,8 +833,8 @@ function createSiteCircleFeatures() {
         conversionFactor = 1609.0;
     }
 
-    for (var i=0; i < SiteCirclesDistances.length; ++i) {
-            var distance = SiteCirclesDistances[i] * conversionFactor;
+    for (var i=0; i < SiteCirclesCount; ++i) {
+	    var distance = (SiteCirclesBaseDistance + (SiteCirclesInterval * i)) * conversionFactor;
             var circle = make_geodesic_circle(SitePosition, distance, 360);
             circle.transform('EPSG:4326', 'EPSG:3857');
             var feature = new ol.Feature(circle);
@@ -1531,6 +1557,13 @@ function resetMap() {
         localStorage['CenterLon'] = CenterLon = DefaultCenterLon;
         localStorage['ZoomLvl']   = ZoomLvl = DefaultZoomLvl;
 
+        // Reset to default range rings
+        localStorage['SiteCirclesCount'] = SiteCirclesCount = DefaultSiteCirclesCount;
+        localStorage['SiteCirclesBaseDistance'] = SiteCirclesBaseDistance = DefaultSiteCirclesBaseDistance;
+        localStorage['SiteCirclesInterval'] = SiteCirclesInterval = DefaultSiteCirclesInterval;
+        setRangeRings();
+        createSiteCircleFeatures();
+
         // Set and refresh
         OLMap.getView().setZoom(ZoomLvl);
 	OLMap.getView().setCenter(ol.proj.fromLonLat([CenterLon, CenterLat]));
@@ -1932,4 +1965,28 @@ function updatePiAwareOrFlightFeeder() {
 		PageName = 'PiAware SkyAware';
 	}
 	refreshPageTitle();
+}
+
+// Set range ring globals and populate form values
+function setRangeRings() {
+        SiteCirclesCount = Number(localStorage['SiteCirclesCount']) || DefaultSiteCirclesCount;
+        SiteCirclesBaseDistance = Number(localStorage['SiteCirclesBaseDistance']) || DefaultSiteCirclesBaseDistance;
+        SiteCirclesInterval = Number(localStorage['SiteCirclesInterval']) || DefaultSiteCirclesInterval;
+
+	// Populate text fields with current values
+        $('#range_ring_count').val(SiteCirclesCount);
+        $('#range_ring_base').val(SiteCirclesBaseDistance);
+        $('#range_ring_interval').val(SiteCirclesInterval);
+}
+
+// redraw range rings with form values
+function onSetRangeRings() {
+	// Save state to localStorage
+	localStorage.setItem('SiteCirclesCount', parseFloat($("#range_ring_count").val().trim()));
+	localStorage.setItem('SiteCirclesBaseDistance', parseFloat($("#range_ring_base").val().trim()));
+	localStorage.setItem('SiteCirclesInterval', parseFloat($("#range_ring_interval").val().trim()));
+
+	setRangeRings();
+
+	createSiteCircleFeatures();
 }
