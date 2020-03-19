@@ -1,6 +1,11 @@
 dump1090-fa (3.8.1~dev) UNRELEASED; urgency=medium
 
-  * in development
+  * SkyAware: Fixed SkyAware banner aspect ratio
+  * SkyAware: Fixed issue with "Group By Data Type" and "All Aircraft Trails" checkboxes
+    not saving across browser refreshes
+  * SkyAware: Fixed bug with ShowFlags=False config.js setting
+  * SkyAware: Added position age to aircraft detail pane
+  * SkyAware: Added ability to customize range ring distances in SkyAware
 
  -- Eric Tran <eric.tran@flightaware.com>  Thu, 30 Jan 2020 09:15:00 -6000
 
