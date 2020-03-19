@@ -1,4 +1,4 @@
-dump1090-fa (3.8.1~dev) UNRELEASED; urgency=medium
+dump1090-fa (3.8.1) stable; urgency=medium
 
   * SkyAware: Fixed SkyAware banner aspect ratio
   * SkyAware: Fixed issue with "Group By Data Type" and "All Aircraft Trails" checkboxes
@@ -7,7 +7,7 @@ dump1090-fa (3.8.1~dev) UNRELEASED; urgency=medium
   * SkyAware: Added position age to aircraft detail pane
   * SkyAware: Added ability to customize range ring distances in SkyAware
 
- -- Eric Tran <eric.tran@flightaware.com>  Thu, 30 Jan 2020 09:15:00 -6000
+ -- Eric Tran <eric.tran@flightaware.com>  Thu, 19 Mar 2020 09:20:00 -6000
 
 dump1090-fa (3.8.0) stable; urgency=medium
 
