@@ -52,7 +52,7 @@
 
 // Default version number, if not overriden by the Makefile
 #ifndef MODES_DUMP1090_VERSION
-# define MODES_DUMP1090_VERSION     "v1.13-custom"
+# define MODES_DUMP1090_VERSION     "v1.13-stratux"
 #endif
 
 #ifndef MODES_DUMP1090_VARIANT
@@ -332,6 +332,7 @@ struct {                             // Internal state
     struct net_writer beast_verbatim_out;        // Beast-format output, verbatim mode
     struct net_writer beast_cooked_out;          // Beast-format output, "cooked" mode
     struct net_writer sbs_out;                   // SBS-format output
+    struct net_writer stratux_out;               // Stratux-format output
     struct net_writer fatsv_out;                 // FATSV-format output
 
 #ifdef _WIN32
@@ -354,6 +355,7 @@ struct {                             // Internal state
     char *net_output_raw_ports;      // List of raw output TCP ports
     char *net_input_raw_ports;       // List of raw input TCP ports
     char *net_output_sbs_ports;      // List of SBS output TCP ports
+    char *net_output_stratux_ports;  // List of Stratux output TCP ports
     char *net_input_beast_ports;     // List of Beast input TCP ports
     char *net_output_beast_ports;    // List of Beast output TCP ports
     char *net_bind_address;          // Bind address
