@@ -797,9 +797,21 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     struct tm    stTime_receive, stTime_now;
     int          msgType;
 
-    // Send all addresses, since we want to see TIS-B data.
-    //if (mm->addr & MODES_NON_ICAO_ADDRESS)
-    //    return;
+    // We require a tracked aircraft for SBS output
+    if (!a)
+        return;
+
+    // Don't ever forward 2-bit-corrected messages via SBS output.
+    if (mm->correctedbits >= 2)
+        return;
+
+    // Don't ever forward mlat messages via SBS output.
+    if (mm->source == SOURCE_MLAT)
+        return;
+
+    // Don't ever send unreliable messages via SBS output
+    if (!mm->reliable && !a->reliable)
+        return;
 
     p = prepareWrite(&Modes.stratux_out, 1000); // larger buffer size needed vs SBS
     if (!p)
@@ -869,7 +881,7 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     // Emitter type
 	int emitter = 0;
 	int setEmitter = 0;
-	if ((mm->msgtype ==  17) || (mm->msgtype = 18)) {
+	if ((mm->msgtype ==  17) || (mm->msgtype == 18)) {
 		switch (mm->metype) {
 			case 1:
 				emitter = ((mm->mesub) | 0x18);
