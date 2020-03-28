@@ -884,7 +884,11 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     localtime_r(&received, &stTime_receive);
 
     // Time message received (based on system clock). Format is 2016-02-20T06:35:43.155Z
-    p += sprintf(p, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03dZ\"", (stTime_receive.tm_year+1900),(stTime_receive.tm_mon+1), stTime_receive.tm_mday, stTime_receive.tm_hour, stTime_receive.tm_min, stTime_receive.tm_sec, (unsigned) (mm->sysTimestampMsg % 1000));
+    p += sprintf(p, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03dZ\"",
+            (stTime_receive.tm_year+1900),(stTime_receive.tm_mon+1),
+            stTime_receive.tm_mday, stTime_receive.tm_hour,
+            stTime_receive.tm_min, stTime_receive.tm_sec,
+            (unsigned)(mm->sysTimestampMsg % 1000));
 
     //// callsign
     if (mm->callsign_valid)
