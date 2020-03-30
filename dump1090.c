@@ -116,7 +116,7 @@ void modesInitConfig(void) {
     Modes.net_output_sbs_ports    = strdup("30003");
     Modes.net_input_beast_ports   = strdup("30004,30104");
     Modes.net_output_beast_ports  = strdup("30005");
-    Modes.net_output_stratux_ports= strdup("30006");
+    Modes.net_output_stratux_ports= NULL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
     Modes.json_location_accuracy  = 1;
@@ -535,7 +535,8 @@ int main(int argc, char **argv) {
             free(Modes.net_output_sbs_ports);
             Modes.net_output_sbs_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-stratux-port") && more) {
-            free(Modes.net_output_stratux_ports);
+            if (Modes.net_output_stratux_ports)
+                free(Modes.net_output_stratux_ports);
             Modes.net_output_stratux_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-buffer") && more) {
             Modes.net_sndbuf_size = atoi(argv[++j]);
