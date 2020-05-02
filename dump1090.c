@@ -309,8 +309,8 @@ void showHelp(void) {
 "--lat <latitude>         Reference/receiver latitude for surface posn (opt)\n"
 "--lon <longitude>        Reference/receiver longitude for surface posn (opt)\n"
 "--max-range <distance>   Absolute maximum range for position decoding (in nm, default: 300)\n"
-"--fix                    Enable single-bits error correction using CRC\n"
-"                         (specify twice for two-bit error correction)\n"
+"--fix                    Enable single-bit error correction using CRC\n"
+"--fix-2bit               Enable two-bit error correction using CRC (use with caution)\n"
 "--no-fix                 Disable error correction using CRC\n"
 "--no-crc-check           Disable messages with broken CRC (discouraged)\n"
 "--mlat                   display raw messages in Beast ascii mode\n"
@@ -481,7 +481,10 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--measure-noise")) {
             // Ignored
         } else if (!strcmp(argv[j],"--fix")) {
-            ++Modes.nfix_crc;
+            if (Modes.nfix_crc < 1)
+                Modes.nfix_crc = 1;
+        } else if (!strcmp(argv[j],"--fix-2bit")) {
+            Modes.nfix_crc = 2;
         } else if (!strcmp(argv[j],"--no-fix")) {
             Modes.nfix_crc = 0;
         } else if (!strcmp(argv[j],"--no-crc-check")) {
