@@ -343,11 +343,21 @@ var CategoryIcons = {
 
         "A3" : 'airliner',
 
+        "A4" : 'heavy_2e',
+
         "A5" : 'heavy_4e',
+
+        "A6" : 'hi_perf',
 
         "A7" : 'helicopter',
 
+        "B1" : 'cessna',
+
         "B2" : 'balloon',
+
+        "B4" : 'cessna',
+
+        "B7" : 'hi_perf',
 
         'C0' : 'ground_unknown',
 
@@ -355,7 +365,15 @@ var CategoryIcons = {
 
         'C2' : 'ground_service',
 
-        'C3' : 'ground_fixed'
+        'C3' : 'ground_fixed',
+
+        "C4" : 'ground_fixed',
+
+        "C5" : 'ground_fixed',
+
+        "C6" : 'ground_unknown',
+
+        "C7" : 'ground_unknown'
 };
 
 function getBaseMarker(category, typeDesignator, typeDescription, wtc) {
