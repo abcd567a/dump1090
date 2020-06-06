@@ -49,6 +49,8 @@
 
 #include "dump1090.h"
 
+struct _Modes Modes;
+
 #include <stdarg.h>
 
 void receiverPositionChanged(float lat, float lon, float alt)
