@@ -1259,7 +1259,8 @@ function refreshTableInfo() {
         if (tableplane.flight) {
                 tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
         } else {
-                tableplane.tr.cells[2].innerHTML = "";
+		// Show _registration if ident is not present
+		tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
         }
         tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
         tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
@@ -1311,7 +1312,7 @@ function compareNumeric(xf,yf) {
 }
 
 function sortByICAO()     { sortBy('icao',    compareAlpha,   function(x) { return x.icao; }); }
-function sortByFlight()   { sortBy('flight',  compareAlpha,   function(x) { return x.flight; }); }
+function sortByFlight()   { sortBy('flight',  compareAlpha,   function(x) { return x.flight ? x.flight : x.registration; }); }
 function sortByRegistration()   { sortBy('registration',    compareAlpha,   function(x) { return x.registration; }); }
 function sortByAircraftType()   { sortBy('icaotype',        compareAlpha,   function(x) { return x.icaotype; }); }
 function sortBySquawk()   { sortBy('squawk',  compareAlpha,   function(x) { return x.squawk; }); }
