@@ -49,6 +49,7 @@ var MessageRate = 0;
 var NBSP='\u00a0';
 
 var layers;
+var layerGroup;
 
 // piaware vs flightfeeder
 var isFlightFeeder = false;
@@ -524,18 +525,22 @@ function make_geodesic_circle(center, radius, points) {
         var angularDistance = radius / 6378137.0;
         var lon1 = center[0] * Math.PI / 180.0;
         var lat1 = center[1] * Math.PI / 180.0;
-        var geom = new ol.geom.LineString();
+        var geom;
         for (var i = 0; i <= points; ++i) {
-                var bearing = i * 2 * Math.PI / points;
+            var bearing = i * 2 * Math.PI / points;
 
-                var lat2 = Math.asin( Math.sin(lat1)*Math.cos(angularDistance) +
-                                      Math.cos(lat1)*Math.sin(angularDistance)*Math.cos(bearing) );
-                var lon2 = lon1 + Math.atan2(Math.sin(bearing)*Math.sin(angularDistance)*Math.cos(lat1),
-                                             Math.cos(angularDistance)-Math.sin(lat1)*Math.sin(lat2));
+            var lat2 = Math.asin( Math.sin(lat1)*Math.cos(angularDistance) +
+                Math.cos(lat1)*Math.sin(angularDistance)*Math.cos(bearing) );
+            var lon2 = lon1 + Math.atan2(Math.sin(bearing)*Math.sin(angularDistance)*Math.cos(lat1),
+                Math.cos(angularDistance)-Math.sin(lat1)*Math.sin(lat2));
 
-                lat2 = lat2 * 180.0 / Math.PI;
-                lon2 = lon2 * 180.0 / Math.PI;
+            lat2 = lat2 * 180.0 / Math.PI;
+            lon2 = lon2 * 180.0 / Math.PI;
+            if (!geom) {
+                geom = new ol.geom.LineString([[lon2, lat2]]);
+            } else {
                 geom.appendCoordinate([lon2, lat2]);
+            }
         }
         return geom;
 }
@@ -612,7 +617,11 @@ function initialize_map() {
         var foundType = false;
         var baseCount = 0;
 
-        ol.control.LayerSwitcher.forEachRecursive(layers, function(lyr) {
+        layerGroup = new ol.layer.Group({
+                layers: layers
+        })
+
+        ol.control.LayerSwitcher.forEachRecursive(layerGroup, function(lyr) {
                 if (!lyr.get('name'))
                         return;
 
@@ -644,7 +653,7 @@ function initialize_map() {
         })
 
         if (!foundType) {
-                ol.control.LayerSwitcher.forEachRecursive(layers, function(lyr) {
+                ol.control.LayerSwitcher.forEachRecursive(layerGroup, function(lyr) {
                         if (foundType)
                                 return;
                         if (lyr.get('type') === 'base') {
@@ -704,11 +713,12 @@ function initialize_map() {
                                                         function(feature, layer) {
                                                                 return feature.hex;
                                                         },
-                                                        null,
-                                                        function(layer) {
-                                                                return (layer === iconsLayer);
-                                                        },
-                                                        null);
+                                                        {
+                                                                layerFilter: function(layer) {
+                                                                        return (layer === iconsLayer);
+                                                                },
+                                                                hitTolerance: 5,
+                                                        });
                 if (hex) {
                         selectPlaneByHex(hex, (evt.type === 'dblclick'));
                         adjustSelectedInfoBlockPosition();
@@ -726,11 +736,12 @@ function initialize_map() {
             function(feature, layer) {
                     return feature.hex;
             },
-            null,
-            function(layer) {
-                    return (layer === iconsLayer);
-            },
-            null
+            {
+                layerFilter: function(layer) {
+                        return (layer === iconsLayer);
+                },
+                hitTolerance: 5,
+            }
         );
 
         if (hex) {
@@ -1987,8 +1998,8 @@ function getAirframesModeSLink(code) {
 
 // takes in an elemnt jQuery path and the OL3 layer name and toggles the visibility based on clicking it
 function toggleLayer(element, layer) {
-	// set initial checked status
-	ol.control.LayerSwitcher.forEachRecursive(layers, function(lyr) { 
+        // set initial checked status
+        ol.control.LayerSwitcher.forEachRecursive(layerGroup, function(lyr) {
 		if (lyr.get('name') === layer && lyr.getVisible()) {
 			$(element).addClass('settingsCheckboxChecked');
 		}
@@ -1998,7 +2009,7 @@ function toggleLayer(element, layer) {
 		if ($(element).hasClass('settingsCheckboxChecked')) {
 			visible = true;
 		}
-		ol.control.LayerSwitcher.forEachRecursive(layers, function(lyr) { 
+		ol.control.LayerSwitcher.forEachRecursive(layerGroup, function(lyr) {
 			if (lyr.get('name') === layer) {
 				if (visible) {
 					lyr.setVisible(false);
