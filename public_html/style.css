@@ -45,6 +45,79 @@ html, body {
     height: 100%;
 }
 
+#planes_table_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+#planes_table {
+    overflow-x: scroll;
+}
+
+#column_select {
+    position: relative;
+    float: right;
+    background-color: #002F5D;
+    color: #FFFFFF;
+}
+
+#column_select_window {
+    position: absolute;
+    right: 1px;
+    top: 80px;
+    width: 150px;
+    min-height: 180px;
+    background: #ffffff;
+    box-shadow: 4px 4px 10px #444444;
+    padding: 20px;
+    z-index: 9999;
+    display: none;
+}
+
+#column_select_header {
+    display: table;
+    background-color: #002F5D;
+    color: #ffffff;
+    font-size: smaller;
+    padding: 5px;
+    text-align: center;
+    width: 120px;
+}
+
+#column_select_close_box {
+    position: absolute;
+    right: 15px;
+    top: 21px;
+    background-image: url('images/close-settings.png');
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.columnOptionContainer {
+    position: relative;
+    display: table;
+    padding-top: 5px;
+    left: 20px;
+}
+
+.columnOptionSelectAllContainer {
+    position: relative;
+    display: table;
+    padding-top: 5px;
+}
+
+.columnOptionText {
+    position: relative;
+    line-height: 10px;
+    display: table-cell;
+    width: 100%;
+    left: 5px;
+
+}
+
 #toggle_sidebar_control {
     display: block;
     position: absolute;
@@ -636,7 +709,7 @@ select.error, textarea.error, input.error {
     padding-bottom: 10px;
 }
 
-.settingsCheckbox {
+.settingsCheckbox, .columnSelectCheckbox, .columnSelectAllCheckbox {
     width: 20px;
     height: 11px;
     background-image: url('images/box-empty.png');
