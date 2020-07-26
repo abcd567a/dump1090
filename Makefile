@@ -2,6 +2,7 @@ PROGNAME=dump1090
 
 RTLSDR ?= yes
 BLADERF ?= yes
+LIMESDR ?= yes
 
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
@@ -37,6 +38,13 @@ ifeq ($(BLADERF), yes)
   CPPFLAGS += -DENABLE_BLADERF
   CFLAGS += $(shell pkg-config --cflags libbladeRF)
   LIBS_SDR += $(shell pkg-config --libs libbladeRF)
+endif
+
+ifeq ($(LIMESDR), yes)
+  SDR_OBJ += sdr_limesdr.o
+  CPPFLAGS += -DENABLE_LIMESDR
+  CFLAGS += $(shell pkg-config --cflags LimeSuite)
+  LIBS_SDR += $(shell pkg-config --libs LimeSuite)
 endif
 
 all: dump1090 view1090
