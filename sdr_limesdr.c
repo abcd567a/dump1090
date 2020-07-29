@@ -58,6 +58,7 @@ static struct {
     bool is_stream_opened;
     bool is_stop;
     char verbosity;
+    lms_info_str_t serial;
     int bytes_in_sample;
     iq_convert_fn converter;
     struct converter_state *converter_state;
@@ -97,6 +98,7 @@ void limesdrInitConfig()
     LimeSDR.is_stream_opened = false;
     LimeSDR.is_stop = false;
     LimeSDR.verbosity = LMS_LOG_INFO;
+    LimeSDR.serial[0] = '\0';
     LimeSDR.bytes_in_sample = 2 * sizeof(int16_t); // hardcoded for LMS_FMT_I16
 
     LMS_RegisterLogHandler(limesdrLogHandler);
@@ -107,6 +109,7 @@ void limesdrShowHelp()
     printf("      limesdr-specific options (use with --device-type limesdr)\n");
     printf("\n");
     printf("--limesdr-verbosity      set verbosity level for LimeSDR messages\n");
+    printf("--limesdr-serial         serial number of desired device\n");
     printf("\n");
 }
 
@@ -117,6 +120,8 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
 
     if (!strcmp(argv[j], "--limesdr-verbosity") && more) {
         LimeSDR.verbosity = atoi(argv[++j]);
+    } else if (!strcmp(argv[j], "--limesdr-serial") && more) {
+        strcpy(LimeSDR.serial, argv[++j]);
     } else {
         return false;
     }
@@ -140,7 +145,32 @@ bool limesdrOpen(void)
         goto error;
     }
 
-    if (LMS_Open(&LimeSDR.dev, list[0], NULL) ) {
+    limesdrLogHandler(LMS_LOG_INFO, "connected devices:");
+    for (int i = 0; i < devCount; ++i) {
+        limesdrLogHandler(LMS_LOG_INFO, list[i]);
+    }
+
+    bool isDevMatched = !strlen(LimeSDR.serial);
+    int devIndex = 0;
+    const char *serialTag = "serial=";
+    for (int i = 0; i < devCount && !isDevMatched; ++i) {
+        const char *serial = strstr(list[i], serialTag);
+        if (serial) {
+            if (strstr(serial + strlen(serialTag), LimeSDR.serial)) {
+                isDevMatched = true;
+                devIndex = i;
+            }
+        }
+    }
+    if (isDevMatched) {
+        limesdrLogHandler(LMS_LOG_INFO, "selected device:");
+        limesdrLogHandler(LMS_LOG_INFO, list[devIndex]);
+    } else {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to find desired device");
+        goto error;
+    }
+
+    if (LMS_Open(&LimeSDR.dev, list[devIndex], NULL) ) {
         limesdrLogHandler(LMS_LOG_ERROR, "unable to open device");
         goto error;
     }
