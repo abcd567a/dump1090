@@ -57,6 +57,7 @@ static struct {
     lms_stream_t stream;
     bool is_stream_opened;
     bool is_stop;
+    char verbosity;
     int bytes_in_sample;
     iq_convert_fn converter;
     struct converter_state *converter_state;
@@ -64,11 +65,14 @@ static struct {
 
 void limesdrLogHandler(int lvl, const char *msg)
 {
+    if (lvl > LimeSDR.verbosity) {
+        return;
+    }
+
     FILE *out = NULL;
     switch (lvl) {
         default:
         case LMS_LOG_DEBUG:
-            return;
         case LMS_LOG_INFO:
             out = stdout;
             break;
@@ -92,6 +96,7 @@ void limesdrInitConfig()
     LimeSDR.stream.dataFmt = LMS_FMT_I16; // should be matched with conveter
     LimeSDR.is_stream_opened = false;
     LimeSDR.is_stop = false;
+    LimeSDR.verbosity = LMS_LOG_INFO;
     LimeSDR.bytes_in_sample = 2 * sizeof(int16_t); // hardcoded for LMS_FMT_I16
 
     LMS_RegisterLogHandler(limesdrLogHandler);
@@ -101,17 +106,23 @@ void limesdrShowHelp()
 {
     printf("      limesdr-specific options (use with --device-type limesdr)\n");
     printf("\n");
-    printf("so far there is no any LimeSDR specific option...\n");
+    printf("--limesdr-verbosity      set verbosity level for LimeSDR messages\n");
     printf("\n");
 }
 
 bool limesdrHandleOption(int argc, char **argv, int *jptr)
 {
-    MODES_NOTUSED(argc);
-    MODES_NOTUSED(argv);
-    MODES_NOTUSED(jptr);
+    int j = *jptr;
+    bool more = (j + 1 < argc);
 
-    return false;
+    if (!strcmp(argv[j], "--limesdr-verbosity") && more) {
+        LimeSDR.verbosity = atoi(argv[++j]);
+    } else {
+        return false;
+    }
+    *jptr = j;
+
+    return true;
 }
 
 bool limesdrOpen(void)
@@ -120,64 +131,64 @@ bool limesdrOpen(void)
     lms_info_str_t list[devCountMax];
     const int devCount = LMS_GetDeviceList(list);
     if (devCount < 0) {
-        fprintf(stderr, "limesdr: unable to get a number of connected devices\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to get a number of connected devices");
         goto error;
     }
 
     if (devCount < 1) {
-        fprintf(stderr, "limesdr: no connected devices\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "no connected devices");
         goto error;
     }
 
     if (LMS_Open(&LimeSDR.dev, list[0], NULL) ) {
-        fprintf(stderr, "limesdr: unable to open device\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to open device");
         goto error;
     }
 
     if (LMS_Init(LimeSDR.dev)) {
-        fprintf(stderr, "limesdr: unable to initialize device\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to initialize device");
         goto error;
     }
 
     if (LMS_EnableChannel(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, true)) {
-        fprintf(stderr, "limesdr: unable to enable RX channel\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to enable RX channel");
         goto error;
     }
 
     if (LMS_SetLOFrequency(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.freq)) {
-        fprintf(stderr, "limesdr: unable to set frequency\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set frequency");
         goto error;
     }
 
     if (LMS_SetAntenna(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, LMS_PATH_LNAL)) {
-        fprintf(stderr, "limesdr: unable to set RF port\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set RF port");
         goto error;
     }
 
     if (LMS_SetSampleRate(LimeSDR.dev, Modes.sample_rate, 0/*default oversample*/)) {
-        fprintf(stderr, "limesdr: unable to set sampling rate\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set sampling rate");
         goto error;
     }
 
     if (LMS_SetNormalizedGain(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, 0.85)) {
-        fprintf(stderr, "limesdr: unable to set gain\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set gain");
         goto error;
     }
 
     if (LMS_SetLPFBW(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.sample_rate)) {
-        fprintf(stderr, "limesdr: unable to set LP filter\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set LP filter");
         goto error;
     }
 
     LimeSDR.is_stream_opened = true;
     if (LMS_SetupStream(LimeSDR.dev, &LimeSDR.stream)) {
-        fprintf(stderr, "limesdr: unable to setup stream\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to setup stream");
         LimeSDR.is_stream_opened = false;
         goto error;
     }
 
     if (LMS_Calibrate(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, 2.5e6/*0.5e5*/, 0)) {
-        fprintf(stderr, "limesdr: unable to calibrate device\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to calibrate device");
         goto error;
     }
 
@@ -186,7 +197,7 @@ bool limesdrOpen(void)
                                       Modes.dc_filter,
                                       &LimeSDR.converter_state);
     if (!LimeSDR.converter) {
-        fprintf(stderr, "limesdr: can't initialize sample converter.\n");
+        limesdrLogHandler(LMS_LOG_ERROR, "can't initialize sample converter");
         goto error;
     }
 
@@ -236,8 +247,7 @@ void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
     // Paranoia! Unlikely, but let's go for belt and suspenders here
 
     if (len != MODES_RTL_BUF_SIZE) {
-        fprintf(stderr, "weirdness: limesdr gave us a block with an unusual size (got %u bytes, expected %u bytes)\n",
-                (unsigned)len, (unsigned)MODES_RTL_BUF_SIZE);
+        limesdrLogHandler(LMS_LOG_WARNING, "device gave us a block with an unusual size");
 
         if (len > MODES_RTL_BUF_SIZE) {
             // wat?! Discard the start.
@@ -316,7 +326,7 @@ void limesdrRun()
     }
 
     if (!Modes.exit) {
-        fprintf(stderr, "limesdr: async read returned unexpectedly.\n");
+        limesdrLogHandler(LMS_LOG_WARNING, "async read returned unexpectedly");
     }
 
     free(buffer);
