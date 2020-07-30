@@ -110,6 +110,7 @@ void limesdrShowHelp()
     printf("\n");
     printf("--limesdr-verbosity      set verbosity level for LimeSDR messages\n");
     printf("--limesdr-serial         serial number of desired device\n");
+    printf("--limesdr-channel        set number of an RX channel\n");
     printf("\n");
 }
 
@@ -122,6 +123,8 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
         LimeSDR.verbosity = atoi(argv[++j]);
     } else if (!strcmp(argv[j], "--limesdr-serial") && more) {
         strcpy(LimeSDR.serial, argv[++j]);
+    } else if (!strcmp(argv[j], "--limesdr-channel") && more) {
+        LimeSDR.stream.channel = atoi(argv[++j]);
     } else {
         return false;
     }
