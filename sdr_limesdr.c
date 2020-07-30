@@ -58,6 +58,7 @@ static struct {
     bool is_stream_opened;
     bool is_stop;
     char verbosity;
+    size_t oversample;
     lms_info_str_t serial;
     int bytes_in_sample;
     iq_convert_fn converter;
@@ -98,6 +99,7 @@ void limesdrInitConfig()
     LimeSDR.is_stream_opened = false;
     LimeSDR.is_stop = false;
     LimeSDR.verbosity = LMS_LOG_INFO;
+    LimeSDR.oversample = 0; // default oversample
     LimeSDR.serial[0] = '\0';
     LimeSDR.bytes_in_sample = 2 * sizeof(int16_t); // hardcoded for LMS_FMT_I16
 
@@ -111,6 +113,7 @@ void limesdrShowHelp()
     printf("--limesdr-verbosity      set verbosity level for LimeSDR messages\n");
     printf("--limesdr-serial         serial number of desired device\n");
     printf("--limesdr-channel        set number of an RX channel\n");
+    printf("--limesdr-oversample     set RF oversampling ratio\n");
     printf("\n");
 }
 
@@ -125,6 +128,8 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
         strcpy(LimeSDR.serial, argv[++j]);
     } else if (!strcmp(argv[j], "--limesdr-channel") && more) {
         LimeSDR.stream.channel = atoi(argv[++j]);
+    } else if (!strcmp(argv[j], "--limesdr-oversample") && more) {
+        LimeSDR.oversample = atoi(argv[++j]);
     } else {
         return false;
     }
@@ -198,7 +203,7 @@ bool limesdrOpen(void)
         goto error;
     }
 
-    if (LMS_SetSampleRate(LimeSDR.dev, Modes.sample_rate, 0/*default oversample*/)) {
+    if (LMS_SetSampleRate(LimeSDR.dev, Modes.sample_rate, LimeSDR.oversample)) {
         limesdrLogHandler(LMS_LOG_ERROR, "unable to set sampling rate");
         goto error;
     }
