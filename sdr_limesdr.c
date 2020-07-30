@@ -60,6 +60,7 @@ static struct {
     char verbosity;
     size_t oversample;
     float gain;
+    float lpfbw;
     lms_info_str_t serial;
     int bytes_in_sample;
     iq_convert_fn converter;
@@ -102,6 +103,7 @@ void limesdrInitConfig()
     LimeSDR.verbosity = LMS_LOG_INFO;
     LimeSDR.oversample = 0; // default oversample
     LimeSDR.gain = 0.75;
+    LimeSDR.lpfbw = 2400000.0;
     LimeSDR.serial[0] = '\0';
     LimeSDR.bytes_in_sample = 2 * sizeof(int16_t); // hardcoded for LMS_FMT_I16
 
@@ -117,6 +119,7 @@ void limesdrShowHelp()
     printf("--limesdr-channel        set number of an RX channel\n");
     printf("--limesdr-oversample     set RF oversampling ratio\n");
     printf("--limesdr-gain           set normalized gain\n");
+    printf("--limesdr-lpfbw          set LPF bandwidth\n");
     printf("\n");
 }
 
@@ -135,6 +138,8 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
         LimeSDR.oversample = atoi(argv[++j]);
     } else if (!strcmp(argv[j], "--limesdr-gain") && more) {
         LimeSDR.gain = atof(argv[++j]);
+    } else if (!strcmp(argv[j], "--limesdr-lpfbw") && more) {
+        LimeSDR.lpfbw = atof(argv[++j]);
     } else {
         return false;
     }
@@ -218,7 +223,7 @@ bool limesdrOpen(void)
         goto error;
     }
 
-    if (LMS_SetLPFBW(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.sample_rate)) {
+    if (LMS_SetLPFBW(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, LimeSDR.lpfbw)) {
         limesdrLogHandler(LMS_LOG_ERROR, "unable to set LP filter");
         goto error;
     }
