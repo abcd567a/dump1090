@@ -61,6 +61,7 @@ static struct {
     size_t oversample;
     float gain;
     float lpfbw;
+    float bw;
     lms_info_str_t serial;
     int bytes_in_sample;
     iq_convert_fn converter;
@@ -104,6 +105,7 @@ void limesdrInitConfig()
     LimeSDR.oversample = 0; // default oversample
     LimeSDR.gain = 0.75;
     LimeSDR.lpfbw = 2400000.0;
+    LimeSDR.bw = 2.5e6; // the minimal supported value
     LimeSDR.serial[0] = '\0';
     LimeSDR.bytes_in_sample = 2 * sizeof(int16_t); // hardcoded for LMS_FMT_I16
 
@@ -120,6 +122,7 @@ void limesdrShowHelp()
     printf("--limesdr-oversample     set RF oversampling ratio\n");
     printf("--limesdr-gain           set normalized gain\n");
     printf("--limesdr-lpfbw          set LPF bandwidth\n");
+    printf("--limesdr-bw             set bandwidth\n");
     printf("\n");
 }
 
@@ -140,6 +143,8 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
         LimeSDR.gain = atof(argv[++j]);
     } else if (!strcmp(argv[j], "--limesdr-lpfbw") && more) {
         LimeSDR.lpfbw = atof(argv[++j]);
+    } else if (!strcmp(argv[j], "--limesdr-bw") && more) {
+        LimeSDR.bw = atof(argv[++j]);
     } else {
         return false;
     }
@@ -235,7 +240,7 @@ bool limesdrOpen(void)
         goto error;
     }
 
-    if (LMS_Calibrate(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, 2.5e6/*0.5e5*/, 0)) {
+    if (LMS_Calibrate(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, LimeSDR.bw, 0)) {
         limesdrLogHandler(LMS_LOG_ERROR, "unable to calibrate device");
         goto error;
     }
