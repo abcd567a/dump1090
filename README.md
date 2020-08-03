@@ -40,6 +40,11 @@ This is packaged with jessie. `sudo apt-get install librtlsdr-dev`
 
 This is packaged with jessie. `sudo apt-get install libhackrf-dev`
 
+### Dependencies - LimeSDR
+
+You will need a build of [LimeSuite](https://github.com/myriadrf/LimeSuite).  
+See detailed instruction on [the official Wiki](https://wiki.myriadrf.org/Lime_Suite) how to build and install it.
+
 ### Actually building it
 
 Nothing special, just build it (`dpkg-buildpackage -b`)
@@ -49,7 +54,7 @@ Nothing special, just build it (`dpkg-buildpackage -b`)
 First run `prepare-wheezy-tree.sh`. This will create a package tree in
 package-wheezy/. Build in there (`dpkg-buildpackage -b`)
 
-The wheezy build does not include bladeRF nor HackRF support.
+The wheezy build does not include bladeRF, HackRF, or LimeSDR support.
 
 ## Building manually
 
@@ -60,8 +65,11 @@ install them (and a method for starting them) yourself.
 ``make BLADERF=no`` will disable bladeRF support and remove the dependency on
 libbladeRF.
 
-``make RTLSDR=no`` will disable rtl-sdr support and remove the dependency on 
+``make RTLSDR=no`` will disable rtl-sdr support and remove the dependency on
 librtlsdr.
 
 ``make HACKRF=no`` will disable HackRF support and remove the dependency on 
 libhackrf.
+
+``make LIMESDR=no`` will disable LimeSDR support and remove the dependency on
+libLimeSuite.
