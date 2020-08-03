@@ -30,6 +30,9 @@
 #ifdef ENABLE_HACKRF
 #  include "sdr_hackrf.h"
 #endif
+#ifdef ENABLE_LIMESDR
+#  include "sdr_limesdr.h"
+#endif
 
 typedef struct {
     const char *name;
@@ -90,6 +93,9 @@ static sdr_handler sdr_handlers[] = {
 
 #ifdef ENABLE_HACKRF
     { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, hackRFClose },
+#endif
+#ifdef ENABLE_LIMESDR
+    { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, limesdrClose },
 #endif
 
     { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, ifileClose },

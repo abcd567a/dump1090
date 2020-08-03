@@ -18,6 +18,10 @@ ifndef HACKRF
   HACKRF := $(shell pkg-config --exists libhackrf && echo "yes" || echo "no")
 endif
 
+ifndef LIMESDR
+  LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
+endif
+
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
@@ -61,6 +65,13 @@ ifeq ($(HACKRF), yes)
   LIBS_SDR += $(shell pkg-config --libs libhackrf)
 endif
 
+ifeq ($(LIMESDR), yes)
+  SDR_OBJ += sdr_limesdr.o
+  CPPFLAGS += -DENABLE_LIMESDR
+  CFLAGS += $(shell pkg-config --cflags LimeSuite)
+  LIBS_SDR += $(shell pkg-config --libs LimeSuite)
+endif
+
 all: showconfig dump1090 view1090
 
 showconfig:
@@ -69,6 +80,9 @@ showconfig:
 	@echo "  RTLSDR support:  $(RTLSDR)" >&2
 	@echo "  BladeRF support: $(BLADERF)" >&2
 	@echo "  HackRF support:  $(HACKRF)" >&2
+	@echo "  LimeSDR support: $(LIMESDR)" >&2
+
+all: dump1090 view1090
 
 %.o: %.c *.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
