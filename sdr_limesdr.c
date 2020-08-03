@@ -68,7 +68,7 @@ static struct {
     struct converter_state *converter_state;
 } LimeSDR;
 
-void limesdrLogHandler(int lvl, const char *msg)
+static void limesdrLogHandler(int lvl, const char *msg)
 {
     if (lvl > LimeSDR.verbosity) {
         return;
@@ -272,7 +272,7 @@ bool limesdrOpen(void)
 
 static struct timespec limesdr_thread_cpu;
 
-void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
+static void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
 {
     struct mag_buf *outbuf;
     struct mag_buf *lastbuf;
