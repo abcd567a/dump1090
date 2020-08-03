@@ -131,15 +131,12 @@ bool hackRFOpen()
     status = hackrf_init();
     if (status != 0) {
         fprintf(stderr, "HackRF: hackrf_init failed with code %d\n", status);
-        hackrf_close(HackRF.device);
-        hackrf_exit();
         return false;
     }
 
     status = hackrf_open(&HackRF.device);
     if (status != 0) {
         fprintf(stderr, "HackRF: hackrf_open failed with code %d\n", status);
-        hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
     }
