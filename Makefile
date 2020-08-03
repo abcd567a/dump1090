@@ -2,6 +2,7 @@ PROGNAME=dump1090
 
 RTLSDR ?= yes
 BLADERF ?= yes
+HACKRF ?= yes
 
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
@@ -37,6 +38,13 @@ ifeq ($(BLADERF), yes)
   CPPFLAGS += -DENABLE_BLADERF
   CFLAGS += $(shell pkg-config --cflags libbladeRF)
   LIBS_SDR += $(shell pkg-config --libs libbladeRF)
+endif
+
+ifeq ($(HACKRF), yes)
+  SDR_OBJ += sdr_hackrf.o
+  CPPFLAGS += -DENABLE_HACKRF
+  CFLAGS += $(shell pkg-config --cflags libhackrf)
+  LIBS_SDR += $(shell pkg-config --libs libhackrf)
 endif
 
 all: dump1090 view1090

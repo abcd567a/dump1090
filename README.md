@@ -36,6 +36,10 @@ see https://flightaware.com/adsb/piaware/install
 
 This is packaged with jessie. `sudo apt-get install librtlsdr-dev`
 
+### Dependencies - HackRF
+
+This is packaged with jessie. `sudo apt-get install libhackrf-dev`
+
 ### Actually building it
 
 Nothing special, just build it (`dpkg-buildpackage -b`)
@@ -45,7 +49,7 @@ Nothing special, just build it (`dpkg-buildpackage -b`)
 First run `prepare-wheezy-tree.sh`. This will create a package tree in
 package-wheezy/. Build in there (`dpkg-buildpackage -b`)
 
-The wheezy build does not include bladeRF support.
+The wheezy build does not include bladeRF nor HackRF support.
 
 ## Building manually
 
@@ -58,3 +62,6 @@ libbladeRF.
 
 ``make RTLSDR=no`` will disable rtl-sdr support and remove the dependency on 
 librtlsdr.
+
+``make HACKRF=no`` will disable HackRF support and remove the dependency on 
+libhackrf.
