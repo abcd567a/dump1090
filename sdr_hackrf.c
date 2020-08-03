@@ -200,7 +200,7 @@ bool hackRFOpen()
 
 struct timespec thread_cpu;
 
-int handle_hackrf_samples(hackrf_transfer *transfer)
+static int handle_hackrf_samples(hackrf_transfer *transfer)
 {
     struct mag_buf *outbuf;
     struct mag_buf *lastbuf;
