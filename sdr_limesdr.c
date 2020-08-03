@@ -179,12 +179,12 @@ static size_t selectAntenna()
     for (int i = 0; i < numAntennas; ++i) {
         lms_range_t range;
         if (LMS_GetAntennaBW(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, i, &range) < 0) {
-            fprintf(stderr, "limesdr: unable to get antenna bandwidth for antenna %d (%s)", i, names[i]);
+            fprintf(stderr, "limesdr: unable to get antenna bandwidth for antenna %d (%s)\n", i, names[i]);
             continue;
         }
 
         if (range.min <= Modes.freq && range.max >= Modes.freq) {
-            fprintf(stderr, "limesdr: selected rx antenna %d (%s) with bandwidth %.1f .. %.1fMHz", i, names[i], range.min / 1e6, range.max / 1e6);
+            fprintf(stderr, "limesdr: selected rx antenna %d (%s) with bandwidth %.1f .. %.1fMHz\n", i, names[i], range.min / 1e6, range.max / 1e6);
             result = i;
             goto done;
         }
