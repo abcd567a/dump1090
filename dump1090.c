@@ -104,7 +104,7 @@ void receiverPositionChanged(float lat, float lon, float alt)
 //
 // =============================== Initialization ===========================
 //
-void modesInitConfig(void) {
+static void modesInitConfig(void) {
     // Default everything to zero/NULL
     memset(&Modes, 0, sizeof(Modes));
 
@@ -129,7 +129,7 @@ void modesInitConfig(void) {
 //
 //=========================================================================
 //
-void modesInit(void) {
+static void modesInit(void) {
     int i;
 
     pthread_mutex_init(&Modes.data_mutex,NULL);
@@ -218,7 +218,7 @@ void modesInit(void) {
 // without caring about data acquisition
 //
 
-void *readerThreadEntryPoint(void *arg)
+static void *readerThreadEntryPoint(void *arg)
 {
     MODES_NOTUSED(arg);
 
@@ -239,7 +239,7 @@ void *readerThreadEntryPoint(void *arg)
 // Get raw IQ samples and filter everything is < than the specified level
 // for more than 256 samples in order to reduce example file size
 //
-void snipMode(int level) {
+static void snipMode(int level) {
     int i, q;
     uint64_t c = 0;
 
@@ -257,7 +257,7 @@ void snipMode(int level) {
 //
 // ================================ Main ====================================
 //
-void showHelp(void) {
+static void showHelp(void) {
 
     printf("-----------------------------------------------------------------------------\n");
     printf("| dump1090 ModeS Receiver     %45s |\n", MODES_DUMP1090_VARIANT " " MODES_DUMP1090_VERSION);
@@ -356,7 +356,7 @@ static void display_total_stats(void)
 // perform tasks we need to do continuously, like accepting new clients
 // from the net, refreshing the screen in interactive mode, and so forth
 //
-void backgroundTasks(void) {
+static void backgroundTasks(void) {
     static uint64_t next_stats_display;
     static uint64_t next_stats_update;
     static uint64_t next_json, next_history;
