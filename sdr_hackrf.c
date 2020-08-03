@@ -130,7 +130,7 @@ bool hackRFOpen()
 
     status = hackrf_init();
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_init failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_init failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -138,7 +138,7 @@ bool hackRFOpen()
 
     status = hackrf_open(&HackRF.device);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_open failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_open failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -146,7 +146,7 @@ bool hackRFOpen()
 
     status = hackrf_set_freq(HackRF.device, HackRF.freq);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_set_freq failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_freq failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -154,7 +154,7 @@ bool hackRFOpen()
 
     status = hackrf_set_sample_rate(HackRF.device, HackRF.rate);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_set_sample_rate failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_sample_rate failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -162,7 +162,7 @@ bool hackRFOpen()
 
     status = hackrf_set_amp_enable(HackRF.device, HackRF.enable_amp);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_set_amp_enable failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_amp_enable failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -170,7 +170,7 @@ bool hackRFOpen()
 
     status = hackrf_set_lna_gain(HackRF.device, HackRF.lna_gain);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_set_lna_gain failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_lna_gain failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
@@ -178,7 +178,7 @@ bool hackRFOpen()
 
     status = hackrf_set_vga_gain(HackRF.device, HackRF.vga_gain);
     if (status != 0) {
-        fprintf(stderr, "HackRF: hackrf_set_vga_gain failed with code %d", status);
+        fprintf(stderr, "HackRF: hackrf_set_vga_gain failed with code %d\n", status);
         hackrf_close(HackRF.device);
         hackrf_exit();
         return false;
