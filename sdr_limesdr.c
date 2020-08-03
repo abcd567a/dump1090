@@ -153,6 +153,51 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
     return true;
 }
 
+static size_t selectAntenna()
+{
+    int result = LMS_PATH_AUTO;
+    lms_name_t *names = NULL;
+
+    int numAntennas = LMS_GetAntennaList(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, NULL);
+    if (numAntennas <= 0) {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to get antenna list");
+        goto done;
+    }
+
+    names = calloc(numAntennas, sizeof(lms_name_t));
+    if (!names) {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to get antenna list");
+        goto done;
+    }
+
+    numAntennas = LMS_GetAntennaList(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, names);
+    if (numAntennas < 0) {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to get antenna list");
+        goto done;
+    }
+
+    for (int i = 0; i < numAntennas; ++i) {
+        lms_range_t range;
+        if (LMS_GetAntennaBW(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, i, &range) < 0) {
+            fprintf(stderr, "limesdr: unable to get antenna bandwidth for antenna %d (%s)", i, names[i]);
+            continue;
+        }
+
+        if (range.min <= Modes.freq && range.max >= Modes.freq) {
+            fprintf(stderr, "limesdr: selected rx antenna %d (%s) with bandwidth %.1f .. %.1fMHz", i, names[i], range.min / 1e6, range.max / 1e6);
+            result = i;
+            goto done;
+        }
+    }
+
+ done:
+    if (result == LMS_PATH_AUTO)
+        limesdrLogHandler(LMS_LOG_INFO, "limesdr: no suitable antenna found, letting LimeSuite do automatic antenna selection");
+    if (names)
+        free(names);
+    return result;
+}
+
 bool limesdrOpen(void)
 {
     const size_t devCountMax = 8;
@@ -208,13 +253,13 @@ bool limesdrOpen(void)
         goto error;
     }
 
-    if (LMS_SetLOFrequency(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.freq)) {
-        limesdrLogHandler(LMS_LOG_ERROR, "unable to set frequency");
+    if (LMS_SetAntenna(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, selectAntenna())) {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set RF port");
         goto error;
     }
 
-    if (LMS_SetAntenna(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, LMS_PATH_LNAL)) {
-        limesdrLogHandler(LMS_LOG_ERROR, "unable to set RF port");
+    if (LMS_SetLOFrequency(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.freq)) {
+        limesdrLogHandler(LMS_LOG_ERROR, "unable to set frequency");
         goto error;
     }
 
