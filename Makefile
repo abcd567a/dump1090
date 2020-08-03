@@ -1,8 +1,22 @@
 PROGNAME=dump1090
 
-RTLSDR ?= yes
-BLADERF ?= yes
-HACKRF ?= yes
+# Try to autodetect available libraries if no explicit setting was used
+
+ifndef RTLSDR
+  ifdef RTLSDR_PREFIX
+    RTLSDR := yes
+  else
+    RTLSDR := $(shell pkg-config --exists librtlsdr && echo "yes" || echo "no")
+  endif
+endif
+
+ifndef BLADERF
+  BLADERF := $(shell pkg-config --exists libbladeRF && echo "yes" || echo "no")
+endif
+
+ifndef HACKRF
+  HACKRF := $(shell pkg-config --exists libhackrf && echo "yes" || echo "no")
+endif
 
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
@@ -47,7 +61,14 @@ ifeq ($(HACKRF), yes)
   LIBS_SDR += $(shell pkg-config --libs libhackrf)
 endif
 
-all: dump1090 view1090
+all: showconfig dump1090 view1090
+
+showconfig:
+	@echo "Building with:" >&2
+	@echo "  Version string:  $(DUMP1090_VERSION)" >&2
+	@echo "  RTLSDR support:  $(RTLSDR)" >&2
+	@echo "  BladeRF support: $(BLADERF)" >&2
+	@echo "  HackRF support:  $(HACKRF)" >&2
 
 %.o: %.c *.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
