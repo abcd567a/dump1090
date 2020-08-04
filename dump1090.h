@@ -65,6 +65,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdatomic.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <errno.h>
@@ -306,7 +307,7 @@ struct _Modes {                             // Internal state
     double          sample_rate;                          // actual sample rate in use (in hz)
 
     uint16_t       *log10lut;        // Magnitude -> log10 lookup table
-    int             exit;            // Exit from the main loop when true (2 = unclean exit)
+    atomic_int      exit;            // Exit from the main loop when true (2 = unclean exit)
 
     // Sample conversion
     int            dc_filter;        // should we apply a DC filter?
