@@ -109,8 +109,8 @@ cprtests: cpr.o cprtests.o
 crctests: crc.c crc.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -g -DCRCDEBUG -o $@ $<
 
-benchmarks: convert_benchmark
-	./convert_benchmark
+benchmarks: oneoff/convert_benchmark
+	oneoff/convert_benchmark
 
 oneoff/convert_benchmark: oneoff/convert_benchmark.o convert.o util.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) -g -o $@ $^ -lm
