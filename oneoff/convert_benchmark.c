@@ -56,7 +56,7 @@ static uint16_t *outdata;
 // SC16Q11_TABLE_BITS=8:          5.77M samples/second
 // SC16Q11_TABLE_BITS=7:         10.23M samples/second
 
-void prepare()
+static void prepare()
 {
     srand(1);
 
@@ -89,7 +89,7 @@ void prepare()
     }
 }
 
-void test(const char *what, input_format_t format, void **data, double sample_rate, bool filter_dc) {
+static void test(const char *what, input_format_t format, void **data, double sample_rate, bool filter_dc) {
     fprintf(stderr, "Benchmarking: %s ", what);
 
     struct converter_state *state;
