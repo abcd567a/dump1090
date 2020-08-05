@@ -47,6 +47,9 @@
 //   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+// we want pthread_setname_np if available
+#define _GNU_SOURCE
+
 #include "dump1090.h"
 
 #include <stdlib.h>
@@ -101,4 +104,13 @@ void end_cpu_timing(const struct timespec *start_time, struct timespec *add_to)
     add_to->tv_sec += end_time.tv_sec - start_time->tv_sec;
     add_to->tv_nsec += end_time.tv_nsec - start_time->tv_nsec;
     normalize_timespec(add_to);
+}
+
+void set_thread_name(const char *name)
+{
+#if (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 12)
+    pthread_setname_np(pthread_self(), name);
+#else
+    MODES_NOTUSED(name);
+#endif
 }

@@ -173,7 +173,8 @@ bool sdrOpen()
 
 void sdrRun()
 {
-    return current_handler()->run();
+    set_thread_name("dump1090-sdr");
+    current_handler()->run();
 }
 
 void sdrClose()
