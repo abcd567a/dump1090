@@ -25,7 +25,7 @@ endif
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
-CFLAGS += $(DIALECT) -O2 -g -Wall -Wmissing-declarations -Werror -W -D_DEFAULT_SOURCE -fno-common
+CFLAGS += $(DIALECT) -O3 -g -Wall -Wmissing-declarations -Werror -W -D_DEFAULT_SOURCE -fno-common
 LIBS = -lpthread -lm -lrt
 SDR_OBJ = sdr.o sdr_ifile.o
 
