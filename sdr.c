@@ -127,17 +127,20 @@ void sdrShowHelp()
 bool sdrHandleOption(int argc, char **argv, int *jptr)
 {
     int j = *jptr;
-    if (!strcmp(argv[j], "--device-type") && (j+1) < argc) {
-        ++j;
-        for (int i = 0; sdr_handlers[i].name; ++i) {
-            if (!strcasecmp(sdr_handlers[i].name, argv[j])) {
-                Modes.sdr_type = sdr_handlers[i].sdr_type;
-                *jptr = j;
-                return true;
+    if (!strcmp(argv[j], "--device-type")) {
+        if ((j+1) < argc) {
+            ++j;
+            for (int i = 0; sdr_handlers[i].name; ++i) {
+                if (!strcasecmp(sdr_handlers[i].name, argv[j])) {
+                    Modes.sdr_type = sdr_handlers[i].sdr_type;
+                    *jptr = j;
+                    return true;
+                }
             }
+            fprintf(stderr, "SDR type '%s' not recognized. ", argv[j]);
         }
 
-        fprintf(stderr, "SDR type '%s' not recognized; supported SDR types are:\n", argv[j]);
+        fprintf(stderr, "Supported SDR types:\n");
         for (int i = 0; sdr_handlers[i].name; ++i) {
             fprintf(stderr, "  %s\n", sdr_handlers[i].name);
         }
