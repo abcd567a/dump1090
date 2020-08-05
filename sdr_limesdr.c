@@ -83,7 +83,9 @@ static void limesdrLogHandler(int lvl, const char *msg)
             break;
         case LMS_LOG_WARNING:
         case LMS_LOG_ERROR:
+#ifdef LMS_LOG_CRITICAL
         case LMS_LOG_CRITICAL:
+#endif
             out = stderr;
             break;
     }
@@ -155,7 +157,7 @@ bool limesdrHandleOption(int argc, char **argv, int *jptr)
 
 static size_t selectAntenna()
 {
-    int result = LMS_PATH_AUTO;
+    ssize_t result = -1;
     lms_name_t *names = NULL;
 
     int numAntennas = LMS_GetAntennaList(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, NULL);
@@ -191,8 +193,11 @@ static size_t selectAntenna()
     }
 
  done:
-    if (result == LMS_PATH_AUTO)
-        limesdrLogHandler(LMS_LOG_INFO, "limesdr: no suitable antenna found, letting LimeSuite do automatic antenna selection");
+    if (result < 0) {
+        limesdrLogHandler(LMS_LOG_WARNING, "no suitable rx antenna range found, using LNAW");
+        result = LMS_PATH_LNAW;
+    }
+
     if (names)
         free(names);
     return result;
