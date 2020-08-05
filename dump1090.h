@@ -301,7 +301,9 @@ struct _Modes {                             // Internal state
     struct mag_buf  mag_buffers[MODES_MAG_BUFFERS];       // Converted magnitude buffers from RTL or file input
     unsigned        first_free_buffer;                    // Entry in mag_buffers that will next be filled with input.
     unsigned        first_filled_buffer;                  // Entry in mag_buffers that has valid data and will be demodulated next. If equal to next_free_buffer, there is no unprocessed data.
-    struct timespec reader_cpu_accumulator;               // CPU time used by the reader thread, copied out and reset by the main thread under the mutex
+    pthread_mutex_t reader_cpu_mutex;                     // mutex protecting reader_cpu_accumulator
+    struct timespec reader_cpu_accumulator;               // accumulated CPU time used by the reader thread
+    struct timespec reader_cpu_start;                     // start time for the last reader thread CPU measurement
 
     unsigned        trailing_samples;                     // extra trailing samples in magnitude buffers
     double          sample_rate;                          // actual sample rate in use (in hz)

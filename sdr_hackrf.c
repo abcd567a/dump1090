@@ -195,8 +195,6 @@ bool hackRFOpen()
     return true;
 }
 
-struct timespec thread_cpu;
-
 static int handle_hackrf_samples(hackrf_transfer *transfer)
 {
     struct mag_buf *outbuf;
@@ -210,6 +208,8 @@ static int handle_hackrf_samples(hackrf_transfer *transfer)
 
     static int dropping = 0;
     static uint64_t sampleCounter = 0;
+
+    sdrMonitor();
 
     // Lock the data buffer variables before accessing them
     pthread_mutex_lock(&Modes.data_mutex);
@@ -271,10 +271,6 @@ static int handle_hackrf_samples(hackrf_transfer *transfer)
     Modes.mag_buffers[next_free_buffer].length = 0;  // just in case
     Modes.first_free_buffer = next_free_buffer;
 
-    // accumulate CPU while holding the mutex, and restart measurement
-    end_cpu_timing(&thread_cpu, &Modes.reader_cpu_accumulator);
-    start_cpu_timing(&thread_cpu);
-
     pthread_cond_signal(&Modes.data_cond);
     pthread_mutex_unlock(&Modes.data_mutex);
 
@@ -288,8 +284,6 @@ void hackRFRun()
         fprintf(stderr, "hackRFRun: HackRF.device = NULL\n");
         return;
     }
-
-    start_cpu_timing(&thread_cpu);
 
     int status = hackrf_start_rx(HackRF.device, &handle_hackrf_samples, NULL);
 

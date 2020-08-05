@@ -179,9 +179,6 @@ void ifileRun()
     int eof = 0;
     struct timespec next_buffer_delivery;
 
-    struct timespec thread_cpu;
-    start_cpu_timing(&thread_cpu);
-
     uint64_t sampleCounter = 0;
 
     clock_gettime(CLOCK_MONOTONIC, &next_buffer_delivery);
@@ -204,6 +201,8 @@ void ifileRun()
         outbuf = &Modes.mag_buffers[Modes.first_free_buffer];
         lastbuf = &Modes.mag_buffers[(Modes.first_free_buffer + MODES_MAG_BUFFERS - 1) % MODES_MAG_BUFFERS];
         pthread_mutex_unlock(&Modes.data_mutex);
+
+        sdrMonitor();
 
         // Compute the sample timestamp for the start of the block
         outbuf->sampleTimestamp = sampleCounter * 12e6 / Modes.sample_rate;
@@ -253,9 +252,6 @@ void ifileRun()
         // Push the new data to the main thread
         pthread_mutex_lock(&Modes.data_mutex);
         Modes.first_free_buffer = next_free_buffer;
-        // accumulate CPU while holding the mutex, and restart measurement
-        end_cpu_timing(&thread_cpu, &Modes.reader_cpu_accumulator);
-        start_cpu_timing(&thread_cpu);
         pthread_cond_signal(&Modes.data_cond);
     }
 

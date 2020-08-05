@@ -315,8 +315,6 @@ bool limesdrOpen(void)
     return false;
 }
 
-static struct timespec limesdr_thread_cpu;
-
 static void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
 {
     struct mag_buf *outbuf;
@@ -330,6 +328,8 @@ static void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
     static uint64_t sampleCounter = 0;
 
     MODES_NOTUSED(ctx);
+
+    sdrMonitor();
 
     // Lock the data buffer variables before accessing them
     pthread_mutex_lock(&Modes.data_mutex);
@@ -396,10 +396,6 @@ static void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
     Modes.mag_buffers[next_free_buffer].length = 0;  // just in case
     Modes.first_free_buffer = next_free_buffer;
 
-    // accumulate CPU while holding the mutex, and restart measurement
-    end_cpu_timing(&limesdr_thread_cpu, &Modes.reader_cpu_accumulator);
-    start_cpu_timing(&limesdr_thread_cpu);
-
     pthread_cond_signal(&Modes.data_cond);
     pthread_mutex_unlock(&Modes.data_mutex);
 }
@@ -413,8 +409,6 @@ void limesdrRun()
     int16_t *buffer = malloc(MODES_RTL_BUF_SIZE);
 
     LMS_StartStream(&LimeSDR.stream);
-
-    start_cpu_timing(&limesdr_thread_cpu);
 
     while (!LimeSDR.is_stop) {
         int sampleCnt = LMS_RecvStream(&LimeSDR.stream, buffer, MODES_RTL_BUF_SIZE / LimeSDR.bytes_in_sample, NULL, 1000);

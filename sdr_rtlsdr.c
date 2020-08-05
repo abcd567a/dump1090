@@ -265,8 +265,6 @@ bool rtlsdrOpen(void) {
     return true;
 }
 
-static struct timespec rtlsdr_thread_cpu;
-
 static void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx) {
     struct mag_buf *outbuf;
     struct mag_buf *lastbuf;
@@ -279,6 +277,8 @@ static void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx) {
     static uint64_t sampleCounter = 0;
 
     MODES_NOTUSED(ctx);
+
+    sdrMonitor();
 
     // Lock the data buffer variables before accessing them
     pthread_mutex_lock(&Modes.data_mutex);
@@ -346,10 +346,6 @@ static void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx) {
     Modes.mag_buffers[next_free_buffer].length = 0;  // just in case
     Modes.first_free_buffer = next_free_buffer;
 
-    // accumulate CPU while holding the mutex, and restart measurement
-    end_cpu_timing(&rtlsdr_thread_cpu, &Modes.reader_cpu_accumulator);
-    start_cpu_timing(&rtlsdr_thread_cpu);
-
     pthread_cond_signal(&Modes.data_cond);
     pthread_mutex_unlock(&Modes.data_mutex);
 }
@@ -359,8 +355,6 @@ void rtlsdrRun()
     if (!RTLSDR.dev) {
         return;
     }
-
-    start_cpu_timing(&rtlsdr_thread_cpu);
 
     rtlsdr_read_async(RTLSDR.dev, rtlsdrCallback, NULL,
                       /* MODES_RTL_BUFFERS */ 4,

@@ -300,7 +300,6 @@ bool bladeRFOpen()
     return false;
 }
 
-static struct timespec thread_cpu;
 static unsigned timeouts = 0;
 
 static void *handle_bladerf_samples(struct bladerf *dev,
@@ -321,6 +320,8 @@ static void *handle_bladerf_samples(struct bladerf *dev,
 
     // record initial time for later sys timestamp calculation
     uint64_t entryTimestamp = mstime();
+
+    sdrMonitor();
 
     pthread_mutex_lock(&Modes.data_mutex);
     if (Modes.exit) {
@@ -430,10 +431,6 @@ static void *handle_bladerf_samples(struct bladerf *dev,
         // Push the new data to the demodulation thread
         pthread_mutex_lock(&Modes.data_mutex);
 
-        // accumulate CPU while holding the mutex, and restart measurement
-        end_cpu_timing(&thread_cpu, &Modes.reader_cpu_accumulator);
-        start_cpu_timing(&thread_cpu);
-
         Modes.mag_buffers[next_free_buffer].dropped = 0;
         Modes.mag_buffers[next_free_buffer].length = 0;  // just in case
         Modes.first_free_buffer = next_free_buffer;
@@ -481,8 +478,6 @@ void bladeRFRun()
         fprintf(stderr, "bladerf_enable_module(RX, true) failed: %s\n", bladerf_strerror(status));
         goto out;
     }
-
-    start_cpu_timing(&thread_cpu);
 
     timeouts = 0; // reset to zero when we get a callback with some data
  retry:

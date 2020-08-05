@@ -382,6 +382,9 @@ static void backgroundTasks(void) {
         interactiveShowData();
     }
 
+    // copy out reader CPU time and reset it
+    sdrUpdateCPUTime(&Modes.stats_current.reader_cpu);
+
     // always update end time so it is current when requests arrive
     Modes.stats_current.end = mstime();
 
@@ -702,11 +705,6 @@ int main(int argc, char **argv) {
             }
 
             // Modes.data_mutex is locked, and possibly we have data.
-
-            // copy out reader CPU time and reset it
-            add_timespecs(&Modes.reader_cpu_accumulator, &Modes.stats_current.reader_cpu, &Modes.stats_current.reader_cpu);
-            Modes.reader_cpu_accumulator.tv_sec = 0;
-            Modes.reader_cpu_accumulator.tv_nsec = 0;
 
             if (Modes.first_free_buffer != Modes.first_filled_buffer) {
                 // FIFO is not empty, process one buffer.
