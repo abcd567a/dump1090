@@ -309,13 +309,15 @@ static void *handle_bladerf_samples(struct bladerf *dev,
                                     size_t num_samples,
                                     void *user_data)
 {
-    static uint64_t nextTimestamp = 0;
+    static uint64_t nextTimestamp = 0;  // what's the next timestamp we expect to see?
+    static bool overrun = false;        // do we have a pending overrun to report?
+    static bool dropped = 0;            // do we have some dropped samples to report?
+    static bool first_buffer = true;    // is this the very first callback?
 
     MODES_NOTUSED(dev);
     MODES_NOTUSED(stream);
     MODES_NOTUSED(meta);
     MODES_NOTUSED(user_data);
-    MODES_NOTUSED(num_samples);
 
     // record initial time for later sys timestamp calculation
     uint64_t entryTimestamp = mstime();
@@ -323,27 +325,17 @@ static void *handle_bladerf_samples(struct bladerf *dev,
     sdrMonitor();
 
     if (Modes.exit) {
+        // ask our caller to return
         return BLADERF_STREAM_SHUTDOWN;
     }
 
-    struct mag_buf *outbuf = fifo_acquire(/* don't wait */ 0);
-
-    if (!outbuf) {
-        // FIFO is full. Drop this block.
-        return samples;
-    }
+    timeouts = 0;
 
     // start handling metadata blocks
-    outbuf->dropped = 0;
-    outbuf->validLength = outbuf->overlap;
-    outbuf->mean_level = outbuf->mean_power = 0;
-
-    unsigned blocks_processed = 0;
     unsigned samples_per_block = (BladeRF.block_size - 16) / 4;
+    struct mag_buf *outbuf = NULL;
 
-    static bool overrun = true; // ignore initial overruns as we get up to speed
-    static bool first_buffer = true;
-    for (unsigned offset = 0; offset < MODES_MAG_BUF_SAMPLES * 4; offset += BladeRF.block_size) {
+    for (unsigned offset = 0; offset < num_samples * 4; offset += BladeRF.block_size) {
         // read the next metadata header
         uint8_t *header = ((uint8_t*)samples) + offset;
         uint64_t metadata_magic = le32toh(*(uint32_t*)(header));
@@ -359,62 +351,64 @@ static void *handle_bladerf_samples(struct bladerf *dev,
             break;
         }
 
-        if (metadata_flags & BLADERF_META_STATUS_OVERRUN) {
-            if (!overrun) {
-                fprintf(stderr, "bladeRF: receive overrun\n");
-            }
+        if (metadata_flags & BLADERF_META_STATUS_OVERRUN)
             overrun = true;
-        } else {
-            overrun = false;
-        }
 
-#ifndef BROKEN_FPGA_METADATA
-        // this needs a fixed decimating FPGA image that handles the timestamp correctly
         if (nextTimestamp && nextTimestamp != metadata_timestamp) {
-            // dropped data or lost sync. start again.
+            // dropped data or lost sync
+            overrun = true;
             if (metadata_timestamp > nextTimestamp)
-                outbuf->dropped += (metadata_timestamp - nextTimestamp);
-            outbuf->dropped += outbuf->validLength - outbuf->overlap;
+                dropped = (metadata_timestamp - nextTimestamp);
+            else
+                dropped = 0;
+        }
+
+        if (outbuf && (overrun || (outbuf->validLength + samples_per_block > outbuf->totalLength))) {
+            // discontinuity or buffer is full. Push the current buffer and get a new one
+            fifo_enqueue(outbuf);
+            outbuf = NULL;
+        }
+
+        if (!outbuf) {
+            // need a new buffer
+            outbuf = fifo_acquire(/* don't wait */ 0);
+            if (!outbuf) {
+                // we have nowhere to put this data, drop it. nb: don't update nextTimestamp
+                overrun = true;
+                continue;
+            }
+
+            // set metadata on the new buffer
+            outbuf->flags = 0;
+            if (overrun) {
+                outbuf->flags |= MAGBUF_DISCONTINUOUS;
+            }
+            outbuf->dropped = dropped;
             outbuf->validLength = outbuf->overlap;
-            outbuf->flags |= MAGBUF_DISCONTINUOUS;
-            blocks_processed = 0;
-            outbuf->mean_level = outbuf->mean_power = 0;
-            nextTimestamp = metadata_timestamp;
-        }
-#else
-        MODES_NOTUSED(metadata_timestamp);
-#endif
+            outbuf->sampleTimestamp = metadata_timestamp * 12e6 / Modes.sample_rate / BladeRF.decimation;
+            outbuf->sysTimestamp = entryTimestamp + (num_samples - offset / 4) * 1000 / Modes.sample_rate / BladeRF.decimation;
+            outbuf->mean_level = 0;
+            outbuf->mean_power = 0;
 
-        if (!blocks_processed) {
-            // Compute the sample timestamp for the start of the block
-            outbuf->sampleTimestamp = nextTimestamp * 12e6 / Modes.sample_rate / BladeRF.decimation;
+            overrun = false;
+            dropped = 0;
         }
 
-        // Convert a block of data
+        // Convert one block of sample data
         double mean_level, mean_power;
         BladeRF.converter(sample_data, &outbuf->data[outbuf->validLength], samples_per_block, BladeRF.converter_state, &mean_level, &mean_power);
         outbuf->validLength += samples_per_block;
         outbuf->mean_level += mean_level;
         outbuf->mean_power += mean_power;
-        nextTimestamp += samples_per_block * BladeRF.decimation;
-        ++blocks_processed;
-        timeouts = 0;
+        nextTimestamp = metadata_timestamp + samples_per_block * BladeRF.decimation;
     }
 
-    first_buffer = false;
-
-    if (blocks_processed) {
-        // Get the approx system time for the start of this block
-        unsigned block_duration = 1e3 * (outbuf->validLength - outbuf->overlap) / Modes.sample_rate;
-        outbuf->sysTimestamp = entryTimestamp - block_duration;
-
-        outbuf->mean_level /= blocks_processed;
-        outbuf->mean_power /= blocks_processed;
-
-        // Push the new data to the demodulation thread
+    // push the final buffer, if any
+    if (outbuf) {
         fifo_enqueue(outbuf);
     }
 
+    first_buffer = false;
     return samples;
 }
 
