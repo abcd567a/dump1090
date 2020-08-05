@@ -53,12 +53,17 @@
 
 #include <rtl-sdr.h>
 
+#ifdef __arm__
+// Assume we need to use a bounce buffer to avoid performance problems on Pis running kernel 5.x and using zerocopy
+#  define USE_BOUNCE_BUFFER
+#endif
+
 static struct {
     rtlsdr_dev_t *dev;
     bool digital_agc;
     int ppm_error;
     int direct_sampling;
-
+    uint8_t *bounce_buffer;
     iq_convert_fn converter;
     struct converter_state *converter_state;
 } RTLSDR;
@@ -73,6 +78,7 @@ void rtlsdrInitConfig()
     RTLSDR.digital_agc = false;
     RTLSDR.ppm_error = 0;
     RTLSDR.direct_sampling = 0;
+    RTLSDR.bounce_buffer = NULL;
     RTLSDR.converter = NULL;
     RTLSDR.converter_state = NULL;
 }
@@ -262,6 +268,14 @@ bool rtlsdrOpen(void) {
         return false;
     }
 
+#ifdef USE_BOUNCE_BUFFER
+    if (!(RTLSDR.bounce_buffer = malloc(MODES_RTL_BUF_SIZE))) {
+        fprintf(stderr, "rtlsdr: can't allocate bounce buffer\n");
+        rtlsdrClose();
+        return false;
+    }
+#endif
+
     return true;
 }
 
@@ -317,10 +331,13 @@ static void rtlsdrCallback(unsigned char *buf, uint32_t len, void *ctx)
         dropped = samples_read - to_convert;
     }
 
-
+#ifdef USE_BOUNCE_BUFFER
+    // Work around zero-copy slowness on Pis with 5.x kernels
+    memcpy(RTLSDR.bounce_buffer, buf, to_convert * 2);
+    buf = RTLSDR.bounce_buffer;
+#endif
 
     RTLSDR.converter(buf, &outbuf->data[outbuf->overlap], to_convert, RTLSDR.converter_state, &outbuf->mean_level, &outbuf->mean_power);
-
     outbuf->validLength = outbuf->overlap + to_convert;
 
     // Push to the demodulation thread
@@ -353,4 +370,7 @@ void rtlsdrClose()
         RTLSDR.converter = NULL;
         RTLSDR.converter_state = NULL;
     }
+
+    free(RTLSDR.bounce_buffer);
+    RTLSDR.bounce_buffer = NULL;
 }
