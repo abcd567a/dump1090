@@ -100,7 +100,7 @@ faup1090: faup1090.o anet.o mode_ac.o mode_s.o comm_b.o net_io.o crc.o stats.o c
 	$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o compat/clock_gettime/*.o compat/clock_nanosleep/*.o dump1090 view1090 faup1090 cprtests crctests convert_benchmark
+	rm -f *.o oneoff/*.o compat/clock_gettime/*.o compat/clock_nanosleep/*.o dump1090 view1090 faup1090 cprtests crctests convert_benchmark
 
 test: cprtests
 	./cprtests
