@@ -22,6 +22,8 @@ ifndef LIMESDR
   LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
 endif
 
+DUMP1090_VERSION ?= unknown
+
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
