@@ -107,7 +107,7 @@ void hackRFShowHelp()
 
 static void show_config()
 {
-    fprintf(stderr, "freq : %ld\n", HackRF.freq);
+    fprintf(stderr, "freq : %" PRIu64 "\n", HackRF.freq);
     fprintf(stderr, "lna_gain : %d\n", HackRF.lna_gain);
     fprintf(stderr, "vga_gain : %d\n", HackRF.vga_gain);
     fprintf(stderr, "samplerate : %d\n", HackRF.rate);
