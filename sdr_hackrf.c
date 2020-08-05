@@ -288,7 +288,7 @@ void hackRFRun()
     int status = hackrf_start_rx(HackRF.device, &handle_hackrf_samples, NULL);
 
     if (status != 0) { 
-        fprintf(stderr, "hackrf_start_rx failed"); 
+        fprintf(stderr, "hackrf_start_rx failed\n");
         hackrf_close(HackRF.device); 
         hackrf_exit(); 
         exit (1); 
