@@ -322,7 +322,6 @@ static void showHelp(void)
 "--metric                 Use metric units (meters, km/h, ...)\n"
 "--gnss                   Show altitudes as HAE/GNSS (with H suffix) when available\n"
 "--snip <level>           Strip IQ file removing samples < level\n"
-"--debug <flags>          Debug mode (verbose), see README for details\n"
 "--quiet                  Disable output to stdout. Use for daemon applications\n"
 "--show-only <addr>       Show only messages from the given ICAO on stdout\n"
 "--write-json <dir>       Periodically write json output to <dir> (for serving by a separate webserver)\n"
@@ -331,14 +330,6 @@ static void showHelp(void)
 "--dcfilter               Apply a 1Hz DC filter to input data (requires more CPU)\n"
 "--version                Show version and build options\n"
 "--help                   Show this help\n"
-"\n"
-"Debug mode flags: d = Log frames decoded with errors\n"
-"                  D = Log frames decoded with zero errors\n"
-"                  c = Log frames with bad CRC\n"
-"                  C = Log frames with good CRC\n"
-"                  p = Log frames with bad preamble\n"
-"                  n = Log network debugging info\n"
-"                  j = Log frames to frames.js, loadable by debug.html\n"
     );
 }
 
@@ -565,23 +556,8 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--max-range") && more) {
             Modes.maxRange = atof(argv[++j]) * 1852.0; // convert to metres
         } else if (!strcmp(argv[j],"--debug") && more) {
-            char *f = argv[++j];
-            while(*f) {
-                switch(*f) {
-                case 'D': Modes.debug |= MODES_DEBUG_DEMOD; break;
-                case 'd': Modes.debug |= MODES_DEBUG_DEMODERR; break;
-                case 'C': Modes.debug |= MODES_DEBUG_GOODCRC; break;
-                case 'c': Modes.debug |= MODES_DEBUG_BADCRC; break;
-                case 'p': Modes.debug |= MODES_DEBUG_NOPREAMBLE; break;
-                case 'n': Modes.debug |= MODES_DEBUG_NET; break;
-                case 'j': Modes.debug |= MODES_DEBUG_JS; break;
-                default:
-                    fprintf(stderr, "Unknown debugging flag: %c\n", *f);
-                    exit(1);
-                    break;
-                }
-                f++;
-            }
+            fprintf(stderr, "warning: --debug is obsolete and ignored\n");
+            ++j;
         } else if (!strcmp(argv[j],"--stats")) {
             if (!Modes.stats)
                 Modes.stats = (uint64_t)1 << 60; // "never"
