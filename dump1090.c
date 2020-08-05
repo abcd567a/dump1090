@@ -245,8 +245,8 @@ static void snipMode(int level) {
 //
 // ================================ Main ====================================
 //
-static void showHelp(void) {
-
+static void showVersion()
+{
     printf("-----------------------------------------------------------------------------\n");
     printf("| dump1090 ModeS Receiver     %45s |\n", MODES_DUMP1090_VARIANT " " MODES_DUMP1090_VERSION);
     printf("| build options: %-58s |\n",
@@ -274,6 +274,11 @@ static void showHelp(void) {
            );
     printf("-----------------------------------------------------------------------------\n");
     printf("\n");
+}
+
+static void showHelp(void)
+{
+    showVersion();
 
     sdrShowHelp();
 
@@ -324,6 +329,7 @@ static void showHelp(void) {
 "--write-json-every <t>   Write json output every t seconds (default 1)\n"
 "--json-location-accuracy <n>  Accuracy of receiver location in json metadata: 0=no location, 1=approximate, 2=exact\n"
 "--dcfilter               Apply a 1Hz DC filter to input data (requires more CPU)\n"
+"--version                Show version and build options\n"
 "--help                   Show this help\n"
 "\n"
 "Debug mode flags: d = Log frames decoded with errors\n"
@@ -589,6 +595,9 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--help")) {
             showHelp();
             exit(0);
+        } else if (!strcmp(argv[j],"--version")) {
+            showVersion();
+            exit(0);
         } else if (!strcmp(argv[j],"--quiet")) {
             Modes.quiet = 1;
         } else if (!strcmp(argv[j],"--show-only") && more) {
@@ -611,9 +620,9 @@ int main(int argc, char **argv) {
             /* handled */
         } else {
             fprintf(stderr,
-                "Unknown or not enough arguments for option '%s'.\n\n",
-                argv[j]);
-            showHelp();
+                    "Unknown or not enough arguments for option '%s'.\nTry %s --help for full option help.\n",
+                    argv[j],
+                    argv[0]);
             exit(1);
         }
     }
