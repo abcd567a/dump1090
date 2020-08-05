@@ -132,9 +132,6 @@ static void modesInitConfig(void) {
 static void modesInit(void) {
     int i;
 
-    pthread_mutex_init(&Modes.data_mutex,NULL);
-    pthread_cond_init(&Modes.data_cond,NULL);
-
     Modes.sample_rate = 2400000.0;
 
     // Allocate the various buffers used by Modes
@@ -146,15 +143,9 @@ static void modesInit(void) {
         exit(1);
     }
 
-    for (i = 0; i < MODES_MAG_BUFFERS; ++i) {
-        if ( (Modes.mag_buffers[i].data = calloc(MODES_MAG_BUF_SAMPLES+Modes.trailing_samples, sizeof(uint16_t))) == NULL ) {
-            fprintf(stderr, "Out of memory allocating magnitude buffer.\n");
-            exit(1);
-        }
-
-        Modes.mag_buffers[i].length = 0;
-        Modes.mag_buffers[i].dropped = 0;
-        Modes.mag_buffers[i].sampleTimestamp = 0;
+    if (!fifo_create(MODES_MAG_BUFFERS, MODES_MAG_BUF_SAMPLES + Modes.trailing_samples, Modes.trailing_samples)) {
+        fprintf(stderr, "Out of memory allocating FIFO\n");
+        exit(1);
     }
 
     // Validate the users Lat/Lon home location inputs
@@ -224,13 +215,10 @@ static void *readerThreadEntryPoint(void *arg)
 
     sdrRun();
 
-    // Wake the main thread (if it's still waiting)
-    pthread_mutex_lock(&Modes.data_mutex);
     if (!Modes.exit)
         Modes.exit = 2; // unexpected exit
-    pthread_cond_signal(&Modes.data_cond);
-    pthread_mutex_unlock(&Modes.data_mutex);
 
+    fifo_halt(); // wakes the main thread, if it's still waiting
     return NULL;
 }
 //
@@ -684,59 +672,34 @@ int main(int argc, char **argv) {
         int watchdogCounter = 10; // about 1 second
 
         // Create the thread that will read the data from the device.
-        pthread_mutex_lock(&Modes.data_mutex);
         pthread_create(&Modes.reader_thread, NULL, readerThreadEntryPoint, NULL);
 
         while (!Modes.exit) {
+            // get the next sample buffer off the FIFO; wait only up to 100ms
+            // this is fairly aggressive as all our network I/O runs out of the background work!
+            struct mag_buf *buf = fifo_dequeue(100 /* milliseconds */);
             struct timespec start_time;
 
-            if (Modes.first_free_buffer == Modes.first_filled_buffer) {
-                /* wait for more data.
-                 * we should be getting data every 50-60ms. wait for max 100ms before we give up and do some background work.
-                 * this is fairly aggressive as all our network I/O runs out of the background work!
-                 */
-
-                struct timespec ts;
-                clock_gettime(CLOCK_REALTIME, &ts);
-                ts.tv_nsec += 100000000;
-                normalize_timespec(&ts);
-
-                pthread_cond_timedwait(&Modes.data_cond, &Modes.data_mutex, &ts); // This unlocks Modes.data_mutex, and waits for Modes.data_cond
-            }
-
-            // Modes.data_mutex is locked, and possibly we have data.
-
-            if (Modes.first_free_buffer != Modes.first_filled_buffer) {
-                // FIFO is not empty, process one buffer.
-
-                struct mag_buf *buf;
+            if (buf) {
+                // Process one buffer
 
                 start_cpu_timing(&start_time);
-                buf = &Modes.mag_buffers[Modes.first_filled_buffer];
-
-                // Process data after releasing the lock, so that the capturing
-                // thread can read data while we perform computationally expensive
-                // stuff at the same time.
-                pthread_mutex_unlock(&Modes.data_mutex);
-
                 demodulate2400(buf);
                 if (Modes.mode_ac) {
                     demodulate2400AC(buf);
                 }
 
-                Modes.stats_current.samples_processed += buf->length;
+                Modes.stats_current.samples_processed += buf->validLength;
                 Modes.stats_current.samples_dropped += buf->dropped;
                 end_cpu_timing(&start_time, &Modes.stats_current.demod_cpu);
 
-                // Mark the buffer we just processed as completed.
-                pthread_mutex_lock(&Modes.data_mutex);
-                Modes.first_filled_buffer = (Modes.first_filled_buffer + 1) % MODES_MAG_BUFFERS;
-                pthread_cond_signal(&Modes.data_cond);
-                pthread_mutex_unlock(&Modes.data_mutex);
+                // Return the buffer to the FIFO freelist for reuse
+                fifo_release(buf);
+
+                // We got something so reset the watchdog
                 watchdogCounter = 10;
             } else {
                 // Nothing to process this time around.
-                pthread_mutex_unlock(&Modes.data_mutex);
                 if (--watchdogCounter <= 0) {
                     log_with_timestamp("No data received from the SDR for a long time, it may have wedged");
                     watchdogCounter = 600;
@@ -746,16 +709,11 @@ int main(int argc, char **argv) {
             start_cpu_timing(&start_time);
             backgroundTasks();
             end_cpu_timing(&start_time, &Modes.stats_current.background_cpu);
-
-            pthread_mutex_lock(&Modes.data_mutex);
         }
 
-        pthread_mutex_unlock(&Modes.data_mutex);
-
         log_with_timestamp("Waiting for receive thread termination");
+        fifo_halt(); // Reader thread should do this anyway, but just in case..
         pthread_join(Modes.reader_thread,NULL);     // Wait on reader thread exit
-        pthread_cond_destroy(&Modes.data_cond);     // Thread cleanup - only after the reader thread is dead!
-        pthread_mutex_destroy(&Modes.data_mutex);
     }
 
     interactiveCleanup();

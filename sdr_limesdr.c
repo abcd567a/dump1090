@@ -317,87 +317,54 @@ bool limesdrOpen(void)
 
 static void limesdrCallback(unsigned char *buf, uint32_t len, void *ctx)
 {
-    struct mag_buf *outbuf;
-    struct mag_buf *lastbuf;
-    uint32_t slen;
-    unsigned next_free_buffer;
-    unsigned free_bufs;
-    unsigned block_duration;
-
-    static int dropping = 0;
+    static int dropped = 0;
     static uint64_t sampleCounter = 0;
 
     MODES_NOTUSED(ctx);
 
     sdrMonitor();
 
-    // Lock the data buffer variables before accessing them
-    pthread_mutex_lock(&Modes.data_mutex);
-    if (Modes.exit) {
-        LimeSDR.is_stop = true; // ask our caller to exit
-    }
+    unsigned samples_read = len / LimeSDR.bytes_in_sample; // Drops any trailing odd sample, not much else we can do there
 
-    next_free_buffer = (Modes.first_free_buffer + 1) % MODES_MAG_BUFFERS;
-    outbuf = &Modes.mag_buffers[Modes.first_free_buffer];
-    lastbuf = &Modes.mag_buffers[(Modes.first_free_buffer + MODES_MAG_BUFFERS - 1) % MODES_MAG_BUFFERS];
-    free_bufs = (Modes.first_filled_buffer - next_free_buffer + MODES_MAG_BUFFERS) % MODES_MAG_BUFFERS;
-
-    // Paranoia! Unlikely, but let's go for belt and suspenders here
-
-    if (len != MODES_RTL_BUF_SIZE) {
-        limesdrLogHandler(LMS_LOG_WARNING, "device gave us a block with an unusual size");
-
-        if (len > MODES_RTL_BUF_SIZE) {
-            // wat?! Discard the start.
-            unsigned discard = (len - MODES_RTL_BUF_SIZE + 1) / LimeSDR.bytes_in_sample;
-            outbuf->dropped += discard;
-            buf += discard * LimeSDR.bytes_in_sample;
-            len -= discard * LimeSDR.bytes_in_sample;
-        }
-    }
-
-    slen = len / LimeSDR.bytes_in_sample; // Drops any trailing odd sample, that's OK
-
-    if (free_bufs == 0 || (dropping && free_bufs < MODES_MAG_BUFFERS/2)) {
+    struct mag_buf *outbuf = fifo_acquire(0 /* don't wait */);
+    if (!outbuf) {
         // FIFO is full. Drop this block.
-        dropping = 1;
-        outbuf->dropped += slen;
-        sampleCounter += slen;
-        pthread_mutex_unlock(&Modes.data_mutex);
+        dropped += samples_read;
+        sampleCounter += samples_read;
         return;
     }
 
-    dropping = 0;
-    pthread_mutex_unlock(&Modes.data_mutex);
+    outbuf->flags = 0;
+
+    if (dropped) {
+        // We previously dropped some samples due to no buffers being available
+        outbuf->flags |= MAGBUF_DISCONTINUOUS;
+        outbuf->dropped = dropped;
+    }
+
+    dropped = 0;
 
     // Compute the sample timestamp and system timestamp for the start of the block
     outbuf->sampleTimestamp = sampleCounter * 12e6 / Modes.sample_rate;
-    sampleCounter += slen;
+    sampleCounter += samples_read;
 
     // Get the approx system time for the start of this block
-    block_duration = 1e3 * slen / Modes.sample_rate;
+    unsigned block_duration = 1e3 * samples_read / Modes.sample_rate;
     outbuf->sysTimestamp = mstime() - block_duration;
 
-    // Copy trailing data from last block (or reset if not valid)
-    if (outbuf->dropped == 0) {
-        memcpy(outbuf->data, lastbuf->data + lastbuf->length, Modes.trailing_samples * sizeof(uint16_t));
-    } else {
-        memset(outbuf->data, 0, Modes.trailing_samples * sizeof(uint16_t));
+    // Convert the new data
+    unsigned to_convert = samples_read;
+    if (to_convert + outbuf->overlap > outbuf->totalLength) {
+        // how did that happen?
+        to_convert = outbuf->totalLength - outbuf->overlap;
+        dropped = samples_read - to_convert;
     }
 
-    // Convert the new data
-    outbuf->length = slen;
-    LimeSDR.converter(buf, &outbuf->data[Modes.trailing_samples], slen, LimeSDR.converter_state, &outbuf->mean_level, &outbuf->mean_power);
+    LimeSDR.converter(buf, &outbuf->data[outbuf->overlap], to_convert, LimeSDR.converter_state, &outbuf->mean_level, &outbuf->mean_power);
+    outbuf->validLength = outbuf->overlap + to_convert;
 
-    // Push the new data to the demodulation thread
-    pthread_mutex_lock(&Modes.data_mutex);
-
-    Modes.mag_buffers[next_free_buffer].dropped = 0;
-    Modes.mag_buffers[next_free_buffer].length = 0;  // just in case
-    Modes.first_free_buffer = next_free_buffer;
-
-    pthread_cond_signal(&Modes.data_cond);
-    pthread_mutex_unlock(&Modes.data_mutex);
+    // Push to the demodulation thread
+    fifo_enqueue(outbuf);
 }
 
 void limesdrRun()
@@ -406,19 +373,24 @@ void limesdrRun()
         return;
     }
 
-    int16_t *buffer = malloc(MODES_RTL_BUF_SIZE);
+    int16_t *buffer = malloc(MODES_MAG_BUF_SAMPLES * LimeSDR.bytes_in_sample);
+    if (!buffer) {
+        limesdrLogHandler(LMS_LOG_ERROR, "out of memory allocating sample buffer");
+        return;
+    }
 
     LMS_StartStream(&LimeSDR.stream);
 
-    while (!LimeSDR.is_stop) {
-        int sampleCnt = LMS_RecvStream(&LimeSDR.stream, buffer, MODES_RTL_BUF_SIZE / LimeSDR.bytes_in_sample, NULL, 1000);
+    while (!Modes.exit) {
+        int sampleCnt = LMS_RecvStream(&LimeSDR.stream, buffer, MODES_MAG_BUF_SAMPLES, NULL, 1000);
+        if (sampleCnt < 0) {
+            limesdrLogHandler(LMS_LOG_ERROR, "LMS_RecvStream failed");
+            break;
+        }
+
         if (sampleCnt) {
             limesdrCallback((unsigned char *)buffer, sampleCnt * LimeSDR.bytes_in_sample, NULL);
         }
-    }
-
-    if (!Modes.exit) {
-        limesdrLogHandler(LMS_LOG_WARNING, "async read returned unexpectedly");
     }
 
     free(buffer);

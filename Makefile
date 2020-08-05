@@ -29,7 +29,7 @@ CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VA
 DIALECT = -std=c11
 CFLAGS += $(DIALECT) -O3 -g -Wall -Wmissing-declarations -Werror -W -D_DEFAULT_SOURCE -fno-common
 LIBS = -lpthread -lm -lrt
-SDR_OBJ = sdr.o sdr_ifile.o
+SDR_OBJ = sdr.o fifo.o sdr_ifile.o
 
 ifeq ($(RTLSDR), yes)
   SDR_OBJ += sdr_rtlsdr.o

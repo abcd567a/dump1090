@@ -66,9 +66,6 @@ static void view1090InitConfig(void) {
 //
 static void view1090Init(void) {
 
-    pthread_mutex_init(&Modes.data_mutex,NULL);
-    pthread_cond_init(&Modes.data_cond,NULL);
-
 #ifdef _WIN32
     if ( (!Modes.wsaData.wVersion)
       && (!Modes.wsaData.wHighVersion) ) {

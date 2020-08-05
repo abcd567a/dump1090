@@ -273,6 +273,7 @@ typedef enum {
 #include "icao_filter.h"
 #include "convert.h"
 #include "sdr.h"
+#include "fifo.h"
 
 //======================== structure declarations =========================
 
@@ -280,27 +281,10 @@ typedef enum {
     SDR_NONE, SDR_IFILE, SDR_RTLSDR, SDR_BLADERF, SDR_HACKRF, SDR_LIMESDR
 } sdr_type_t;
 
-// Structure representing one magnitude buffer
-struct mag_buf {
-    uint16_t       *data;            // Magnitude data. Starts with Modes.trailing_samples worth of overlap from the previous block
-    unsigned        length;          // Number of valid samples _after_ overlap. Total buffer length is buf->length + Modes.trailing_samples.
-    uint64_t        sampleTimestamp; // Clock timestamp of the start of this block, 12MHz clock
-    uint64_t        sysTimestamp;    // Estimated system time at start of block
-    uint32_t        dropped;         // Number of dropped samples preceding this buffer
-    double          mean_level;      // Mean of normalized (0..1) signal level
-    double          mean_power;      // Mean of normalized (0..1) power level
-};
-
 // Program global state
 struct _Modes {                             // Internal state
     pthread_t       reader_thread;
 
-    pthread_mutex_t data_mutex;      // Mutex to synchronize buffer access
-    pthread_cond_t  data_cond;       // Conditional variable associated
-
-    struct mag_buf  mag_buffers[MODES_MAG_BUFFERS];       // Converted magnitude buffers from RTL or file input
-    unsigned        first_free_buffer;                    // Entry in mag_buffers that will next be filled with input.
-    unsigned        first_filled_buffer;                  // Entry in mag_buffers that has valid data and will be demodulated next. If equal to next_free_buffer, there is no unprocessed data.
     pthread_mutex_t reader_cpu_mutex;                     // mutex protecting reader_cpu_accumulator
     struct timespec reader_cpu_accumulator;               // accumulated CPU time used by the reader thread
     struct timespec reader_cpu_start;                     // start time for the last reader thread CPU measurement

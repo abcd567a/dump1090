@@ -90,6 +90,13 @@ void normalize_timespec(struct timespec *ts)
     }
 }
 
+void get_deadline(uint32_t timeout_ms, struct timespec *ts)
+{
+    clock_gettime(CLOCK_REALTIME, ts);
+    ts->tv_nsec += timeout_ms * 1000000;
+    normalize_timespec(ts);
+}
+
 /* record current CPU time in start_time */
 void start_cpu_timing(struct timespec *start_time)
 {
