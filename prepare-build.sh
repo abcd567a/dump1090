@@ -37,14 +37,6 @@ cp -a $FILES $OUT
 cp -a $TOP/debian $OUT
 
 case "$DIST" in
-    wheezy)
-        cp -a $TOP/debian-wheezy/* $OUT/debian/
-        echo "Updating changelog for wheezy backport build" >&2
-        dch --changelog $OUT/debian/changelog --local ~bpo7+ --force-distribution --distribution wheezy-backports "Automated backport build for wheezy"
-        echo "Cloning rtl-sdr source"
-        git clone git://git.osmocom.org/rtl-sdr.git $OUT/rtl-sdr
-        ;;
-
     jessie)
         cp -a $TOP/debian-jessie/* $OUT/debian/
         echo "Updating changelog for jessie backport build" >&2
