@@ -19,8 +19,38 @@ ifeq ($(DEB_HOST_ARCH),armhf)
   CPPFLAGS += -DSC16Q11_TABLE_BITS=8
 endif
 
+ifeq (,$(filter custom,$(DEB_BUILD_PROFILES)))
+  # Standard build
+  RTLSDR = yes
+  BLADERF = yes
+  HACKRF = yes
+  LIMESDR = yes
+else
+  # Custom build
+  ifneq (,$(filter rtlsdr,$(DEB_BUILD_PROFILES)))
+    RTLSDR = yes
+  else
+    RTLSDR = no
+  endif
+  ifneq (,$(filter bladerf,$(DEB_BUILD_PROFILES)))
+    BLADERF = yes
+  else
+    BLADERF = no
+  endif
+  ifneq (,$(filter hackrf,$(DEB_BUILD_PROFILES)))
+    HACKRF = yes
+  else
+    HACKRF = no
+  endif
+  ifneq (,$(filter limesdr,$(DEB_BUILD_PROFILES)))
+    LIMESDR = yes
+  else
+    LIMESDR = no
+  endif
+endif
+
 override_dh_auto_build:
-	dh_auto_build -- RTLSDR=yes BLADERF=yes HACKRF=yes LIMESDR=yes DUMP1090_VERSION=$(DEB_VERSION)
+	dh_auto_build -- RTLSDR=$(RTLSDR) BLADERF=$(BLADERF) HACKRF=$(HACKRF) LIMESDR=$(LIMESDR) DUMP1090_VERSION=$(DEB_VERSION)
 
 override_dh_install:
 	dh_install
