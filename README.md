@@ -1,16 +1,33 @@
 # dump1090-fa Debian/Raspbian packages
 
-This is a fork of [dump1090-mutability](https://github.com/mutability/dump1090)
-customized for use within [FlightAware](http://flightaware.com)'s
-[PiAware](http://flightaware.com/adsb/piaware) software.
+dump1090-fa is a ADS-B, Mode S, and Mode 3A/3C demodulator and decoder that
+will receive and decode aircraft transponder messages received via
+a directly connected software defined radio, or from data provided over a
+network connection.
 
-It is designed to build as a Debian package.
+It is the successor to
+[dump1090-mutability](https://github.com/mutability/dump1090) and is
+maintained by [FlightAware](http://flightaware.com/).
+
+It can provide a display of locally received aircraft data in a terminal or
+via a browser map. Together with [PiAware](http://flightaware.com/adsb/piaware)
+it can be used to contribute crowd-sourced flight tracking data to FlightAware.
+
+It is designed to build as a Debian package, but should also be buildable on
+many other Linux or Unix-like systems.
+
+## Building under buster
+
+```bash
+$ sudo apt-get install build-essential debhelper librtlsdr-dev pkg-config dh-systemd libncurses5-dev libbladerf-dev libhackrf-dev liblimesuite-dev
+$ dpkg-buildpackage -b --no-sign
+```
 
 ## Building under stretch
 
 ```bash
 $ sudo apt-get install build-essential debhelper librtlsdr-dev pkg-config dh-systemd libncurses5-dev libbladerf-dev
-$ dpkg-buildpackage -b
+$ dpkg-buildpackage -b --no-sign
 ```
 
 ## Building under jessie
@@ -36,25 +53,25 @@ see https://flightaware.com/adsb/piaware/install
 
 This is packaged with jessie. `sudo apt-get install librtlsdr-dev`
 
-### Dependencies - HackRF
-
-This is packaged with jessie. `sudo apt-get install libhackrf-dev`
-
-### Dependencies - LimeSDR
-
-You will need a build of [LimeSuite](https://github.com/myriadrf/LimeSuite).  
-See detailed instruction on [the official Wiki](https://wiki.myriadrf.org/Lime_Suite) how to build and install it.
-
 ### Actually building it
 
 Nothing special, just build it (`dpkg-buildpackage -b`)
 
-## Building under wheezy
+## Building with limited dependencies
 
-First run `prepare-wheezy-tree.sh`. This will create a package tree in
-package-wheezy/. Build in there (`dpkg-buildpackage -b`)
+The package supports some build profiles to allow building without all
+required SDR libraries being present. This will produce a package with
+limited SDR support only.
 
-The wheezy build does not include bladeRF, HackRF, or LimeSDR support.
+Pass `--build-profiles` to `dpkg-buildpackage` with a comma-separated list of
+profiles. The list of profiles should include `custom` and zero or more of
+`rtlsdr`, `bladerf`, `hackrf`, `limesdr` depending on what you want:
+
+```bash
+$ dpkg-buildpackage -b --no-sign --build-profiles=custom,rtlsdr          # builds with rtlsdr support only
+$ dpkg-buildpackage -b --no-sign --build-profiles=custom,rtlsdr,bladerf  # builds with rtlsdr and bladeRF support
+$ dpkg-buildpackage -b --no-sign --build-profiles=custom                 # builds with _no_ SDR support (network support only)
+```
 
 ## Building manually
 
