@@ -28,6 +28,30 @@
 
 #endif
 
+/* clock_* and time-related types */
+
+#include <time.h>
+
+#if defined(CLOCK_REALTIME)
+#  define HAVE_CLOCKID_T
+#endif
+
+#ifndef HAVE_CLOCKID_T
+typedef enum
+{
+    CLOCK_REALTIME,
+    CLOCK_MONOTONIC,
+    CLOCK_PROCESS_CPUTIME_ID,
+    CLOCK_THREAD_CPUTIME_ID
+} clockid_t;
+#endif // !HAVE_CLOCKID_T
+
+#ifndef TIMER_ABSTIME
+#define TIMER_ABSTIME 1
+#endif // !TIMER_ABSTIME
+
+struct timespec;
+
 #ifdef MISSING_NANOSLEEP
 #include "clock_nanosleep/clock_nanosleep.h"
 #endif
