@@ -84,8 +84,14 @@ ifeq ($(RTLSDR), yes)
       LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -lrtlsdr $(LIBS_USB)
     endif
   else
-    CFLAGS += $(shell pkg-config --cflags librtlsdr)
     # some packaged .pc files are massively broken, try to handle it
+
+    # FreeBSD's librtlsdr.pc includes -std=gnu89 in cflags
+    RTLSDR_CFLAGS := $(shell pkg-config --cflags librtlsdr)
+    CFLAGS += $(filter-out -std=%,$(RTLSDR_CFLAGS))
+
+    # some linux librtlsdr packages return a bare -L with no path in --libs
+    # which horribly confuses things because it eats the next option on the command line
     RTLSDR_LFLAGS := $(shell pkg-config --libs-only-L librtlsdr)
     ifeq ($(RTLSDR_LFLAGS),-L)
       LIBS_SDR += $(shell pkg-config --libs-only-l --libs-only-other librtlsdr)
