@@ -1,35 +1,76 @@
 PROGNAME=dump1090
 
-# Try to autodetect available libraries if no explicit setting was used
-
-ifndef RTLSDR
-  ifdef RTLSDR_PREFIX
-    RTLSDR := yes
-  else
-    RTLSDR := $(shell pkg-config --exists librtlsdr && echo "yes" || echo "no")
-  endif
-endif
-
-ifndef BLADERF
-  BLADERF := $(shell pkg-config --exists libbladeRF && echo "yes" || echo "no")
-endif
-
-ifndef HACKRF
-  HACKRF := $(shell pkg-config --exists libhackrf && echo "yes" || echo "no")
-endif
-
-ifndef LIMESDR
-  LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
-endif
-
 DUMP1090_VERSION ?= unknown
 
 CPPFLAGS += -DMODES_DUMP1090_VERSION=\"$(DUMP1090_VERSION)\" -DMODES_DUMP1090_VARIANT=\"dump1090-fa\"
 
 DIALECT = -std=c11
 CFLAGS += $(DIALECT) -O3 -g -Wall -Wmissing-declarations -Werror -W -D_DEFAULT_SOURCE -fno-common
-LIBS = -lpthread -lm -lrt
+LIBS = -lpthread -lm
 SDR_OBJ = sdr.o fifo.o sdr_ifile.o
+
+# Try to autodetect available libraries via pkg-config if no explicit setting was used
+PKGCONFIG=$(shell pkg-config --version >/dev/null 2>&1 && echo "yes" || echo "no")
+ifeq ($(PKGCONFIG), yes)
+  ifndef RTLSDR
+    ifdef RTLSDR_PREFIX
+      RTLSDR := yes
+    else
+      RTLSDR := $(shell pkg-config --exists librtlsdr && echo "yes" || echo "no")
+    endif
+  endif
+
+  ifndef BLADERF
+    BLADERF := $(shell pkg-config --exists libbladeRF && echo "yes" || echo "no")
+  endif
+
+  ifndef HACKRF
+    HACKRF := $(shell pkg-config --exists libhackrf && echo "yes" || echo "no")
+  endif
+
+  ifndef LIMESDR
+    LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
+  endif
+else
+  # pkg-config not available. Only use explicitly enabled libraries.
+  RTLSDR ?= no
+  BLADERF ?= no
+  HACKRF ?= no
+  LIMESDR ?= no
+endif
+
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+  CFLAGS += -D_DEFAULT_SOURCE
+  LIBS += -lrt
+  LIBS_USB += -lusb-1.0
+endif
+
+ifeq ($(UNAME), Darwin)
+  ifneq ($(shell sw_vers -productVersion | egrep '^10\.([0-9]|1[01])\.'),) # Mac OS X ver <= 10.11
+    CFLAGS += -DMISSING_GETTIME
+    COMPAT += compat/clock_gettime/clock_gettime.o
+  endif
+  CFLAGS += -DMISSING_NANOSLEEP
+  COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+  LIBS_USB += -lusb-1.0
+endif
+
+ifeq ($(UNAME), OpenBSD)
+  CFLAGS += -DMISSING_NANOSLEEP
+  COMPAT += compat/clock_nanosleep/clock_nanosleep.o
+  LIBS_USB += -lusb-1.0
+endif
+
+ifeq ($(UNAME), FreeBSD)
+  CFLAGS += -D_DEFAULT_SOURCE
+  LIBS += -lrt
+  LIBS_USB += -lusb
+endif
+
+RTLSDR ?= yes
+BLADERF ?= yes
 
 ifeq ($(RTLSDR), yes)
   SDR_OBJ += sdr_rtlsdr.o
@@ -38,13 +79,19 @@ ifeq ($(RTLSDR), yes)
   ifdef RTLSDR_PREFIX
     CPPFLAGS += -I$(RTLSDR_PREFIX)/include
     ifeq ($(STATIC), yes)
-      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic -lusb-1.0
+      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -Wl,-Bstatic -lrtlsdr -Wl,-Bdynamic $(LIBS_USB)
     else
-      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -lrtlsdr -lusb-1.0
+      LIBS_SDR += -L$(RTLSDR_PREFIX)/lib -lrtlsdr $(LIBS_USB)
     endif
   else
-    CFLAGS += $(shell pkg-config --cflags librtlsdr)
     # some packaged .pc files are massively broken, try to handle it
+
+    # FreeBSD's librtlsdr.pc includes -std=gnu89 in cflags
+    RTLSDR_CFLAGS := $(shell pkg-config --cflags librtlsdr)
+    CFLAGS += $(filter-out -std=%,$(RTLSDR_CFLAGS))
+
+    # some linux librtlsdr packages return a bare -L with no path in --libs
+    # which horribly confuses things because it eats the next option on the command line
     RTLSDR_LFLAGS := $(shell pkg-config --libs-only-L librtlsdr)
     ifeq ($(RTLSDR_LFLAGS),-L)
       LIBS_SDR += $(shell pkg-config --libs-only-l --libs-only-other librtlsdr)

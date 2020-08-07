@@ -90,3 +90,15 @@ libhackrf.
 
 ``make LIMESDR=no`` will disable LimeSDR support and remove the dependency on
 libLimeSuite.
+
+## Building on OSX
+
+Minimal testing, YMMV.
+
+```
+$ brew install librtlsdr
+$ brew install libbladerf
+$ brew install pkg-config
+$ make
+```
+
