@@ -97,6 +97,7 @@ Minimal testing, YMMV.
 
 ```
 $ brew install librtlsdr
+$ brew install libbladerf
 $ brew install pkg-config
 $ make
 ```
