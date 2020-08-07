@@ -1,8 +1,16 @@
 #ifndef CLOCK_NANOSLEEP_H
 #define CLOCK_NANOSLEEP_H
 
+#ifdef __OpenBSD__
 #ifdef _CLOCKID_T_DEFINED_
 #define CLOCKID_T
+#endif
+#endif
+
+#ifdef __APPLE__
+#ifdef CLOCK_MONOTONIC
+#define CLOCKID_T
+#endif
 #endif
 
 #ifndef CLOCKID_T
