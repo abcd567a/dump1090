@@ -1043,12 +1043,15 @@ function refreshPageTitle() {
         var subtitle = "";
 
         if (PlaneCountInTitle) {
-                subtitle += TrackedAircraftPositions + '/' + TrackedAircraft;
+                subtitle += 'Tracking ' + TrackedAircraft + ' Aircraft';
         }
 
-        if (MessageRateInTitle) {
-                if (subtitle) subtitle += ' | ';
-                subtitle += MessageRate.toFixed(1) + '/s';
+        if (MessageRateInTitle && MessageRate) {
+                if (subtitle) {
+                     subtitle += ' | ';
+                }
+
+                subtitle += MessageRate.toFixed(1) + ' msg/sec';
         }
 
         document.title = PageName + ' - ' + subtitle;
