@@ -1040,21 +1040,18 @@ function refreshPageTitle() {
                 return;
         }
 
-        var subtitle = "";
+        var aircraftCount = "";
+        var rate = "";
 
         if (PlaneCountInTitle) {
-                subtitle += 'Tracking ' + TrackedAircraft + ' Aircraft';
+                aircraftCount += TrackedAircraft;
         }
 
         if (MessageRateInTitle && MessageRate) {
-                if (subtitle) {
-                     subtitle += ' | ';
-                }
-
-                subtitle += MessageRate.toFixed(1) + ' msg/sec';
+                rate += ' - ' + MessageRate.toFixed(1) + ' msg/sec';
         }
 
-        document.title = PageName + ' - ' + subtitle;
+        document.title = '(' + aircraftCount + ') ' + PageName + rate;
 }
 
 // Refresh the detail window about the plane
