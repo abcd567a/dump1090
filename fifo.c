@@ -83,10 +83,10 @@ static void free_buffer_list(struct mag_buf *head)
 void fifo_destroy()
 {
     free_buffer_list(fifo_head);
-    fifo_freelist = NULL;
+    fifo_head = fifo_tail = NULL;
 
     free_buffer_list(fifo_freelist);
-    fifo_head = fifo_tail = NULL;
+    fifo_freelist = NULL;
 
     free(overlap_buffer);
     overlap_buffer = NULL;

@@ -709,6 +709,7 @@ int main(int argc, char **argv) {
     }
 
     sdrClose();
+    fifo_destroy();
 
     if (Modes.exit == 1) {
         log_with_timestamp("Normal exit.");
