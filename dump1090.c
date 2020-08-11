@@ -599,7 +599,6 @@ int main(int argc, char **argv) {
             Modes.mlat = 1;
         } else if (!strcmp(argv[j],"--oversample")) {
             // Ignored
-#ifndef _WIN32
         } else if (!strcmp(argv[j], "--write-json") && more) {
             Modes.json_dir = strdup(argv[++j]);
         } else if (!strcmp(argv[j], "--write-json-every") && more) {
@@ -608,7 +607,6 @@ int main(int argc, char **argv) {
                 Modes.json_interval = 100;
         } else if (!strcmp(argv[j], "--json-location-accuracy") && more) {
             Modes.json_location_accuracy = atoi(argv[++j]);
-#endif
         } else if (sdrHandleOption(argc, argv, &j)) {
             /* handled */
         } else {
@@ -628,11 +626,6 @@ int main(int argc, char **argv) {
                 argv[0]);
         exit(1);
     }
-
-#ifdef _WIN32
-    // Try to comply with the Copyright license conditions for binary distribution
-    if (!Modes.quiet) {showCopyright();}
-#endif
 
     if (Modes.nfix_crc > MODES_MAX_BITERRORS)
         Modes.nfix_crc = MODES_MAX_BITERRORS;
