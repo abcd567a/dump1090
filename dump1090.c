@@ -113,11 +113,6 @@ static void modesInitConfig(void) {
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.check_crc               = 1;
     Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
-    Modes.net_input_raw_ports     = strdup("30001");
-    Modes.net_output_raw_ports    = strdup("30002");
-    Modes.net_output_sbs_ports    = strdup("30003");
-    Modes.net_input_beast_ports   = strdup("30004,30104");
-    Modes.net_output_beast_ports  = strdup("30005");
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
     Modes.json_location_accuracy  = 1;
@@ -290,7 +285,7 @@ static void showHelp(void)
 "--interactive            Interactive mode refreshing data on screen. Implies --throttle\n"
 "--interactive-ttl <sec>  Remove from list if idle for <sec> (default: 60)\n"
 "--raw                    Show only messages hex values\n"
-"--net                    Enable networking\n"
+"--net                    Enable networking with default ports unless overridden\n"
 "--modeac                 Enable decoding of SSR Modes 3/A & 3/C\n"
 "--no-modeac-auto         Don't enable Mode A/C if requested by a Beast connection\n"
 "--net-only               Enable just networking, no RTL device or file used\n"
@@ -452,6 +447,21 @@ static void backgroundTasks(void) {
 //
 //=========================================================================
 //
+
+static void applyNetDefaults()
+{
+    if (!Modes.net_input_raw_ports)
+        Modes.net_input_raw_ports = strdup("30001");
+    if (!Modes.net_output_raw_ports)
+        Modes.net_output_raw_ports = strdup("30002");
+    if (!Modes.net_output_sbs_ports)
+        Modes.net_output_sbs_ports = strdup("30003");
+    if (!Modes.net_input_beast_ports)
+        Modes.net_input_beast_ports = strdup("30004,30104");
+    if (!Modes.net_output_beast_ports)
+        Modes.net_output_beast_ports = strdup("30005");
+}
+
 int main(int argc, char **argv) {
     int j;
 
@@ -491,6 +501,7 @@ int main(int argc, char **argv) {
             Modes.raw = 1;
         } else if (!strcmp(argv[j],"--net")) {
             Modes.net = 1;
+            applyNetDefaults();
         } else if (!strcmp(argv[j],"--modeac")) {
             Modes.mode_ac = 1;
             Modes.mode_ac_auto = 0;
@@ -501,6 +512,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--net-only")) {
             Modes.net = 1;
             Modes.sdr_type = SDR_NONE;
+            applyNetDefaults();
        } else if (!strcmp(argv[j],"--net-heartbeat") && more) {
             Modes.net_heartbeat_interval = (uint64_t)(1000 * atof(argv[++j]));
        } else if (!strcmp(argv[j],"--net-ro-size") && more) {
@@ -510,15 +522,19 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--net-ro-interval") && more) {
             Modes.net_output_flush_interval = (uint64_t)(1000 * atof(argv[++j]));
         } else if (!strcmp(argv[j],"--net-ro-port") && more) {
+            Modes.net = 1;
             free(Modes.net_output_raw_ports);
             Modes.net_output_raw_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-ri-port") && more) {
+            Modes.net = 1;
             free(Modes.net_input_raw_ports);
             Modes.net_input_raw_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-bo-port") && more) {
+            Modes.net = 1;
             free(Modes.net_output_beast_ports);
             Modes.net_output_beast_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-bi-port") && more) {
+            Modes.net = 1;
             free(Modes.net_input_beast_ports);
             Modes.net_input_beast_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-bind-address") && more) {
@@ -529,6 +545,7 @@ int main(int argc, char **argv) {
                 fprintf(stderr, "warning: --net-http-port not supported in this build, option ignored.\n");
             }
         } else if (!strcmp(argv[j],"--net-sbs-port") && more) {
+            Modes.net = 1;
             free(Modes.net_output_sbs_ports);
             Modes.net_output_sbs_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-buffer") && more) {
