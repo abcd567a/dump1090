@@ -603,6 +603,15 @@ int main(int argc, char **argv) {
         }
     }
 
+    if (Modes.sdr_type == SDR_NONE && !Modes.net) {
+        fprintf(stderr,
+                "No SDR available and network mode not enabled; nothing to do!\n"
+                "Select a SDR type (--device-type or --ifile), or enable network mode (--net)\n"
+                "Try %s --help for full option help.\n",
+                argv[0]);
+        exit(1);
+    }
+
 #ifdef _WIN32
     // Try to comply with the Copyright license conditions for binary distribution
     if (!Modes.quiet) {showCopyright();}
