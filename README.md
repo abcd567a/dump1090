@@ -102,3 +102,15 @@ $ brew install pkg-config
 $ make
 ```
 
+## Building on FreeBSD
+
+Minimal testing on 12.1-RELEASE, YMMV.
+
+```
+# cd /usr/ports/devel/pkgconf && make && make install
+# pkg install gmake
+# pkg install rtl-sdr
+# pkg install bladerf
+# pkg install hackrf
+$ gmake
+```
