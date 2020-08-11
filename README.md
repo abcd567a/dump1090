@@ -93,11 +93,12 @@ libLimeSuite.
 
 ## Building on OSX
 
-Minimal testing, YMMV.
+Minimal testing on Mojave 10.14.6, YMMV.
 
 ```
 $ brew install librtlsdr
 $ brew install libbladerf
+$ brew install hackrf
 $ brew install pkg-config
 $ make
 ```
