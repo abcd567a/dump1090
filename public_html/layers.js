@@ -16,6 +16,46 @@ function createBaseLayers() {
                 type: 'base',
         }));
 
+        world.push(new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                        "url" : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+	                "attributions" : "Tiles © Esri - Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+                }),
+	        name: 'esri_satellite',
+                title: 'ESRI Satellite',
+                type: 'base',
+	}));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.XYZ({
+                        "url" : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+                        "attributions" : "Tiles © Esri - Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+                }),
+                name: 'esri_topo',
+                title: 'ESRI Topographic',
+                type: 'base',
+        }));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.XYZ({
+			"url" : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+                        "attributions" : "Tiles © Esri - Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+                }),
+                name: 'esri_street',
+                title: 'ESRI Street',
+                type: 'base',
+        }));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.XYZ({
+			"url" : "http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
+			"attributions" : "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a>  contributors."
+                }),
+                name: 'osm_blackwhite',
+                title: 'OSM Black and White',
+                type: 'base',
+        }));
+
         if (BingMapsAPIKey) {
                 world.push(new ol.layer.Tile({
                         source: new ol.source.BingMaps({
