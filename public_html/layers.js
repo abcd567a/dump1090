@@ -114,7 +114,7 @@ function createBaseLayers() {
                 world.push(new ol.layer.Tile({
                         source: new ol.source.BingMaps({
                                 key: BingMapsAPIKey,
-                                imagerySet: 'Road'
+                                imagerySet: 'RoadOnDemand'
                         }),
                         name: 'bing_roads',
                         title: 'Bing Roads',
