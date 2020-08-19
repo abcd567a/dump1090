@@ -8,6 +8,7 @@ function createBaseLayers() {
 
         var world = [];
         var us = [];
+        var europe = [];
 
         world.push(new ol.layer.Tile({
                 source: new ol.source.OSM(),
@@ -129,7 +130,8 @@ function createBaseLayers() {
                         hel: "Helicopter Charts",
                         enrl: "IFR Enroute Low Charts",
                         enra: "IFR Area Charts",
-                        enrh: "IFR Enroute High Charts"
+                        enrh: "IFR Enroute High Charts",
+                        secgrids: "Sect. w/ SAR grid"
                 };
 
                 for (var type in chartbundleTypes) {
@@ -168,6 +170,76 @@ function createBaseLayers() {
         refreshNexrad();
         window.setInterval(refreshNexrad, 5 * 60000);
 
+        var createGeoJsonLayer = function (title, name, url, fill, stroke, showLabel = true) {
+                return new ol.layer.Vector({
+                    type: 'overlay',
+                    title: title,
+                    name: name,
+                    zIndex: 99,
+                    visible: false,
+                    source: new ol.source.Vector({
+                      url: url,
+                      format: new ol.format.GeoJSON({
+                        defaultDataProjection :'EPSG:4326',
+                            projection: 'EPSG:3857'
+                      })
+                    }),
+                    style: function style(feature) {
+                        return new ol.style.Style({
+                            fill: new ol.style.Fill({
+                                color : fill
+                            }),
+                            stroke: new ol.style.Stroke({
+                                color: stroke,
+                                width: 1
+                            }),
+                            text: new ol.style.Text({
+                                text: showLabel ? feature.get("name") : "",
+                                overflow: OLMap.getView().getZoom() > 5,
+                                scale: 1.25,
+                                fill: new ol.style.Fill({
+                                    color: '#000000'
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: '#FFFFFF',
+                                    width: 2
+                                })
+                            })
+                        });
+                    }
+                });
+            };
+
+        var dwd = new ol.layer.Tile({
+                source: new ol.source.TileWMS({
+                        url: 'https://maps.dwd.de/geoserver/wms',
+                        params: {LAYERS: 'dwd:RX-Produkt', validtime: (new Date()).getTime()},
+                        projection: 'EPSG:3857',
+                        attributions: 'Deutscher Wetterdienst (DWD)'
+                }),
+                name: 'radolan',
+                title: 'DWD RADOLAN',
+                type: 'overlay',
+                opacity: 0.3,
+                visible: false,
+                zIndex: 99,
+                maxZoom: 14,
+        });
+
+        var refreshDwd = function () {
+                dwd.getSource().updateParams({"validtime": (new Date()).getTime()});
+        };
+
+        refreshDwd();
+        window.setInterval(refreshDwd, 4 * 60000);
+
+        europe.push(dwd);
+
+        // Taken from https://github.com/alkissack/Dump1090-OpenLayers3-html
+        europe.push(createGeoJsonLayer('UK Radar Corridors', 'ukradarcorridors', 'geojson/UK_Mil_RC.geojson', 'rgba(22, 171, 22, 0.3)', 'rgba(22, 171, 22, 1)'));
+        europe.push(createGeoJsonLayer('UK A2A Refueling', 'uka2arefueling', 'geojson/UK_Mil_AAR_Zones.geojson', 'rgba(52, 50, 168, 0.3)', 'rgba(52, 50, 168, 1)'));
+        europe.push(createGeoJsonLayer('UK AWACS Orbits', 'uka2awacsorbits', 'geojson/UK_Mil_AWACS_Orbits.geojson', 'rgba(252, 186, 3, 0.3)', 'rgba(252, 186, 3, 1)', false));
+
         if (world.length > 0) {
                 layers.push(new ol.layer.Group({
                         name: 'world',
@@ -181,6 +253,14 @@ function createBaseLayers() {
                         name: 'us',
                         title: 'US',
                         layers: us
+                }));
+        }
+
+        if (europe.length > 0) {
+                layers.push(new ol.layer.Group({
+                        name: 'europe',
+                        title: 'Europe',
+                        layers: europe,
                 }));
         }
 
