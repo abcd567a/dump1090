@@ -56,6 +56,51 @@ function createBaseLayers() {
                 type: 'base',
         }));
 
+        world.push(new ol.layer.Tile({
+                source: new ol.source.OSM({
+                        "url" : "https://{a-z}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                        "attributions" : 'Courtesy of <a href="https://carto.com">CARTO.com</a>'
+                               + ' using data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                }),
+                name: 'carto_dark_all',
+                title: 'CARTO.COM Dark',
+                type: 'base',
+        }));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.OSM({
+                        "url" : "https://{a-z}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png",
+                        "attributions" : 'Courtesy of <a href="https://carto.com">CARTO.com</a>'
+                               + ' using data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                }),
+                name: 'carto_dark_nolabels',
+                title: 'CARTO.com Dark (No Labels)',
+                type: 'base',
+        }));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.OSM({
+                        "url" : "https://{a-z}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                        "attributions" : 'Courtesy of <a href="https://carto.com">CARTO.com</a>'
+                               + ' using data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                }),
+                name: 'carto_light_all',
+                title: 'CARTO.com Light',
+                type: 'base',
+        }));
+
+        world.push(new ol.layer.Tile({
+                source: new ol.source.OSM({
+                        "url" : "https://{a-z}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+                        "attributions" : 'Courtesy of <a href="https://carto.com">CARTO.com</a>'
+                               + ' using data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                }),
+                name: 'carto_light_nolabels',
+                title: 'CARTO.com Light (No Labels)',
+                type: 'base',
+        }));
+
+
         if (BingMapsAPIKey) {
                 world.push(new ol.layer.Tile({
                         source: new ol.source.BingMaps({
