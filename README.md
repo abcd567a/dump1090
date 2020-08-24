@@ -108,8 +108,8 @@ $ make
 Minimal testing on 12.1-RELEASE, YMMV.
 
 ```
-# cd /usr/ports/devel/pkgconf && make && make install
 # pkg install gmake
+# pkg install pkgconf
 # pkg install rtl-sdr
 # pkg install bladerf
 # pkg install hackrf
