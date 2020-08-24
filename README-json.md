@@ -81,6 +81,8 @@ This file contains dump1090's list of recently seen aircraft. The keys are:
    * sil_type: interpretation of SIL: unknown, perhour, persample
    * gva: Geometric Vertical Accuracy  (2.2.3.2.7.2.8)
    * sda: System Design Assurance (2.2.3.2.7.2.4.6)
+   * modea: true if we seem to be also receiving Mode A responses from this aircraft
+   * modec: true if we seem to be also receiving Mode C responses from this aircraft
    * mlat: list of fields derived from MLAT data
    * tisb: list of fields derived from TIS-B data
    * messages: total number of Mode S messages received from this aircraft

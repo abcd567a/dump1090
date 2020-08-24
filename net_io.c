@@ -1457,6 +1457,10 @@ char *generateAircraftJson(const char *url_path, int *len) {
             p = safe_snprintf(p, end, ",\"gva\":%u", a->gva);
         if (trackDataValid(&a->sda_valid))
             p = safe_snprintf(p, end, ",\"sda\":%u", a->sda);
+        if (a->modeA_hit)
+            p = safe_snprintf(p, end, ",\"modea\":true");
+        if (a->modeC_hit)
+            p = safe_snprintf(p, end, ",\"modec\":true");
 
 
         p = safe_snprintf(p, end, ",\"mlat\":");
