@@ -64,7 +64,7 @@ function createBaseLayers() {
                                + ' using data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
                 }),
                 name: 'carto_dark_all',
-                title: 'CARTO.COM Dark',
+                title: 'CARTO.com Dark',
                 type: 'base',
         }));
 
