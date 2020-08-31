@@ -1,6 +1,6 @@
 // Part of dump1090, a Mode S message decoder for RTLSDR devices.
 //
-// track.h: aircraft state tracking prototypes
+// util.h: misc utilities prototypes
 //
 // Copyright (c) 2015 Oliver Jowett <oliver@mutability.co.uk>
 //
