@@ -791,21 +791,20 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     char *p;
     struct timespec now;
     struct tm    stTime_receive, stTime_now;
-    int          msgType;
 
-    // We require a tracked aircraft for SBS output
+    // We require a tracked aircraft for Stratux output
     if (!a)
         return;
 
-    // Don't ever forward 2-bit-corrected messages via SBS output.
+    // Don't ever forward 2-bit-corrected messages via Stratux output.
     if (mm->correctedbits >= 2)
         return;
 
-    // Don't ever forward mlat messages via SBS output.
+    // Don't ever forward mlat messages via Stratux output.
     if (mm->source == SOURCE_MLAT)
         return;
 
-    // Don't ever send unreliable messages via SBS output
+    // Don't ever send unreliable messages via Stratux output
     if (!mm->reliable && !a->reliable)
         return;
 
@@ -816,42 +815,6 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     p = prepareWrite(&Modes.stratux_out, 1000); // larger buffer size needed vs SBS
     if (!p)
         return;
-
-    // NOTE: not sure about message types, so keep the original code from
-    // stratux/dump1090 as-is.
-    //
-    // Decide on the basic SBS Message Type
-    if        ((mm->msgtype ==  4) || (mm->msgtype == 20)) {
-        msgType = 5;
-    } else if ((mm->msgtype ==  5) || (mm->msgtype == 21)) {
-        msgType = 6;
-    } else if ((mm->msgtype ==  0) || (mm->msgtype == 16)) {
-        msgType = 7;
-    } else if  (mm->msgtype == 11) {
-        msgType = 8;
-    } else if ((mm->msgtype != 17) && (mm->msgtype != 18)) {
-        return;
-    } else if ((mm->metype >= 1) && (mm->metype <=  4)) {
-        msgType = 1;
-    } else if ((mm->metype >= 5) && (mm->metype <=  8)) {
-        if (mm->cpr_decoded)
-            {msgType = 2;}
-        else
-            {msgType = 7;}
-    } else if ((mm->metype >= 9) && (mm->metype <= 18)) {
-        if (mm->cpr_decoded)
-            {msgType = 3;}
-        else
-            {msgType = 7;}
-    } else if ((mm->metype == 29) || (mm->metype == 31)) {
-        msgType = 9; // new message type for target state and operational status messages
-    } else if (mm->metype !=  19) {
-        return;
-    } else if ((mm->mesub == 1) || (mm->mesub == 2)) {
-        msgType = 4;
-    } else {
-        return;
-    }
 
     // Begin populating the traffic.go fields.
     // ICAO address, Mode S message types, and signal level
@@ -868,13 +831,11 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
             "\"DF\":%d,\"CA\":%d,"
             "\"TypeCode\":%d,"
             "\"SubtypeCode\":%d,"
-            "\"SBS_MsgType\":%d,"
             "\"SignalLevel\":%f,",
             mm->addr,
             mm->msgtype, cacf,
             mm->metype,
             mm->mesub,
-            msgType,
             mm->signalLevel); // what precision and range is needed for RSSI?
 
     // Find current system time
@@ -892,14 +853,17 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
         p += sprintf(p, "\"Tail\":null,");
 
     //// altitude & gnss
-    bool alt_is_geom = false;
-    if (Modes.use_gnss && mm->altitude_geom_valid) {
+    bool alt_is_geom;
+    if (mm->altitude_baro_valid) {
+        p += sprintf(p, "\"Alt\":%d,",mm->altitude_baro);
+        alt_is_geom = false;
+    } else if (mm->altitude_geom_valid) {
         p += sprintf(p, "\"Alt\":%d,",mm->altitude_geom);
         alt_is_geom = true;
-    } else if (mm->altitude_baro_valid)
-        p += sprintf(p, "\"Alt\":%d,",mm->altitude_baro);
-    else
+    } else {
         p += sprintf(p, "\"Alt\":null,");
+        alt_is_geom = false;
+    }
 
     // altitude source
     if (alt_is_geom)
@@ -933,22 +897,13 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     else
         p += sprintf(p, "\"Lat\":null,\"Lng\":null,\"Position_valid\":false,");
 
-    //// vrate
-    if (Modes.use_gnss) {
-        if (mm->geom_rate_valid)
-            p += sprintf(p, "\"Vvel\":%d,", mm->geom_rate);
-        else if (mm->baro_rate_valid)
-            p += sprintf(p, "\"Vvel\":%d,", mm->baro_rate);
-        else
-            p += sprintf(p,  "\"Vvel\":null,");
-    } else {
-        if (mm->baro_rate_valid)
-            p += sprintf(p, "\"Vvel\":%d,", mm->baro_rate);
-        else if (mm->geom_rate_valid)
-            p += sprintf(p, "\"Vvel\":%d,", mm->geom_rate);
-        else
-            p += sprintf(p,  "\"Vvel\":null,");
-    }
+    //// vrate (use barometric if possible)
+    if (mm->baro_rate_valid)
+        p += sprintf(p, "\"Vvel\":%d,", mm->baro_rate);
+    else if (mm->geom_rate_valid)
+        p += sprintf(p, "\"Vvel\":%d,", mm->geom_rate);
+    else
+        p += sprintf(p,  "\"Vvel\":null,");
 
     //// squawk
     if (mm->squawk_valid)

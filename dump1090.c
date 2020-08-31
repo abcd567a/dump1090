@@ -300,7 +300,7 @@ void showHelp(void) {
 "--net-sbs-port <ports>   TCP BaseStation output listen ports (default: 30003)\n"
 "--net-bi-port <ports>    TCP Beast input listen ports  (default: 30004,30104)\n"
 "--net-bo-port <ports>    TCP Beast output listen ports (default: 30005)\n"
-"--net-stratux-port <ports>   TCP Stratux output listen ports (default: 30006)\n"
+"--net-stratux-port <ports>   TCP Stratux output listen ports (default: disabled)\n"
 "--net-ro-size <size>     TCP output minimum size (default: 0)\n"
 "--net-ro-interval <rate> TCP output memory flush rate in seconds (default: 0)\n"
 "--net-heartbeat <rate>   TCP heartbeat rate in seconds (default: 60 sec; 0 to disable)\n"
