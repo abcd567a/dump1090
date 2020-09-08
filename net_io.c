@@ -794,8 +794,6 @@ static void send_sbs_heartbeat(struct net_service *service)
 #define STRATUX_MAX_PACKET_SIZE 1000
 static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) {
     char *p;
-    struct timespec now;
-    struct tm    stTime_receive, stTime_now;
 
     // We require a tracked aircraft for Stratux output
     if (!a)
@@ -840,14 +838,6 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
             mm->metype,
             mm->mesub,
             mm->signalLevel); // what precision and range is needed for RSSI?
-
-    // Find current system time
-    clock_gettime(CLOCK_REALTIME, &now);
-    gmtime_r(&now.tv_sec, &stTime_now);  // we expect UTC
-
-    // Find message reception time
-    time_t received = (time_t) (mm->sysTimestampMsg / 1000);
-    localtime_r(&received, &stTime_receive);
 
     //// callsign
     if (mm->callsign_valid)
@@ -962,6 +952,9 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
         p = safe_snprintf(p, end, "\"Emitter_category\":null,");
 
     // Time message received (based on system clock). Format is 2016-02-20T06:35:43.155Z
+    struct tm stTime_receive;
+    time_t received = (time_t) (mm->sysTimestampMsg / 1000);
+    gmtime_r(&received, &stTime_receive);
     p = safe_snprintf(p, end, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03dZ\"",
             (stTime_receive.tm_year+1900),(stTime_receive.tm_mon+1),
             stTime_receive.tm_mday, stTime_receive.tm_hour,
