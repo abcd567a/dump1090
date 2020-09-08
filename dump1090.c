@@ -550,6 +550,7 @@ int main(int argc, char **argv) {
             free(Modes.net_output_sbs_ports);
             Modes.net_output_sbs_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-stratux-port") && more) {
+            Modes.net = 1;
             free(Modes.net_output_stratux_ports);
             Modes.net_output_stratux_ports = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--net-buffer") && more) {
