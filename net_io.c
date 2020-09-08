@@ -800,7 +800,9 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     if (mm->correctedbits >= 2)
         return;
 
-    // NOTE: mlat messages are forwarded via Stratux output.
+    // Don't ever forward mlat messages via Stratux output.
+    if (mm->source == SOURCE_MLAT)
+        return;
 
     // Don't ever send unreliable messages via Stratux output
     if (!mm->reliable && !a->reliable)
