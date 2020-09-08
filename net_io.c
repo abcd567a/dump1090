@@ -77,6 +77,7 @@ static void moveNetClient(struct client *c, struct net_service *new_service);
 static void send_raw_heartbeat(struct net_service *service);
 static void send_beast_heartbeat(struct net_service *service);
 static void send_sbs_heartbeat(struct net_service *service);
+static void send_stratux_heartbeat(struct net_service *service);
 
 static void writeBeastMessage(struct net_writer *writer, uint64_t timestamp, double signalLevel, unsigned char *msg, int msgLen);
 
@@ -267,6 +268,11 @@ void modesInitNet(void) {
 
     s = serviceInit("Basestation TCP output", &Modes.sbs_out, send_sbs_heartbeat, READ_MODE_IGNORE, NULL, NULL);
     serviceListen(s, Modes.net_bind_address, Modes.net_output_sbs_ports);
+
+    if (Modes.net_output_stratux_ports) {
+        s = serviceInit("Stratux TCP output", &Modes.stratux_out, send_stratux_heartbeat, READ_MODE_IGNORE, NULL, NULL);
+        serviceListen(s, Modes.net_bind_address, Modes.net_output_stratux_ports);
+    }
 
     s = serviceInit("Raw TCP input", NULL, NULL, READ_MODE_ASCII, "\n", decodeHexMessage);
     serviceListen(s, Modes.net_bind_address, Modes.net_input_raw_ports);
@@ -779,10 +785,220 @@ static void send_sbs_heartbeat(struct net_service *service)
 //
 //=========================================================================
 //
+// Write Stratux output to TCP clients
+//
+static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) {
+    char *p;
+    struct timespec now;
+    struct tm    stTime_receive, stTime_now;
+
+    // We require a tracked aircraft for Stratux output
+    if (!a)
+        return;
+
+    // Don't ever forward 2-bit-corrected messages via Stratux output.
+    if (mm->correctedbits >= 2)
+        return;
+
+    // NOTE: mlat messages are forwarded via Stratux output.
+
+    // Don't ever send unreliable messages via Stratux output
+    if (!mm->reliable && !a->reliable)
+        return;
+
+    //// For now, suppress non-ICAO addresses
+    //if (mm->addr & MODES_NON_ICAO_ADDRESS)
+    //    return;
+
+    p = prepareWrite(&Modes.stratux_out, 1000); // larger buffer size needed vs SBS
+    if (!p)
+        return;
+
+    // Begin populating the traffic.go fields.
+    // ICAO address, Mode S message types, and signal level
+
+    int cacf = 0; // overload the JSON "CA" field to report CA (DF11 or DF17), CF (DF18), or zero (all other DF types)
+    if ((mm->msgtype == 11) || (mm->msgtype == 17)) {
+        cacf = mm->CA;
+    } else if (mm->msgtype == 18) {
+        cacf = mm->CF;
+    }
+
+    p += sprintf(p,
+            "{\"Icao_addr\":%d,"
+            "\"DF\":%d,\"CA\":%d,"
+            "\"TypeCode\":%d,"
+            "\"SubtypeCode\":%d,"
+            "\"SignalLevel\":%f,",
+            mm->addr,
+            mm->msgtype, cacf,
+            mm->metype,
+            mm->mesub,
+            mm->signalLevel); // what precision and range is needed for RSSI?
+
+    // Find current system time
+    clock_gettime(CLOCK_REALTIME, &now);
+    gmtime_r(&now.tv_sec, &stTime_now);  // we expect UTC
+
+    // Find message reception time
+    time_t received = (time_t) (mm->sysTimestampMsg / 1000);
+    localtime_r(&received, &stTime_receive);
+
+    //// callsign
+    if (mm->callsign_valid)
+        p += sprintf(p, "\"Tail\":\"%s\",", mm->callsign);
+    else
+        p += sprintf(p, "\"Tail\":null,");
+
+    //// altitude & gnss
+    bool alt_is_geom;
+    if (mm->altitude_baro_valid) {
+        p += sprintf(p, "\"Alt\":%d,",mm->altitude_baro);
+        alt_is_geom = false;
+    } else if (mm->altitude_geom_valid) {
+        p += sprintf(p, "\"Alt\":%d,",mm->altitude_geom);
+        alt_is_geom = true;
+    } else {
+        p += sprintf(p, "\"Alt\":null,");
+        alt_is_geom = false;
+    }
+
+    // altitude source
+    if (alt_is_geom)
+        p += sprintf(p, "\"AltIsGNSS\":true,");
+    else
+        p += sprintf(p, "\"AltIsGNSS\":false,");
+
+    // GNSS alt. delta From baro alt.
+    if (trackDataValid(&a->geom_delta_valid))
+        p += sprintf(p, "\"GnssDiffFromBaroAlt\":%d,",a->geom_delta);
+    else
+        p += sprintf(p, "\"GnssDiffFromBaroAlt\":null,");
+    ////
+
+    //// ground speed and track
+    if (mm->gs_valid)
+        p += sprintf(p, "\"Speed_valid\":true,\"Speed\":%.0f,", mm->gs.selected);
+    else
+        p += sprintf(p, "\"Speed_valid\":false,\"Speed\":null,");
+
+    //// ground heading
+    if (mm->heading_valid && mm->heading_type == HEADING_GROUND_TRACK)
+        p += sprintf(p, "\"Track\":%.0f,", mm->heading);
+    else
+        p += sprintf(p, "\"Track\":null,");
+
+    //// position
+    if (mm->cpr_decoded)
+        p += sprintf(p, "\"Lat\":%.6f,\"Lng\":%.6f,\"Position_valid\":true,",
+                    mm->decoded_lat, mm->decoded_lon);
+    else
+        p += sprintf(p, "\"Lat\":null,\"Lng\":null,\"Position_valid\":false,");
+
+    //// vrate (use barometric if possible)
+    if (mm->baro_rate_valid)
+        p += sprintf(p, "\"Vvel\":%d,", mm->baro_rate);
+    else if (mm->geom_rate_valid)
+        p += sprintf(p, "\"Vvel\":%d,", mm->geom_rate);
+    else
+        p += sprintf(p,  "\"Vvel\":null,");
+
+    //// squawk
+    if (mm->squawk_valid)
+        p += sprintf(p, "\"Squawk\":%x,", mm->squawk);
+    else
+        p += sprintf(p, "\"Squawk\":null,");
+
+    // TODO: squawk changing alert support in stratux?
+    // TODO: squawk emergency flag?
+    // TODO: squawk ident flag?
+
+    // airground
+    switch (mm->airground) {
+        case AG_GROUND:
+            p += sprintf(p, "\"OnGround\":true,");
+            break;
+        case AG_AIRBORNE:
+            p += sprintf(p, "\"OnGround\":false,");
+            break;
+        default:
+            p += sprintf(p, "\"OnGround\":null,");
+    }
+
+    // navigation accuracy category - position
+    if (mm->accuracy.nac_p_valid) {
+        p += sprintf(p, "\"NACp\":%d,", mm->accuracy.nac_p);
+    } else {
+        p += sprintf(p, "\"NACp\":null,");
+    }
+
+    // emitter type
+    int emitter = 0;
+    int setEmitter = 0;
+    if ((mm->msgtype ==  17) || (mm->msgtype == 18)) {
+        switch (mm->metype) {
+            case 1:
+                emitter = ((mm->mesub) | 0x18);
+                setEmitter = 1;
+                break;
+            case 2:
+                emitter = ((mm->mesub) | 0x10);
+                setEmitter = 1;
+                break;
+            case 3:
+                emitter = ((mm->mesub) | 0x08);
+                setEmitter = 1;
+                break;
+            case 4:
+                emitter = (mm->mesub);
+                setEmitter = 1;
+                break;
+        }
+    }
+
+    if (setEmitter)
+        p += sprintf(p, "\"Emitter_category\":%d,", emitter);
+    else
+        p += sprintf(p, "\"Emitter_category\":null,");
+
+    // Time message received (based on system clock). Format is 2016-02-20T06:35:43.155Z
+    p += sprintf(p, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03dZ\"",
+            (stTime_receive.tm_year+1900),(stTime_receive.tm_mon+1),
+            stTime_receive.tm_mday, stTime_receive.tm_hour,
+            stTime_receive.tm_min, stTime_receive.tm_sec,
+            (unsigned)(mm->sysTimestampMsg % 1000));
+
+    p += sprintf(p, "}\r\n");
+
+    completeWrite(&Modes.stratux_out, p);
+}
+
+static void send_stratux_heartbeat(struct net_service *service)
+{
+    static char *heartbeat_message = "{\"Icao_addr\":134217727}\r\n";  // 0x07FFFFFF. Overflows 24-bit ICAO to signal invalic #, need to validate that this won't cause problems with traffic.go
+    char *data;
+    int len = strlen(heartbeat_message);
+
+    if (!service->writer)
+        return;
+
+    data = prepareWrite(service->writer, len);
+    if (!data)
+        return;
+
+    memcpy(data, heartbeat_message, len);
+    completeWrite(service->writer, data + len);
+}
+
+//
+//=========================================================================
+//
 void modesQueueOutput(struct modesMessage *mm, struct aircraft *a) {
 
     // Delegate to the format-specific outputs, each of which makes its own decision about filtering messages
     modesSendSBSOutput(mm, a);
+    if (Modes.net_output_stratux_ports)
+        modesSendStratuxOutput(mm, a);
     modesSendRawOutput(mm, a);
     modesSendBeastVerbatimOutput(mm, a);
     modesSendBeastCookedOutput(mm, a);
