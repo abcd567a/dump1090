@@ -1000,8 +1000,7 @@ void modesQueueOutput(struct modesMessage *mm, struct aircraft *a) {
 
     // Delegate to the format-specific outputs, each of which makes its own decision about filtering messages
     modesSendSBSOutput(mm, a);
-    if (Modes.net_output_stratux_ports)
-        modesSendStratuxOutput(mm, a);
+    modesSendStratuxOutput(mm, a);
     modesSendRawOutput(mm, a);
     modesSendBeastVerbatimOutput(mm, a);
     modesSendBeastCookedOutput(mm, a);
