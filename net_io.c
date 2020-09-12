@@ -803,10 +803,6 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     if (mm->correctedbits >= 2)
         return;
 
-    // Don't ever forward mlat messages via Stratux output.
-    if (mm->source == SOURCE_MLAT)
-        return;
-
     // Don't ever send unreliable messages via Stratux output
     if (!mm->reliable && !a->reliable)
         return;
@@ -827,17 +823,23 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
         cacf = mm->CF;
     }
 
+    const char* is_mlat_str = "false";
+    if (mm->source == SOURCE_MLAT)
+        is_mlat_str = "true";
+
     p = safe_snprintf(p, end,
             "{\"Icao_addr\":%d,"
             "\"DF\":%d,\"CA\":%d,"
             "\"TypeCode\":%d,"
             "\"SubtypeCode\":%d,"
-            "\"SignalLevel\":%f,",
+            "\"SignalLevel\":%f,"
+            "\"IsMlat\":%s,",
             mm->addr,
             mm->msgtype, cacf,
             mm->metype,
             mm->mesub,
-            mm->signalLevel); // what precision and range is needed for RSSI?
+            mm->signalLevel, // what precision and range is needed for RSSI?
+            is_mlat_str);
 
     //// callsign
     if (mm->callsign_valid)
