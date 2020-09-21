@@ -1,11 +1,11 @@
-dump1090-fa (3.8.2~dev) UNRELEASED; urgency=medium
+dump1090-fa (4.0~dev) UNRELEASED; urgency=medium
 
   * in development
   * --fix --fix was a bad choice for 2-bit correction since some existing configs
     accidentally specified it twice anyway. Change 2-bit correction to a separate
     option, --fix-2bit
 
- -- Oliver Jowett <oliver.jowett@flightaware.com>  Sat, 02 May 2020 14:50:25 +0800
+ -- Eric Tran <eric.tran@flightaware.com>  Mon, 21 Sep 2020 10:30:00 -6000
 
 dump1090-fa (3.8.1) stable; urgency=medium
 
