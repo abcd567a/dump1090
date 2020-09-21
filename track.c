@@ -207,7 +207,7 @@ static int compare_validity(const data_validity *lhs, const data_validity *rhs) 
 // Distance between points on a spherical earth.
 // This has up to 0.5% error because the earth isn't actually spherical
 // (but we don't use it in situations where that matters)
-static double greatcircle(double lat0, double lon0, double lat1, double lon1)
+double greatcircle(double lat0, double lon0, double lat1, double lon1)
 {
     double dlat, dlon;
 
@@ -227,6 +227,25 @@ static double greatcircle(double lat0, double lon0, double lat1, double lon1)
 
     // spherical law of cosines
     return 6371e3 * acos(sin(lat0) * sin(lat1) + cos(lat0) * cos(lat1) * cos(dlon));
+}
+
+double get_bearing(double lat0, double lon0, double lat1, double lon1)
+{
+    double dlon;
+
+    lat0 = lat0 * M_PI / 180.0;
+    lon0 = lon0 * M_PI / 180.0;
+    lat1 = lat1 * M_PI / 180.0;
+    lon1 = lon1 * M_PI / 180.0;
+
+    dlon = (lon1 - lon0);
+
+    double x = (cos(lat0) * sin(lat1)) -
+                     (sin(lat0) * cos(lat1) * cos(dlon));
+    double y = sin(dlon) * cos(lat1);
+    double degree = atan2(y, x) * 180 / M_PI;
+
+    return (degree >= 0)? degree : (degree + 360);
 }
 
 static void update_range_histogram(double lat, double lon)
@@ -1128,6 +1147,11 @@ struct aircraft *trackUpdateFromMessage(struct modesMessage *mm)
     }
 
     if (mm->callsign_valid && accept_data(&a->callsign_valid, mm->source)) {
+        if (strcmp(a->callsign, mm->callsign) != 0) {
+            // The callsign changed so tell interactive to
+            // re-evaluate its callsign filter regex if it has one
+            a->callsign_matched = 0;
+        }
         memcpy(a->callsign, mm->callsign, sizeof(a->callsign));
     }
 
