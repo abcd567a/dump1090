@@ -1,6 +1,6 @@
 dump1090-fa (4.0) stable; urgency=medium
 
-  * dump1090: build support for OS X, FreeBSD, OpenBSD [courtesy @mikenor / @apparentorder on Github, PRs #33 / #38]
+  * dump1090: Build support for OS X, FreeBSD, OpenBSD [courtesy @mikenor / @apparentorder on Github, PRs #33 / #38]
   * dump1090: Overhaul of SDR / ring buffer / demodulator interface to make it easier to add new SDR types
   * dump1090: LimeSDR support [courtesy @Glutton on Github, PR #75]
   * dump1090: HackRF support [courtesy @kr105 on Github, PR #57]
@@ -8,20 +8,20 @@ dump1090-fa (4.0) stable; urgency=medium
   * dump1090: Change option syntax for 2-bit correction from --fix --fix (introduced in 3.8.0) to --fix-2bit. Any number of --fix options now yields 1-bit correction.
   * dump1090: Support building under GCC 10 (github issue #65)
   * dump1090: Include a (disabled by default) example HTTPS configuration [courtesy @jwbernin on Github, PR #66)
-  * dump1090: for manual builds, if no explicit SDR choice is made, autodetect available libraries via pkg-config
-  * dump1090: add a --version command-line option that shows just the version without needing to show the full help screen
-  * dump1090: only emit verbose command-line option help if --help is requested, not on any error
-  * dump1090: list supported device types if --device-type is given without a device type
-  * dump1090: removed Debian Wheezy support (distribution is no longer supported upstream)
-  * dump1090: remove the "dump1090" Debian metapackage that exists only to provide an upgrade path from very very old installs
-  * dump1090: add package profiles to selectively build packages with reduced SDR library dependencies. See the README for details.
-  * dump1090: if a network port option (--net-bo-port et al) is given on the command line, implicitly enable networking, but don't enable the default port assignments
-  * dump1090: provide Mode A / Mode C hit count in aircraft.json
+  * dump1090: For manual builds, if no explicit SDR choice is made, autodetect available libraries via pkg-config
+  * dump1090: Add a --version command-line option that shows just the version without needing to show the full help screen
+  * dump1090: Only emit verbose command-line option help if --help is requested, not on any error
+  * dump1090: List supported device types if --device-type is given without a device type
+  * dump1090: Removed Debian Wheezy support (distribution is no longer supported upstream)
+  * dump1090: Remove the "dump1090" Debian metapackage that exists only to provide an upgrade path from very very old installs
+  * dump1090: Add package profiles to selectively build packages with reduced SDR library dependencies. See the README for details.
+  * dump1090: If a network port option (--net-bo-port et al) is given on the command line, implicitly enable networking, but don't enable the default port assignments
+  * dump1090: Provide Mode A / Mode C hit count in aircraft.json
   * SkyAware: Update aircraft registry to 20200924
   * SkyAware: Update to OpenLayers6
   * SkyAware: New basemap layers added/enabled
   * SkyAware: Added customizable aircraft table columns
-  * SkyAware: Added URL query parameter feature to customize display
+  * SkyAware: Added URL query parameter feature to customize display [courtesy @sigwx on Github, PR #58)
   * SkyAware: Display registration number in aircraft table if ident is not present
   * SkyAware: Fix duplicated Access-Control-Allow-Origin header [courtesy @ianrenton on Github, PR #74)
 
