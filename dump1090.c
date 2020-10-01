@@ -284,6 +284,10 @@ static void showHelp(void)
 "--freq <hz>              Set frequency (default: 1090 Mhz)\n"
 "--interactive            Interactive mode refreshing data on screen. Implies --throttle\n"
 "--interactive-ttl <sec>  Remove from list if idle for <sec> (default: 60)\n"
+"--interactive-show-distance   Show aircraft distance and bearing instead of lat/lon\n"
+"                              (requires --lat and --lon)\n"
+"--interactive-distance-units  Distance units ('km', 'sm', 'nm') (default: 'nm')\n"
+"--interactive-callsign-filter Only callsigns that match the prefix or regex will be displayed\n"
 "--raw                    Show only messages hex values\n"
 "--net                    Enable networking with default ports unless overridden\n"
 "--modeac                 Enable decoding of SSR Modes 3/A & 3/C\n"
@@ -571,7 +575,20 @@ int main(int argc, char **argv) {
             Modes.interactive = 1;
         } else if (!strcmp(argv[j],"--interactive-ttl") && more) {
             Modes.interactive_display_ttl = (uint64_t)(1000 * atof(argv[++j]));
-        } else if (!strcmp(argv[j],"--lat") && more) {
+        } else if (!strcmp(argv[j],"--interactive-show-distance")) {
+            Modes.interactive_show_distance = 1;
+        } else if (!strcmp(argv[j], "--interactive-distance-units") && more) {
+            char *units = argv[++j];
+            if (!strcmp(units, "km")) {
+                Modes.interactive_distance_units = UNIT_KILOMETERS;
+            } else if (!strcmp(units, "sm")) {
+                Modes.interactive_distance_units = UNIT_STATUTE_MILES;
+            } else {
+                Modes.interactive_distance_units = UNIT_NAUTICAL_MILES;
+            }
+        } else if (!strcmp(argv[j], "--interactive-callsign-filter") && more) {
+            Modes.interactive_callsign_filter = strdup(argv[++j]);
+        } else if (!strcmp(argv[j], "--lat") && more) {
             Modes.fUserLat = atof(argv[++j]);
         } else if (!strcmp(argv[j],"--lon") && more) {
             Modes.fUserLon = atof(argv[++j]);
