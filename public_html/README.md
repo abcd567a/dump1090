@@ -6,13 +6,13 @@ Syntax: <ip_address>/dump1090-fa/?parameter=value
 
 Examples:
 
-    http://192.0.0.1/dump1090-fa/?sidebar=hide
+    http://<ip_address>/dump1090-fa/?sidebar=hide
 
-    http://192.0.0.1/dump1090-fa/?altitudeChart=hide
+    http://<ip_address>/dump1090-fa/?altitudeChart=hide
 
-    http://192.0.0.1/dump1090-fa/?rangeRings=hide
+    http://<ip_address>/dump1090-fa/?rangeRings=hide
 
-    http://192.0.0.1/dump1090-fa/?ringCount=3?ringBaseDistance=100?ringInterval=50
+    http://<ip_address>/dump1090-fa/?ringCount=3&ringBaseDistance=100&ringInterval=50
 
 | Parameter | Possible Values |
 | :---------: | :---------: |
