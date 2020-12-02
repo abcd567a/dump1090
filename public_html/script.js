@@ -323,6 +323,10 @@ function initialize() {
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
 
+        $("#aircraft_type_filter_form").submit(onFilterByAircraftType);
+        $("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
+
+
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
@@ -1977,6 +1981,18 @@ function onFilterByAltitude(e) {
     }
 }
 
+function onFilterByAircraftType(e) {
+        e.preventDefault();
+        updatePlaneFilter();
+        refreshTableInfo();
+}
+
+function onResetAircraftTypeFilter(e) {
+        $("#aircraft_type_filter").val("");
+        updatePlaneFilter();
+        refreshTableInfo();
+}
+
 function filterGroundVehicles(switchFilter) {
 	if (typeof localStorage['groundVehicleFilter'] === 'undefined') {
 		localStorage.setItem('groundVehicleFilter' , 'not_filtered');
@@ -2065,6 +2081,13 @@ function updatePlaneFilter() {
     PlaneFilter.minAltitude = minAltitude;
     PlaneFilter.maxAltitude = maxAltitude;
     PlaneFilter.altitudeUnits = DisplayUnits;
+
+    var aircraftTypeCode = $("#aircraft_type_filter").val().trim()
+    if (aircraftTypeCode === "") {
+            aircraftTypeCode = undefined
+    }
+
+    PlaneFilter.aircraftTypeCode = aircraftTypeCode;
 }
 
 function getFlightAwareIdentLink(ident, linkText) {

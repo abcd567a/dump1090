@@ -109,6 +109,13 @@ function PlaneObject(icao) {
 }
 
 PlaneObject.prototype.isFiltered = function() {
+    // aircraft type filter
+    if (this.filter.aircraftTypeCode && this.icaotype !== null) {
+        if (typeof this.icaotype === 'string' && this.icaotype !== this.filter.aircraftTypeCode) {
+            return true;
+        }
+    }
+
     if (this.filter.minAltitude !== undefined && this.filter.maxAltitude !== undefined) {
         if (this.altitude === null || this.altitude === undefined) {
             return true;
