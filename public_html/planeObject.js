@@ -110,8 +110,8 @@ function PlaneObject(icao) {
 
 PlaneObject.prototype.isFiltered = function() {
     // aircraft type filter
-    if (this.filter.aircraftTypeCode && this.icaotype !== null) {
-        if (typeof this.icaotype === 'string' && this.icaotype !== this.filter.aircraftTypeCode) {
+    if (this.filter.aircraftTypeCode) {
+        if (this.icaotype === null || (typeof this.icaotype === 'string' && this.icaotype.toUpperCase() !== this.filter.aircraftTypeCode.toUpperCase())) {
             return true;
         }
     }
