@@ -327,6 +327,10 @@ function initialize() {
         $("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
 
 
+        $("#aircraft_ident_filter_form").submit(onFilterByAircraftIdent);
+        $("#aircraft_ident_filter_reset_button").click(onResetAircraftIdentFilter);
+
+
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
@@ -1993,6 +1997,19 @@ function onResetAircraftTypeFilter(e) {
         refreshTableInfo();
 }
 
+
+function onFilterByAircraftIdent(e) {
+        e.preventDefault();
+        updatePlaneFilter();
+        refreshTableInfo();
+}
+
+function onResetAircraftIdentFilter(e) {
+        $("#aircraft_ident_filter").val("");
+        updatePlaneFilter();
+        refreshTableInfo();
+}
+
 function filterGroundVehicles(switchFilter) {
 	if (typeof localStorage['groundVehicleFilter'] === 'undefined') {
 		localStorage.setItem('groundVehicleFilter' , 'not_filtered');
@@ -2087,7 +2104,13 @@ function updatePlaneFilter() {
             aircraftTypeCode = undefined
     }
 
+    var aircraftIdent = $("#aircraft_ident_filter").val().trim()
+    if (aircraftIdent === "") {
+        aircraftIdent = undefined
+    }
+
     PlaneFilter.aircraftTypeCode = aircraftTypeCode;
+    PlaneFilter.aircraftIdent = aircraftIdent;
 }
 
 function getFlightAwareIdentLink(ident, linkText) {

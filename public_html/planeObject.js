@@ -116,6 +116,12 @@ PlaneObject.prototype.isFiltered = function() {
         }
     }
 
+    if (this.filter.aircraftIdent) {
+        if (this.flight === null || (typeof this.flight === 'string' && this.flight.toUpperCase().trim() !== this.filter.aircraftIdent.toUpperCase())) {
+            return true;
+        }
+    }
+
     if (this.filter.minAltitude !== undefined && this.filter.maxAltitude !== undefined) {
         if (this.altitude === null || this.altitude === undefined) {
             return true;
