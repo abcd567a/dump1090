@@ -116,10 +116,22 @@ PlaneObject.prototype.isFiltered = function() {
         }
     }
 
+    // aircraft ident filter
     if (this.filter.aircraftIdent) {
         if (this.flight === null || (typeof this.flight === 'string' && this.flight.toUpperCase().trim() !== this.filter.aircraftIdent.toUpperCase())) {
             return true;
         }
+    }
+
+    var dataSource = this.getDataSource();
+    if (dataSource === 'adsb_icao') {
+        if (!this.filter.ADSB) return true;
+    } else if (dataSource === 'mlat') {
+        if (!this.filter.MLAT) return true;
+    } else if (dataSource === 'tisb_trackfile' || dataSource === 'tisb_icao' || dataSource === 'tisb_other') {
+        if (!this.filter.TISB) return true;
+    } else {
+        if (!this.filter.Other) return true;
     }
 
     if (this.filter.minAltitude !== undefined && this.filter.maxAltitude !== undefined) {
