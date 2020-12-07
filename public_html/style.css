@@ -340,8 +340,12 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
      background-color: #3c6ea3;
 }
 
-.altitudeFilterInput, .aircraftTypeFilterInput {
+.altitudeFilterInput {
     width: 50px;
+}
+
+.aircraftFilterInput {
+    width: 80px;
 }
 
 .rangeRingsInput {
