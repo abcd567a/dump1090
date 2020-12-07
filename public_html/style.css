@@ -271,7 +271,9 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
 }
 
 #units_container,
-#altitude_filter_form {
+#altitude_filter_form,
+#aircraft_type_filter_form,
+#aircraft_ident_filter_form {
     font-size: small;
     margin: 10px 0 10px 0;
 }
@@ -704,8 +706,10 @@ select.error, textarea.error, input.error {
 .legendTitle {
     line-height: 19px;
     display: inline-block;
-    padding-right: 20px;
+    padding-right: 5px;
     padding-left: 5px;
+    border-radius: 5px;
+    margin-right: 20px;
 }
 
 #settings_infoblock {
@@ -741,6 +745,22 @@ select.error, textarea.error, input.error {
 }
 
 .settingsCheckboxChecked {
+    background-image: url('images/box-checked.png') !important;
+}
+
+.sourceCheckbox {
+    width: 13px;
+    height: 13px;
+    background-image: url('images/box-empty.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-right: 3px;
+}
+
+.sourceCheckboxChecked {
     background-image: url('images/box-checked.png') !important;
 }
 

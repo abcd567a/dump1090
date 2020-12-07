@@ -368,12 +368,28 @@ function initialize() {
 		toggleAllColumns(true);
 	})
 
-	// Event handlers for to column checkboxes
-	checkbox_div_map.forEach(function (checkbox, div) {
-		$(div).on('click', function() {
-			toggleColumn(checkbox, div, true);
-		});
-	});
+        $('#adsb_datasource_checkbox').on('click', function() {
+                toggleADSBAircraft(true);
+        })
+
+        $('#mlat_datasource_checkbox').on('click', function() {
+                toggleMLATAircraft(true);
+        })
+
+        $('#other_datasource_checkbox').on('click', function() {
+                toggleOtherAircraft(true);
+        })
+
+        $('#tisb_datasource_checkbox').on('click', function() {
+                toggleTISBAircraft(true);
+        })
+
+        // Event handlers for to column checkboxes
+        checkbox_div_map.forEach(function (checkbox, div) {
+                $(div).on('click', function() {
+                        toggleColumn(checkbox, div, true);
+                });
+        });
 
 	// Force map to redraw if sidebar container is resized - use a timer to debounce
 	var mapResizeTimeout;
@@ -382,78 +398,42 @@ function initialize() {
 	    mapResizeTimeout = setTimeout(updateMapSize, 10);
 	});
 
-	filterGroundVehicles(false);
-	filterBlockedMLAT(false);
-	toggleAltitudeChart(false);
-	toggleAllPlanes(false);
-	toggleGroupByDataType(false);
-	toggleAllColumns(false);
+        filterGroundVehicles(false);
+        filterBlockedMLAT(false);
+        toggleAltitudeChart(false);
+        toggleAllPlanes(false);
+        toggleGroupByDataType(false);
+        toggleAllColumns(false);
+        toggleADSBAircraft(false);
+        toggleMLATAircraft(false);
+        toggleOtherAircraft(false);
+        toggleTISBAircraft(false);
 
-	// Get receiver metadata, reconfigure using it, then continue
-	// with initialization
-	$.ajax({ url: 'data/receiver.json',
-		 timeout: 5000,
-		 cache: false,
-		 data: window.location.search.substring(1),
-		 dataType: 'json' })
+        // Get receiver metadata, reconfigure using it, then continue
+        // with initialization
+        $.ajax({ url: 'data/receiver.json',
+                 timeout: 5000,
+                 cache: false,
+                 dataType: 'json' })
 
-		.done(function(data) {
-			// Stash a copy for possible socket usage
-			receiverData = data;
+                .done(function(data) {
+                        if (typeof data.lat !== "undefined") {
+                                SiteShow = true;
+                                SiteLat = data.lat;
+                                SiteLon = data.lon;
+                                DefaultCenterLat = data.lat;
+                                DefaultCenterLon = data.lon;
+                        }
+                        
+                        Dump1090Version = data.version;
+                        RefreshInterval = data.refresh;
+                        PositionHistorySize = data.history;
+                })
 
-			if (typeof data.lat !== "undefined") {
-				// Local case
-				SiteShow = true;
-				SitePositions = [[data.lon, data.lat]]
-				DefaultCenterLat = data.lat;
-				DefaultCenterLon = data.lon;
-			} else if (typeof data.locations === 'object' && data.locations.length > 0) {
-				// Remote case
-				SiteShow = true;
-				// Figure out default center/zoom
-				if (data.locations.length == 1) {
-					// Only one location provided, go with legacy code path
-					DefaultCenterLat = data.locations[0].lat;
-					DefaultCenterLon = data.locations[0].lon;
-				} else {
-					// Multiple locations, derive correct default center/zoom
-					// Create an OL-sompatible coord array
-					var coords = data.locations.map(function(loc){
-						return ol.proj.fromLonLat([loc.lon, loc.lat]);
-					});
-					// Create an extent to use for our defaults
-					// we'll buffer (pad) the extent by 400nm to allow for range rings
-					var buffer = 400 * 1852;
-					var extent = ol.extent.buffer(ol.extent.boundingExtent(coords), buffer);
-					// This is sorta hacky, but to get the center and zoom, we
-					// just create a throwaway view and fit it to the extent
-					var view = new ol.View();
-					var $canvas = $('#map_canvas');
-					var size = [$canvas.width(), $canvas.height()];
-					view.fit(extent, {size: size});
-					var center = ol.proj.toLonLat(view.getCenter());
-					DefaultCenterLat = center[1];
-					DefaultCenterLon = center[0];
-					DefaultZoomLvl = view.getZoom();
-				}
-
-				// And now set all the receiver locations
-				SitePositions = data.locations.map(function(loc){
-					return [loc.lon, loc.lat];
-				});
-
-			}
-			
-			Dump1090Version = data.version;
-			RefreshInterval = data.refresh;
-			PositionHistorySize = data.history;
-		})
-
-		.always(function() {
-			initialize_map();
-			start_load_history();
-			start_data_fetching();
-		});
+                .always(function() {
+                        initialize_map();
+                        start_load_history();
+                });
 }
 
 var CurrentHistoryFetch = null;
@@ -2466,4 +2446,72 @@ function toggleAllColumns(switchToggle) {
 	}
 
 	localStorage.setItem('selectAllColumnsCheckbox', selectAllColumnsCheckbox);
+}
+
+function toggleADSBAircraft(switchFilter) {
+	if (typeof localStorage['sourceADSBFilter'] === 'undefined') {
+		localStorage.setItem('sourceADSBFilter','not_filtered');
+	}
+
+	var sourceADSBFilter = localStorage.getItem('sourceADSBFilter');
+	if (switchFilter === true) {
+		sourceADSBFilter = (sourceADSBFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+	}
+	if (sourceADSBFilter === 'not_filtered') {
+		$('#adsb_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#adsb_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceADSBFilter', sourceADSBFilter);
+}
+
+function toggleMLATAircraft(switchFilter) {
+	if (typeof localStorage['sourceMLATFilter'] === 'undefined') {
+		localStorage.setItem('sourceMLATFilter','not_filtered');
+	}
+
+	var sourceMLATFilter = localStorage.getItem('sourceMLATFilter');
+	if (switchFilter === true) {
+		sourceMLATFilter = (sourceMLATFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+	}
+	if (sourceMLATFilter === 'not_filtered') {
+		$('#mlat_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#mlat_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceMLATFilter', sourceMLATFilter);
+}
+
+function toggleOtherAircraft(switchFilter) {
+	if (typeof localStorage['sourceOtherFilter'] === 'undefined') {
+		localStorage.setItem('sourceOtherFilter','not_filtered');
+	}
+
+	var sourceOtherFilter = localStorage.getItem('sourceOtherFilter');
+	if (switchFilter === true) {
+		sourceOtherFilter = (sourceOtherFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+	}
+	if (sourceOtherFilter === 'not_filtered') {
+		$('#other_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#other_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceOtherFilter', sourceOtherFilter);
+}
+
+function toggleTISBAircraft(switchFilter) {
+	if (typeof localStorage['sourceTISBFilter'] === 'undefined') {
+		localStorage.setItem('sourceTISBFilter','not_filtered');
+	}
+
+	var sourceTISBFilter = localStorage.getItem('sourceTISBFilter');
+	if (switchFilter === true) {
+		sourceTISBFilter = (sourceTISBFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+	}
+	if (sourceTISBFilter === 'not_filtered') {
+		$('#tisb_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#tisb_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceTISBFilter', sourceTISBFilter);
 }
