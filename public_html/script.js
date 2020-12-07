@@ -379,18 +379,22 @@ function initialize() {
 
         $('#adsb_datasource_checkbox').on('click', function() {
                 toggleADSBAircraft(true);
+                refreshDataSourceFilters();
         })
 
         $('#mlat_datasource_checkbox').on('click', function() {
                 toggleMLATAircraft(true);
+                refreshDataSourceFilters();
         })
 
         $('#other_datasource_checkbox').on('click', function() {
                 toggleOtherAircraft(true);
+                refreshDataSourceFilters();
         })
 
         $('#tisb_datasource_checkbox').on('click', function() {
                 toggleTISBAircraft(true);
+                refreshDataSourceFilters();
         })
 
         // Event handlers for to column checkboxes
@@ -417,6 +421,7 @@ function initialize() {
         toggleMLATAircraft(false);
         toggleOtherAircraft(false);
         toggleTISBAircraft(false);
+        refreshDataSourceFilters();
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
@@ -2121,7 +2126,7 @@ function updatePlaneFilter() {
 
     var aircraftTypeCode = $("#aircraft_type_filter").val().trim()
     if (aircraftTypeCode === "") {
-            aircraftTypeCode = undefined
+        aircraftTypeCode = undefined
     }
 
     var aircraftIdent = $("#aircraft_ident_filter").val().trim()
@@ -2131,6 +2136,13 @@ function updatePlaneFilter() {
 
     PlaneFilter.aircraftTypeCode = aircraftTypeCode;
     PlaneFilter.aircraftIdent = aircraftIdent;
+}
+
+function refreshDataSourceFilters () {
+        PlaneFilter.ADSB = (localStorage.getItem('sourceADSBFilter') === 'selected') ? true : false;
+        PlaneFilter.MLAT = (localStorage.getItem('sourceMLATFilter') === 'selected') ? true : false;
+        PlaneFilter.Other = (localStorage.getItem('sourceOtherFilter') === 'selected') ? true : false;
+        PlaneFilter.TISB = (localStorage.getItem('sourceTISBFilter') === 'selected') ? true : false;
 }
 
 function getFlightAwareIdentLink(ident, linkText) {
@@ -2426,14 +2438,14 @@ function toggleAllColumns(switchToggle) {
 
 function toggleADSBAircraft(switchFilter) {
 	if (typeof localStorage['sourceADSBFilter'] === 'undefined') {
-		localStorage.setItem('sourceADSBFilter','not_filtered');
+		localStorage.setItem('sourceADSBFilter','deselected');
 	}
 
 	var sourceADSBFilter = localStorage.getItem('sourceADSBFilter');
 	if (switchFilter === true) {
-		sourceADSBFilter = (sourceADSBFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+		sourceADSBFilter = (sourceADSBFilter === 'deselected') ? 'selected' : 'deselected';
 	}
-	if (sourceADSBFilter === 'not_filtered') {
+	if (sourceADSBFilter === 'deselected') {
 		$('#adsb_datasource_checkbox').removeClass('sourceCheckboxChecked');
 	} else {
 		$('#adsb_datasource_checkbox').addClass('sourceCheckboxChecked');
@@ -2443,14 +2455,14 @@ function toggleADSBAircraft(switchFilter) {
 
 function toggleMLATAircraft(switchFilter) {
 	if (typeof localStorage['sourceMLATFilter'] === 'undefined') {
-		localStorage.setItem('sourceMLATFilter','not_filtered');
+		localStorage.setItem('sourceMLATFilter','deselected');
 	}
 
 	var sourceMLATFilter = localStorage.getItem('sourceMLATFilter');
 	if (switchFilter === true) {
-		sourceMLATFilter = (sourceMLATFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+		sourceMLATFilter = (sourceMLATFilter === 'deselected') ? 'selected' : 'deselected';
 	}
-	if (sourceMLATFilter === 'not_filtered') {
+	if (sourceMLATFilter === 'deselected') {
 		$('#mlat_datasource_checkbox').removeClass('sourceCheckboxChecked');
 	} else {
 		$('#mlat_datasource_checkbox').addClass('sourceCheckboxChecked');
@@ -2460,14 +2472,14 @@ function toggleMLATAircraft(switchFilter) {
 
 function toggleOtherAircraft(switchFilter) {
 	if (typeof localStorage['sourceOtherFilter'] === 'undefined') {
-		localStorage.setItem('sourceOtherFilter','not_filtered');
+		localStorage.setItem('sourceOtherFilter','deselected');
 	}
 
 	var sourceOtherFilter = localStorage.getItem('sourceOtherFilter');
 	if (switchFilter === true) {
-		sourceOtherFilter = (sourceOtherFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+		sourceOtherFilter = (sourceOtherFilter === 'deselected') ? 'selected' : 'deselected';
 	}
-	if (sourceOtherFilter === 'not_filtered') {
+	if (sourceOtherFilter === 'deselected') {
 		$('#other_datasource_checkbox').removeClass('sourceCheckboxChecked');
 	} else {
 		$('#other_datasource_checkbox').addClass('sourceCheckboxChecked');
@@ -2477,14 +2489,14 @@ function toggleOtherAircraft(switchFilter) {
 
 function toggleTISBAircraft(switchFilter) {
 	if (typeof localStorage['sourceTISBFilter'] === 'undefined') {
-		localStorage.setItem('sourceTISBFilter','not_filtered');
+		localStorage.setItem('sourceTISBFilter','deselected');
 	}
 
 	var sourceTISBFilter = localStorage.getItem('sourceTISBFilter');
 	if (switchFilter === true) {
-		sourceTISBFilter = (sourceTISBFilter === 'not_filtered') ? 'filtered' : 'not_filtered';
+		sourceTISBFilter = (sourceTISBFilter === 'deselected') ? 'selected' : 'deselected';
 	}
-	if (sourceTISBFilter === 'not_filtered') {
+	if (sourceTISBFilter === 'deselected') {
 		$('#tisb_datasource_checkbox').removeClass('sourceCheckboxChecked');
 	} else {
 		$('#tisb_datasource_checkbox').addClass('sourceCheckboxChecked');
