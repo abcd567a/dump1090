@@ -158,55 +158,44 @@ function processReceiverUpdate(data) {
 	}
 }
 
-function fetchData() {
-	if (FetchPending !== null && FetchPending.state() == 'pending') {
-		// don't double up on fetches, let the last one resolve
-		return;
+function onNewData(data) {
+	var now = data.now;
+
+	processReceiverUpdate(data);
+
+	// update timestamps, visibility, history track for all planes - not only those updated
+	for (var i = 0; i < PlanesOrdered.length; ++i) {
+		var plane = PlanesOrdered[i];
+		plane.updateTick(now, LastReceiverTimestamp);
+	}
+	
+	selectNewPlanes();
+	refreshTableInfo();
+	refreshSelected();
+	refreshHighlighted();
+	
+	if (ReceiverClock) {
+		var rcv = new Date(now * 1000);
+		ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
 	}
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
-				timeout: 5000,
-				cache: false,
-				dataType: 'json' });
-	FetchPending.done(function(data) {
-		var now = data.now;
-
-		processReceiverUpdate(data);
-
-		// update timestamps, visibility, history track for all planes - not only those updated
-		for (var i = 0; i < PlanesOrdered.length; ++i) {
-			var plane = PlanesOrdered[i];
-			plane.updateTick(now, LastReceiverTimestamp);
+	// Check for stale receiver data
+	if (LastReceiverTimestamp === now) {
+		StaleReceiverCount++;
+		if (StaleReceiverCount > 5) {
+			$("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+			$("#update_error").css('display','block');
 		}
-		
-		selectNewPlanes();
-		refreshTableInfo();
-		refreshSelected();
-		refreshHighlighted();
-		
-		if (ReceiverClock) {
-			var rcv = new Date(now * 1000);
-			ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-		}
+	} else { 
+		StaleReceiverCount = 0;
+		LastReceiverTimestamp = now;
+		$("#update_error").css('display','none');
+	}
+}
 
-		// Check for stale receiver data
-		if (LastReceiverTimestamp === now) {
-			StaleReceiverCount++;
-			if (StaleReceiverCount > 5) {
-				$("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-				$("#update_error").css('display','block');
-			}
-		} else { 
-			StaleReceiverCount = 0;
-			LastReceiverTimestamp = now;
-			$("#update_error").css('display','none');
-		}
-	});
-
-	FetchPending.fail(function(jqxhr, status, error) {
-		$("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
-		$("#update_error").css('display','block');
-	});
+function onDataError(errMsg) {
+	$("#update_error_detail").text(errMsg);
+	$("#update_error").css('display','block');
 }
 
 var PositionHistorySize = 0;
@@ -413,6 +402,7 @@ function initialize() {
 		.always(function() {
 			initialize_map();
 			start_load_history();
+			start_data_fetching();
 		});
 }
 
@@ -507,17 +497,21 @@ function end_load_history() {
 	refreshTableInfo();
 	refreshSelected();
 	refreshHighlighted();
-	reaper();
 
-	// Setup our timer to poll from the server.
-	window.setInterval(fetchData, RefreshInterval);
+	// Get the reaper going
 	window.setInterval(reaper, 60000);
-
-	// And kick off one refresh immediately.
-	fetchData();
+	reaper();
 
 	// update the display layout from any URL query strings
 	applyUrlQueryStrings();
+}
+
+function start_data_fetching() {
+	var dataFetcher = new SkyAwareDataFetcher({
+		onNewData: onNewData,
+		onDataError: onDataError,
+		refreshInterval: RefreshInterval
+	});
 }
 
 // Function to apply any URL query value to the map before we start
