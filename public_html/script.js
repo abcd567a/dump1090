@@ -26,7 +26,7 @@ var SpecialSquawks = {
 // Get current map settings
 var CenterLat, CenterLon, ZoomLvl, MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
 
-var Dump1090Version = "unknown version";
+var SkyAwareVersion = "unknown version";
 var RefreshInterval = 1000;
 
 var PlaneRowTemplate = null;
@@ -406,7 +406,7 @@ function initialize() {
                                 DefaultCenterLon = data.lon;
                         }
                         
-                        Dump1090Version = data.version;
+                        SkyAwareVersion = data.version;
                         RefreshInterval = data.refresh;
                         PositionHistorySize = data.history;
                 })
@@ -1073,7 +1073,7 @@ function refreshSelected() {
         }
         
         $('#dump1090_infoblock').css('display','block');
-        $('#dump1090_version').text(Dump1090Version);
+        $('#skyaware_version').text('SkyAware ' + SkyAwareVersion);
         $('#dump1090_total_ac').text(TrackedAircraft);
         $('#dump1090_total_ac_positions').text(TrackedAircraftPositions);
         $('#dump1090_total_history').text(TrackedHistorySize);
