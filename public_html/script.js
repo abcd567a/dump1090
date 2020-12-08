@@ -411,6 +411,7 @@ function initialize() {
             mapResizeTimeout = setTimeout(updateMapSize, 10);
         });
 
+        // Initialize settings from local storage
         filterGroundVehicles(false);
         filterBlockedMLAT(false);
         toggleAltitudeChart(false);
@@ -1151,24 +1152,23 @@ function refreshSelected() {
         //         emerg.className = 'hidden';
         // }
 
-		$("#selected_altitude").text(format_altitude_long(selected.altitude, selected.vert_rate, DisplayUnits));
-
-		$('#selected_onground').text(format_onground(selected.altitude));
+        $("#selected_altitude").text(format_altitude_long(selected.altitude, selected.vert_rate, DisplayUnits));
+        $('#selected_onground').text(format_onground(selected.altitude));
 
         if (selected.squawk === null || selected.squawk === '0000') {
                 $('#selected_squawk').text('n/a');
         } else {
                 $('#selected_squawk').text(selected.squawk);
         }
-	
-		$('#selected_speed').text(format_speed_long(selected.gs, DisplayUnits));
-		$('#selected_ias').text(format_speed_long(selected.ias, DisplayUnits));
-		$('#selected_tas').text(format_speed_long(selected.tas, DisplayUnits));
-		$('#selected_vertical_rate').text(format_vert_rate_long(selected.baro_rate, DisplayUnits));
-		$('#selected_vertical_rate_geo').text(format_vert_rate_long(selected.geom_rate, DisplayUnits));
+
+        $('#selected_speed').text(format_speed_long(selected.gs, DisplayUnits));
+        $('#selected_ias').text(format_speed_long(selected.ias, DisplayUnits));
+        $('#selected_tas').text(format_speed_long(selected.tas, DisplayUnits));
+        $('#selected_vertical_rate').text(format_vert_rate_long(selected.baro_rate, DisplayUnits));
+        $('#selected_vertical_rate_geo').text(format_vert_rate_long(selected.geom_rate, DisplayUnits));
         $('#selected_icao').text(selected.icao.toUpperCase());
         $('#airframes_post_icao').attr('value',selected.icao);
-		$('#selected_track').text(format_track_long(selected.track));
+        $('#selected_track').text(format_track_long(selected.track));
 
         if (selected.seen <= 1) {
                 $('#selected_seen').text('now');
@@ -1191,7 +1191,7 @@ function refreshSelected() {
                 $('#selected_flag').addClass('hidden');
         }
 
-	if (selected.position === null) {
+        if (selected.position === null) {
                 $('#selected_position').text('n/a');
                 $('#selected_follow').addClass('hidden');
         } else {
@@ -1204,23 +1204,24 @@ function refreshSelected() {
                 } else {
                         $('#selected_follow').css('font-weight', 'normal');
                 }
-	}
-		if (selected.getDataSource() === "adsb_icao") {
-			$('#selected_source').text("ADS-B");
-		} else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
-			$('#selected_source').text("TIS-B");
-		} else if (selected.getDataSource() === "mlat") {
-			$('#selected_source').text("MLAT");
-		} else {
-			$('#selected_source').text("Other");
-		}
-		$('#selected_category').text(selected.category ? selected.category : "n/a");
+        }
+
+        if (selected.getDataSource() === "adsb_icao") {
+                $('#selected_source').text("ADS-B");
+        } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
+                $('#selected_source').text("TIS-B");
+        } else if (selected.getDataSource() === "mlat") {
+                $('#selected_source').text("MLAT");
+        } else {
+                $('#selected_source').text("Other");
+        }
+
+        $('#selected_category').text(selected.category ? selected.category : "n/a");
         $('#selected_sitedist').text(format_distance_long(selected.sitedist, DisplayUnits));
         $('#selected_rssi').text(selected.rssi.toFixed(1) + ' dBFS');
         $('#selected_message_count').text(selected.messages);
-		$('#selected_photo_link').html(getFlightAwarePhotoLink(selected.registration));
-		
-		$('#selected_altitude_geom').text(format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
+        $('#selected_photo_link').html(getFlightAwarePhotoLink(selected.registration));
+        $('#selected_altitude_geom').text(format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
         $('#selected_mag_heading').text(format_track_long(selected.mag_heading));
         $('#selected_true_heading').text(format_track_long(selected.true_heading));
         $('#selected_ias').text(format_speed_long(selected.ias, DisplayUnits));
