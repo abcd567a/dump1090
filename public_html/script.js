@@ -2463,7 +2463,7 @@ function toggleAllColumns(switchToggle) {
 
 function toggleADSBAircraft(switchFilter) {
 	if (typeof localStorage['sourceADSBFilter'] === 'undefined') {
-		localStorage.setItem('sourceADSBFilter','deselected');
+		localStorage.setItem('sourceADSBFilter','selected');
 	}
 
 	var sourceADSBFilter = localStorage.getItem('sourceADSBFilter');
@@ -2480,7 +2480,7 @@ function toggleADSBAircraft(switchFilter) {
 
 function toggleMLATAircraft(switchFilter) {
 	if (typeof localStorage['sourceMLATFilter'] === 'undefined') {
-		localStorage.setItem('sourceMLATFilter','deselected');
+		localStorage.setItem('sourceMLATFilter','selected');
 	}
 
 	var sourceMLATFilter = localStorage.getItem('sourceMLATFilter');
@@ -2497,7 +2497,7 @@ function toggleMLATAircraft(switchFilter) {
 
 function toggleOtherAircraft(switchFilter) {
 	if (typeof localStorage['sourceOtherFilter'] === 'undefined') {
-		localStorage.setItem('sourceOtherFilter','deselected');
+		localStorage.setItem('sourceOtherFilter','selected');
 	}
 
 	var sourceOtherFilter = localStorage.getItem('sourceOtherFilter');
@@ -2514,7 +2514,7 @@ function toggleOtherAircraft(switchFilter) {
 
 function toggleTISBAircraft(switchFilter) {
 	if (typeof localStorage['sourceTISBFilter'] === 'undefined') {
-		localStorage.setItem('sourceTISBFilter','deselected');
+		localStorage.setItem('sourceTISBFilter','selected');
 	}
 
 	var sourceTISBFilter = localStorage.getItem('sourceTISBFilter');
