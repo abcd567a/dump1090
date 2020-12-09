@@ -110,16 +110,21 @@ function PlaneObject(icao) {
 
 PlaneObject.prototype.isFiltered = function() {
     // aircraft type filter
+<<<<<<< HEAD
     if (this.filter.aircraftTypeCode && this.icaotype !== null) {
         if (typeof this.icaotype === 'string' && this.icaotype !== this.filter.aircraftTypeCode) {
+=======
+    if (this.filter.aircraftTypeCode) {
+        if (this.icaotype === null || (typeof this.icaotype === 'string' && !this.icaotype.toUpperCase().trim().match(this.filter.aircraftTypeCode))) {
+>>>>>>> 1916fc6... Use regex match for filter comparisons
             return true;
         }
     }
 
     // aircraft ident filter
     if (this.filter.aircraftIdent) {
-        if (this.flight === null || (typeof this.flight === 'string' && this.flight.toUpperCase().trim() !== this.filter.aircraftIdent.toUpperCase())) {
-            return true;
+        if (this.flight === null || (typeof this.flight === 'string' && !this.flight.toUpperCase().trim().match(this.filter.aircraftIdent))) {
+                return true;
         }
     }
 

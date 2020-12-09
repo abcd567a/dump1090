@@ -2148,12 +2148,12 @@ function updatePlaneFilter() {
     PlaneFilter.maxAltitude = maxAltitude;
     PlaneFilter.altitudeUnits = DisplayUnits;
 
-    var aircraftTypeCode = $("#aircraft_type_filter").val().trim()
+    var aircraftTypeCode = $("#aircraft_type_filter").val().trim().toUpperCase()
     if (aircraftTypeCode === "") {
         aircraftTypeCode = undefined
     }
 
-    var aircraftIdent = $("#aircraft_ident_filter").val().trim()
+    var aircraftIdent = $("#aircraft_ident_filter").val().trim().toUpperCase()
     if (aircraftIdent === "") {
         aircraftIdent = undefined
     }
