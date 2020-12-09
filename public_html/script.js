@@ -320,25 +320,7 @@ function initialize() {
             customAltitudeColors = false;
         }
 
-        // Accordian display logic for additional config buttons
-        var acc = document.getElementsByClassName("accordion");
-        var i;
 
-        for (i = 0; i < acc.length; i++) {
-          acc[i].addEventListener("click", function() {
-            /* Toggle between adding and removing the "active" class,
-            to highlight the button that controls the panel */
-            this.classList.toggle("active");
-
-            /* Toggle between hiding and showing the active panel */
-            var panel = this.nextElementSibling;
-            if (panel.style.display === "block") {
-              panel.style.display = "none";
-            } else {
-              panel.style.display = "block";
-            }
-          });
-        }
 
         $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
 
@@ -352,14 +334,6 @@ function initialize() {
 
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
-        });
-
-        $('#column_select').on('click', function() {
-                $('#column_select_window').toggle();
-        });
-
-        $('#column_select_close_box').on('click', function() {
-                $('#column_select_window').hide();
         });
 
         $('#settings_close').on('click', function() {
@@ -415,6 +389,15 @@ function initialize() {
                 toggleTISBAircraft(true);
                 refreshDataSourceFilters();
         })
+
+        $('#column_select_button').on('click', function() {
+                $('#column_select_panel').toggle();
+        });
+
+
+        $('#filter_button').on('click', function() {
+                $('#filter_panel').toggle();
+        });
 
         // Event handlers for to column checkboxes
         checkbox_div_map.forEach(function (checkbox, div) {

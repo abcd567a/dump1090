@@ -212,124 +212,125 @@
 										</tr>
 									</table>
 								</div> <!-- dump1090_infoblock -->
-			
+
 								<div class="config_button_row">
-									<button class="accordion">Filters</button>
-										<div class="panel">
-											<form id="altitude_filter_form">
-												<label><span class="infoBlockTitleText">Filter by Altitude:</span></label>
-												<input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="5">
-												<label for="minAltitude" class="altitudeUnit"></label>
-												<span> to </span>
-												<input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="5">
-												<label for="maxAltitude" class="altitudeUnit"></label>
-												<button type="submit">Filter</button>
-												<button id="altitude_filter_reset_button">Reset</button>
-											</form>
-											<form id="aircraft_type_filter_form">
-												<label><span class="infoBlockTitleText">Filter by Aircraft Type:</span></label>
-												<input id="aircraft_type_filter" name="aircraftTypeFilter" type="text" class="aircraftFilterInput" maxlength="5">
-												<button type="submit">Filter by Aircraft Type</button>
-												<button id="aircraft_type_filter_reset_button">Reset</button>
-											</form>
-			
-											<form id="aircraft_ident_filter_form">
-												<label><span class="infoBlockTitleText">Filter by Aircraft Ident:</span></label>
-												<input id="aircraft_ident_filter" name="aircraftIdentFilter" type="text" class="aircraftFilterInput" maxlength="10">
-												<button type="submit">Filter by Aircraft Ident</button>
-												<button id="aircraft_ident_filter_reset_button">Reset</button>
-											</form>
-										</div>
-									<button id="column_select">Select Columns</button>
+									<button id="filter_button" class="config_button">Filters</button>
+									<button id="column_select_button" class="config_button">Select Columns</button>
 								</div>
 
-								<div id="column_select_window" class="hidden">
-									<div id="column_select_close_box"></div>
-									<div id="column_select_header">Columns</div>
-									<div class="columnOptionSelectAllContainer">
-										<div class="columnSelectAllCheckbox" id="select_all_column_checkbox"></div>
-										<div class="columnOptionText">Select/Deselect All</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="icao_col_checkbox"></div>
-										<div class="columnOptionText">Icao</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="flag_col_checkbox"></div>
-										<div class="columnOptionText">Flag</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="ident_col_checkbox"></div>
-										<div class="columnOptionText">Ident</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="reg_col_checkbox"></div>
-										<div class="columnOptionText">Registration</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="ac_col_checkbox"></div>
-										<div class="columnOptionText">Aircraft Type</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="squawk_col_checkbox"></div>
-										<div class="columnOptionText">Squawk</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="alt_col_checkbox"></div>
-										<div class="columnOptionText">Altitude</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="speed_col_checkbox"></div>
-										<div class="columnOptionText">Speed</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="vrate_col_checkbox"></div>
-										<div class="columnOptionText">Vertical Rate</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="distance_col_checkbox"></div>
-										<div class="columnOptionText">Distance</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="heading_col_checkbox"></div>
-										<div class="columnOptionText">Heading</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="messages_col_checkbox"></div>
-										<div class="columnOptionText">Messages</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="msg_age_col_checkbox"></div>
-										<div class="columnOptionText">Message Age</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="rssi_col_checkbox"></div>
-										<div class="columnOptionText">RSSI</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="lat_col_checkbox"></div>
-										<div class="columnOptionText">Latitude</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="lon_col_checkbox"></div>
-										<div class="columnOptionText">Longitude</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="datasource_col_checkbox"></div>
-										<div class="columnOptionText">Data Source</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="airframes_col_checkbox"></div>
-										<div class="columnOptionText">Airframes.org</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="fa_modes_link_checkbox"></div>
-										<div class="columnOptionText">FlightAware</div>
-									</div>
-									<div class="columnOptionContainer">
-										<div class="columnSelectCheckbox" id="fa_photo_link_checkbox"></div>
-										<div class="columnOptionText">Photos</div>
-									</div>
+								<div id="filter_panel" class="panel">
+									<form id="altitude_filter_form">
+										<label><span class="infoBlockTitleText">Filter by Altitude:</span></label>
+										<input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="5">
+										<label for="minAltitude" class="altitudeUnit"></label>
+										<span> to </span>
+										<input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="5">
+										<label for="maxAltitude" class="altitudeUnit"></label>
+										<button type="submit">Filter</button>
+										<button id="altitude_filter_reset_button">Reset</button>
+									</form>
+									<form id="aircraft_type_filter_form">
+										<label><span class="infoBlockTitleText">Filter by Aircraft Type:</span></label>
+										<input id="aircraft_type_filter" name="aircraftTypeFilter" type="text" class="aircraftFilterInput" maxlength="5">
+										<button type="submit">Filter by Aircraft Type</button>
+										<button id="aircraft_type_filter_reset_button">Reset</button>
+									</form>
+
+									<form id="aircraft_ident_filter_form">
+										<label><span class="infoBlockTitleText">Filter by Aircraft Ident:</span></label>
+										<input id="aircraft_ident_filter" name="aircraftIdentFilter" type="text" class="aircraftFilterInput" maxlength="10">
+										<button type="submit">Filter by Aircraft Ident</button>
+										<button id="aircraft_ident_filter_reset_button">Reset</button>
+									</form>
+								</div>
+
+								<div id="column_select_panel" class="panel">
+										<div class="columnOptionSelectAllContainer">
+											<div class="columnSelectAllCheckbox" id="select_all_column_checkbox"></div>
+											<div class="columnOptionText">Select/Deselect All</div>
+										</div>
+										<div class="wrapper">
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="icao_col_checkbox"></div>
+												<div class="columnOptionText">Icao</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="flag_col_checkbox"></div>
+												<div class="columnOptionText">Flag</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="ident_col_checkbox"></div>
+												<div class="columnOptionText">Ident</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="reg_col_checkbox"></div>
+												<div class="columnOptionText">Registration</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="ac_col_checkbox"></div>
+												<div class="columnOptionText">Aircraft Type</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="squawk_col_checkbox"></div>
+												<div class="columnOptionText">Squawk</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="alt_col_checkbox"></div>
+												<div class="columnOptionText">Altitude</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="speed_col_checkbox"></div>
+												<div class="columnOptionText">Speed</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="vrate_col_checkbox"></div>
+												<div class="columnOptionText">Vertical Rate</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="distance_col_checkbox"></div>
+												<div class="columnOptionText">Distance</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="heading_col_checkbox"></div>
+												<div class="columnOptionText">Heading</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="messages_col_checkbox"></div>
+												<div class="columnOptionText">Messages</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="msg_age_col_checkbox"></div>
+												<div class="columnOptionText">Message Age</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="rssi_col_checkbox"></div>
+												<div class="columnOptionText">RSSI</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="lat_col_checkbox"></div>
+												<div class="columnOptionText">Latitude</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="lon_col_checkbox"></div>
+												<div class="columnOptionText">Longitude</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="datasource_col_checkbox"></div>
+												<div class="columnOptionText">Data Source</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="airframes_col_checkbox"></div>
+												<div class="columnOptionText">Airframes.org</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="fa_modes_link_checkbox"></div>
+												<div class="columnOptionText">FlightAware</div>
+											</div>
+											<div class="columnOptionContainer">
+												<div class="columnSelectCheckbox" id="fa_photo_link_checkbox"></div>
+												<div class="columnOptionText">Photos</div>
+											</div>
+										</div>
 								</div>
 
 								<div id="planes_table_container">

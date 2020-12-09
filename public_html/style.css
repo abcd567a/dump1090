@@ -55,48 +55,6 @@ html, body {
     overflow-x: scroll;
 }
 
-#column_select {
-    position: relative;
-    float: right;
-    background-color: #002F5D;
-    color: #FFFFFF;
-    width: 125px;
-}
-
-#column_select_window {
-    position: absolute;
-    right: 1px;
-    top: 80px;
-    width: 150px;
-    min-height: 180px;
-    background: #ffffff;
-    box-shadow: 4px 4px 10px #444444;
-    padding: 20px;
-    z-index: 9999;
-    display: none;
-}
-
-#column_select_header {
-    display: table;
-    background-color: #002F5D;
-    color: #ffffff;
-    font-size: smaller;
-    padding: 5px;
-    text-align: center;
-    width: 120px;
-}
-
-#column_select_close_box {
-    position: absolute;
-    right: 15px;
-    top: 21px;
-    background-image: url('images/close-settings.png');
-    background-size: cover;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-}
-
 .columnOptionContainer {
     position: relative;
     display: table;
@@ -887,28 +845,36 @@ select.error, textarea.error, input.error {
     }
 }
 
-/* Style the buttons that are used to open and close the accordion panel */
-.accordion {
+.config_button {
     position: relative;
-    background-color: #002F5D;
-    color: #FFFFFF;
+    background-color: #FEBC11;
+    color: #002F5D;
     cursor: pointer;
     text-align: center;
     width: 125px;
 }
 
-.active, .accordion:hover, #column_select:hover {
+.config_button:hover {
     background-color: #abcad8;
 }
 
-  /* Style the accordion panel. Note: hidden by default */
-.panel {
-    padding: 0 2px;
-    background-color: #E5F6FC;
-    display: none;
-    overflow: hidden;
+.config_button_row {
+    position: relative;
+    margin-top: 5px;
+    padding: 3px 0 3px 0;
+
 }
 
-.config_button_row {
-      margin-top: 5px;
+.panel {
+    position: relative;
+    padding: 3px 3px 6px 3px;
+    display: none;
+    margin-bottom: 5px;
+    border: solid;
+    border-color: #002F5D;
 }
+
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
