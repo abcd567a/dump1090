@@ -60,6 +60,7 @@ html, body {
     float: right;
     background-color: #002F5D;
     color: #FFFFFF;
+    width: 125px;
 }
 
 #column_select_window {
@@ -884,4 +885,30 @@ select.error, textarea.error, input.error {
     #toggle_sidebar_button.hide_sidebar {
         background-image: url("images/map-icon@3x.png");
     }
+}
+
+/* Style the buttons that are used to open and close the accordion panel */
+.accordion {
+    position: relative;
+    background-color: #002F5D;
+    color: #FFFFFF;
+    cursor: pointer;
+    text-align: center;
+    width: 125px;
+}
+
+.active, .accordion:hover, #column_select:hover {
+    background-color: #abcad8;
+}
+
+  /* Style the accordion panel. Note: hidden by default */
+.panel {
+    padding: 0 2px;
+    background-color: #E5F6FC;
+    display: none;
+    overflow: hidden;
+}
+
+.config_button_row {
+      margin-top: 5px;
 }
