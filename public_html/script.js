@@ -396,11 +396,13 @@ function initialize() {
         })
 
         $('#column_select_button').on('click', function() {
+                this.classList.toggle("config_button_active");
                 $('#column_select_panel').toggle();
         });
 
 
         $('#filter_button').on('click', function() {
+                this.classList.toggle("config_button_active");
                 $('#filter_panel').toggle();
         });
 

@@ -871,7 +871,7 @@ select.error, textarea.error, input.error {
     width: 125px;
 }
 
-.config_button:hover {
+.config_button:hover, .config_button_active {
     background-color: #abcad8;
 }
 
@@ -884,7 +884,7 @@ select.error, textarea.error, input.error {
 
 .panel {
     position: relative;
-    padding: 3px 3px 6px 3px;
+    padding: 3px 3px 10px 3px;
     display: none;
     margin-bottom: 5px;
     border: solid;
