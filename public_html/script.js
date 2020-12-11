@@ -2246,9 +2246,12 @@ function flightFeederCheck() {
 function setStatsLink() {
         $.ajax('/status.json', {
                 success: function(data) {
-                    if (data.site_url) {
+                    if (data.unclaimed_feeder_id) {
+                        var claim_link = "https://flightaware.com/adsb/piaware/claim/" + data.unclaimed_feeder_id;
+                        $('#stats_page_button').text("Claim this feeder on FlightAware")
+                        myAdsbStatsSiteUrl = claim_link;
+                    } else if (data.site_url) {
                         myAdsbStatsSiteUrl = data.site_url;
-                        console.log(myAdsbStatsSiteUrl)
                     }
                 }
         })
