@@ -16,6 +16,7 @@ var HighlightedPlane = null;
 var FollowSelected = false;
 var infoBoxOriginalPosition = {};
 var customAltitudeColors = true;
+var myAdsbStatsSiteUrl = null;
 
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
@@ -217,6 +218,8 @@ function initialize() {
 
         flightFeederCheck();
 
+        setStatsLink();
+
         PlaneRowTemplate = document.getElementById("plane_row_template");
 
         refreshClock();
@@ -399,6 +402,12 @@ function initialize() {
         $('#filter_button').on('click', function() {
                 this.classList.toggle("config_button_active");
                 $('#filter_panel').toggle();
+        });
+
+        $('#stats_page_button').on('click', function() {
+                if (myAdsbStatsSiteUrl) {
+                        window.open(myAdsbStatsSiteUrl);
+                }
         });
 
         // Event handlers for to column checkboxes
@@ -2232,6 +2241,17 @@ function flightFeederCheck() {
             }
         }
     })
+}
+
+function setStatsLink() {
+        $.ajax('/status.json', {
+                success: function(data) {
+                    if (data.site_url) {
+                        myAdsbStatsSiteUrl = data.site_url;
+                        console.log(myAdsbStatsSiteUrl)
+                    }
+                }
+        })
 }
 
 // updates the page to replace piaware with flightfeeder references

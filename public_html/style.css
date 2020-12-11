@@ -851,7 +851,7 @@ select.error, textarea.error, input.error {
     color: #002F5D;
     cursor: pointer;
     text-align: center;
-    width: 125px;
+    width: auto;
 }
 
 .config_button:hover, .config_button_active {
