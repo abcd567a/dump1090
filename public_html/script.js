@@ -99,19 +99,19 @@ function processReceiverUpdate(data) {
         if ((now - MessageCountHistory[0].time) > 30)
                 MessageCountHistory.shift();
 
-	for (var j=0; j < acs.length; j++) {
+        for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
                 var hex = ac.hex;
                 var squawk = ac.squawk;
                 var plane = null;
 
-		// Do we already have this plane object in Planes?
-		// If not make it.
+                // Do we already have this plane object in Planes?
+                // If not make it.
 
-		if (Planes[hex]) {
-			plane = Planes[hex];
-		} else {
-			plane = new PlaneObject(hex);
+                if (Planes[hex]) {
+                        plane = Planes[hex];
+                } else {
+                        plane = new PlaneObject(hex);
                         plane.filter = PlaneFilter;
                         plane.tr = PlaneRowTemplate.cloneNode(true);
 
@@ -156,11 +156,11 @@ function processReceiverUpdate(data) {
 
                         Planes[hex] = plane;
                         PlanesOrdered.push(plane);
-		}
+                }
 
-		// Call the function update
-		plane.updateData(now, ac);
-	}
+                // Call the function update
+                plane.updateData(now, ac);
+        }
 }
 
 function fetchData() {
@@ -184,10 +184,10 @@ function fetchData() {
                         plane.updateTick(now, LastReceiverTimestamp);
                 }
 
-		selectNewPlanes();
-		refreshTableInfo();
-		refreshSelected();
-		refreshHighlighted();
+                selectNewPlanes();
+                refreshTableInfo();
+                refreshSelected();
+                refreshHighlighted();
                 
                 if (ReceiverClock) {
                         var rcv = new Date(now * 1000);
@@ -206,7 +206,7 @@ function fetchData() {
                         LastReceiverTimestamp = now;
                         $("#update_error").css('display','none');
                 }
-	});
+        });
 
         FetchPending.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
@@ -387,7 +387,6 @@ function initialize() {
         $("#aircraft_ident_filter_form").submit(onFilterByAircraftIdent);
         $("#aircraft_ident_filter_reset_button").click(onResetAircraftIdentFilter);
 
-
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
@@ -546,20 +545,19 @@ function load_history_item(i) {
                  dataType: 'json' })
 
                 .done(function(data) {
-					PositionHistoryBuffer.push(data);
-					HistoryItemsReturned++;
-					$("#loader_progress").attr('value',HistoryItemsReturned);
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                        PositionHistoryBuffer.push(data);
+                        HistoryItemsReturned++;
+                        if (HistoryItemsReturned == PositionHistorySize) {
+                                end_load_history();
+                        }
                 })
 
                 .fail(function(jqxhr, status, error) {
-					//Doesn't matter if it failed, we'll just be missing a data point
-					HistoryItemsReturned++;
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                        //Doesn't matter if it failed, we'll just be missing a data point
+                        HistoryItemsReturned++;
+                                        if (HistoryItemsReturned == PositionHistorySize) {
+                                                end_load_history();
+                                        }
                 });
 }
 

@@ -942,3 +942,7 @@ select.error, textarea.error, input.error {
     margin-top: 10px;
     margin-bottom: 5px;
 }
+
+.ui-resizable {
+    min-width: 400px;
+}
