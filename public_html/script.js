@@ -303,11 +303,11 @@ function initialize() {
         altitude_slider = document.getElementById('altitude_slider');
 
         noUiSlider.create(altitude_slider, {
-                start: [0, 50000],
+                start: [0, 65000],
                 connect: true,
                 range: {
                     'min': 0,
-                    'max': 50000
+                    'max': 65000
                 },
                 step: 5,
                 format: {
