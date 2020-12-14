@@ -309,17 +309,10 @@ function initialize() {
                     'min': 0,
                     'max': 65000
                 },
-                step: 5,
+                step: 25,
                 format: {
-                        // 'to' the formatted value. Receives a number.
-                        to: function (value) {
-                            return value;
-                        },
-                        // 'from' the formatted value.
-                        // Receives a string, should return a number.
-                        from: function (value) {
-                            return value;
-                        }
+                        to: (v) => parseFloat(v).toFixed(0),
+                        from: (v) => parseFloat(v).toFixed(0)
                     }
             });
 
