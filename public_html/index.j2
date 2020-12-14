@@ -15,6 +15,9 @@
 		<link rel="stylesheet" href="{{ 'ol/ol-layerswitcher.css'|asset_path() }}" type="text/css"/>
 		<script src="{{ 'ol/ol-layerswitcher.js'|asset_path() }}" type="text/javascript"></script>
 
+		<script src="{{ 'noUiSlider/distribute/nouislider.min.js'|asset_path() }}"></script>
+		<link rel="stylesheet" href="{{ 'noUiSlider/distribute/nouislider.min.css'|asset_path() }}"/>
+
 		<script type="text/javascript" src="{{ 'config.js'|asset_path() }}"></script>
 		<script type="text/javascript" src="{{ 'markers.js'|asset_path() }}"></script>
 		<script type="text/javascript" src="{{ 'dbloader.js'|asset_path() }}"></script>
@@ -222,31 +225,38 @@
 								</div>
 
 								<div id="filter_panel" class="panel">
-									<form id="altitude_filter_form">
-										<label><span class="infoBlockTitleText">Filter by Altitude:</span></label>
-										<input id="altitude_filter_min" name="minAltitude" type="text" class="altitudeFilterInput" maxlength="5">
-										<label for="minAltitude" class="altitudeUnit"></label>
-										<span> to </span>
-										<input id="altitude_filter_max" name="maxAltitude" type="text" class="altitudeFilterInput" maxlength="5">
-										<label for="maxAltitude" class="altitudeUnit"></label>
-										<button type="submit">Filter</button>
-										<button id="altitude_filter_reset_button">Reset</button>
-									</form>
-									<form id="aircraft_type_filter_form">
-										<label><span class="infoBlockTitleText">Filter by Aircraft Type:</span></label>
-										<input id="aircraft_type_filter" name="aircraftTypeFilter" type="text" class="aircraftFilterInput" maxlength="5">
-										<button type="submit">Filter by Aircraft Type</button>
-										<button id="aircraft_type_filter_reset_button">Reset</button>
-									</form>
-
-									<form id="aircraft_ident_filter_form">
-										<label><span class="infoBlockTitleText">Filter by Aircraft Ident:</span></label>
-										<input id="aircraft_ident_filter" name="aircraftIdentFilter" type="text" class="aircraftFilterInput" maxlength="10">
-										<button type="submit">Filter by Aircraft Ident</button>
-										<button id="aircraft_ident_filter_reset_button">Reset</button>
-									</form>
+									<div class="group">
+										<label><span class="infoBlockTitleText">Filter by Altitude</span></label>
+										<div class="align_right">
+											<span id="minAltitudeText" class="infoBlockTitleText"></span>
+											<label for="minAltitude" class="altitudeUnit"></label>
+											<span> to </span>
+											<span id="maxAltitudeText" class="infoBlockTitleText"></span>
+											<label for="maxAltitude" class="altitudeUnit"></label>
+										</div>
+										<div id="altitude_slider"></div>
+									</div>
+									<div class="group">
+										<form id="aircraft_type_filter_form">
+											<label><span class="infoBlockTitleText">Filter by Aircraft Type</span></label>
+											<div class="align_right">
+												<input id="aircraft_type_filter" name="aircraftTypeFilter" type="text" class="aircraftFilterInput" maxlength="5">
+												<button type="submit">Filter</button>
+												<button id="aircraft_type_filter_reset_button">Reset</button>
+											</div>
+										</form>
+									</div>
+									<div class="group">
+										<form id="aircraft_ident_filter_form">
+											<label><span class="infoBlockTitleText">Filter by Aircraft Ident</span></label>
+											<div class="align_right">
+												<input id="aircraft_ident_filter" name="aircraftIdentFilter" type="text" class="aircraftFilterInput" maxlength="10">
+												<button type="submit">Filter</button>
+												<button id="aircraft_ident_filter_reset_button">Reset</button>
+											</div>
+										</form>
+									</div>
 								</div>
-
 								<div id="column_select_panel" class="panel">
 										<div class="columnOptionSelectAllContainer">
 											<div class="columnSelectAllCheckbox" id="select_all_column_checkbox"></div>

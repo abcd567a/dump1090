@@ -53,6 +53,8 @@ var NBSP='\u00a0';
 var layers;
 var layerGroup;
 
+var altitude_slider = null;
+
 // piaware vs flightfeeder
 var isFlightFeeder = false;
 
@@ -166,21 +168,21 @@ function onNewData(data) {
 
 	processReceiverUpdate(data);
 
-	// update timestamps, visibility, history track for all planes - not only those updated
-	for (var i = 0; i < PlanesOrdered.length; ++i) {
-		var plane = PlanesOrdered[i];
-		plane.updateTick(now, LastReceiverTimestamp);
-	}
-	
-	selectNewPlanes();
-	refreshTableInfo();
-	refreshSelected();
-	refreshHighlighted();
-	
-	if (ReceiverClock) {
-		var rcv = new Date(now * 1000);
-		ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-	}
+                // update timestamps, visibility, history track for all planes - not only those updated
+                for (var i = 0; i < PlanesOrdered.length; ++i) {
+                        var plane = PlanesOrdered[i];
+                        plane.updateTick(now, LastReceiverTimestamp);
+                }
+
+		selectNewPlanes();
+		refreshTableInfo();
+		refreshSelected();
+		refreshHighlighted();
+                
+                if (ReceiverClock) {
+                        var rcv = new Date(now * 1000);
+                        ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
+                }
 
 	// Check for stale receiver data
 	if (LastReceiverTimestamp === now) {
@@ -272,52 +274,64 @@ function initialize() {
 			}
 		});
 	
-	// Set up event handlers for buttons
-	$("#toggle_sidebar_button").click(toggleSidebarVisibility);
-	$("#expand_sidebar_button").click(expandSidebar);
-	$("#show_map_button").click(showMap);
+        // Set up event handlers for buttons
+        $("#toggle_sidebar_button").click(toggleSidebarVisibility);
+        $("#expand_sidebar_button").click(expandSidebar);
+        $("#show_map_button").click(showMap);
 
-	// Set initial element visibility
-	$("#show_map_button").hide();
-	$("#range_ring_column").hide();
-	setColumnVisibility();
+        // Set initial element visibility
+        $("#show_map_button").hide();
+        $("#range_ring_column").hide();
+        setColumnVisibility();
 
-	// Initialize other controls
-	initializeUnitsSelector();
+        // Initialize other controls
+        initializeUnitsSelector();
 
-	// Set up altitude filter button event handlers and validation options
-	$("#altitude_filter_form").submit(onFilterByAltitude);
-	$("#altitude_filter_form").validate({
-	    errorPlacement: function(error, element) {
-		return true;
-	    },
-	    
-	    rules: {
-		minAltitude: {
-		    number: true,
-		    min: -99999,
-		    max: 99999
-		},
-		maxAltitude: {
-		    number: true,
-		    min: -99999,
-		    max: 99999
-		}
-	    }
-	});
+        altitude_slider = document.getElementById('altitude_slider');
+
+        noUiSlider.create(altitude_slider, {
+                start: [0, 50000],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 50000
+                },
+                step: 5,
+                format: {
+                        // 'to' the formatted value. Receives a number.
+                        to: function (value) {
+                            return value;
+                        },
+                        // 'from' the formatted value.
+                        // Receives a string, should return a number.
+                        from: function (value) {
+                            return value;
+                        }
+                    }
+            });
+
+        var minAltitudeInput = document.getElementById('minAltitudeText'),
+            maxAltitudeInput = document.getElementById('maxAltitudeText');
+
+        altitude_slider.noUiSlider.on('update', function (values, handle) {
+                if (handle) {
+                        maxAltitudeInput.innerHTML = values[handle];
+                } else {
+                        minAltitudeInput.innerHTML = values[handle];
+                }
+        });
+
+        altitude_slider.noUiSlider.on('set', function (values, handle) {
+                onFilterByAltitude();
+        });
 
 	// check if the altitude color values are default to enable the altitude filter
 	if (ColorByAlt.air.h.length === 3 && ColorByAlt.air.h[0].alt === 2000 && ColorByAlt.air.h[0].val === 20 && ColorByAlt.air.h[1].alt === 10000 && ColorByAlt.air.h[1].val === 140 && ColorByAlt.air.h[2].alt === 40000 && ColorByAlt.air.h[2].val === 300) {
 	    customAltitudeColors = false;
 	}
 
-
-
-	$("#altitude_filter_reset_button").click(onResetAltitudeFilter);
-
-	$("#aircraft_type_filter_form").submit(onFilterByAircraftType);
-	$("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
-
+        $("#aircraft_type_filter_form").submit(onFilterByAircraftType);
+        $("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
 
         $("#aircraft_ident_filter_form").submit(onFilterByAircraftIdent);
         $("#aircraft_ident_filter_reset_button").click(onResetAircraftIdentFilter);
@@ -2030,8 +2044,7 @@ function setAltitudeLegend(units) {
     }
 }
 
-function onFilterByAltitude(e) {
-    e.preventDefault();
+function onFilterByAltitude() {
     updatePlaneFilter();
     refreshTableInfo();
 
@@ -2136,25 +2149,12 @@ function toggleAltitudeChart(switchToggle) {
 	localStorage.setItem('altitudeChart', altitudeChartDisplay);
 }
 
-function onResetAltitudeFilter(e) {
-    $("#altitude_filter_min").val("");
-    $("#altitude_filter_max").val("");
-
-    updatePlaneFilter();
-    refreshTableInfo();
-}
-
 function updatePlaneFilter() {
-    var minAltitude = parseFloat($("#altitude_filter_min").val().trim());
-    var maxAltitude = parseFloat($("#altitude_filter_max").val().trim());
+    var minAltitude = document.getElementById('minAltitudeText').innerHTML.trim();
+    var maxAltitude = document.getElementById('maxAltitudeText').innerHTML.trim();
 
-    if (minAltitude === NaN) {
-	minAltitude = -Infinity;
-    }
-
-    if (maxAltitude === NaN) {
-	maxAltitude = Infinity;
-    }
+    console.log("minAltitude: " + minAltitude);
+    console.log("maxAltitude: " + maxAltitude);
 
     PlaneFilter.minAltitude = minAltitude;
     PlaneFilter.maxAltitude = maxAltitude;
