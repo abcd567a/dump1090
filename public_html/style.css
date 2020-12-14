@@ -888,7 +888,7 @@ select.error, textarea.error, input.error {
     grid-template-columns: repeat(3, 1fr);
   }
 
-#altitude_slider {
+#altitude_slider, #speed_slider {
     position: relative;
     display: block;
     margin-left: 10px;

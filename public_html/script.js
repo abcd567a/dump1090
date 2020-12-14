@@ -53,6 +53,7 @@ var layers;
 var layerGroup;
 
 var altitude_slider = null;
+var speed_slider = null;
 
 // piaware vs flightfeeder
 var isFlightFeeder = false;
@@ -341,6 +342,44 @@ function initialize() {
         if (ColorByAlt.air.h.length === 3 && ColorByAlt.air.h[0].alt === 2000 && ColorByAlt.air.h[0].val === 20 && ColorByAlt.air.h[1].alt === 10000 && ColorByAlt.air.h[1].val === 140 && ColorByAlt.air.h[2].alt === 40000 && ColorByAlt.air.h[2].val === 300) {
             customAltitudeColors = false;
         }
+
+        speed_slider = document.getElementById('speed_slider');
+
+        noUiSlider.create(speed_slider, {
+                start: [0, 1000],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 1000
+                },
+                step: 5,
+                format: {
+                        // 'to' the formatted value. Receives a number.
+                        to: function (value) {
+                            return value;
+                        },
+                        // 'from' the formatted value.
+                        // Receives a string, should return a number.
+                        from: function (value) {
+                            return value;
+                        }
+                    }
+            });
+
+        var minSpeedInput = document.getElementById('minSpeedText'),
+            maxSpeedInput = document.getElementById('maxSpeedText');
+
+            speed_slider.noUiSlider.on('update', function (values, handle) {
+                if (handle) {
+                        maxSpeedInput.innerHTML = values[handle];
+                } else {
+                        minSpeedInput.innerHTML = values[handle];
+                }
+        });
+
+        speed_slider.noUiSlider.on('set', function (values, handle) {
+                onFilterBySpeed();
+        });
 
         $("#aircraft_type_filter_form").submit(onFilterByAircraftType);
         $("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
@@ -2037,6 +2076,11 @@ function onFilterByAltitude() {
     }
 }
 
+function onFilterBySpeed() {
+        updatePlaneFilter();
+        refreshTableInfo();
+}
+
 function onFilterByAircraftType(e) {
         e.preventDefault();
         updatePlaneFilter();
@@ -2128,21 +2172,29 @@ function toggleAltitudeChart(switchToggle) {
 }
 
 function updatePlaneFilter() {
+    // Get min/max altitude values from slider
     var minAltitude = document.getElementById('minAltitudeText').innerHTML.trim();
     var maxAltitude = document.getElementById('maxAltitudeText').innerHTML.trim();
-
-    console.log("minAltitude: " + minAltitude);
-    console.log("maxAltitude: " + maxAltitude);
 
     PlaneFilter.minAltitude = minAltitude;
     PlaneFilter.maxAltitude = maxAltitude;
     PlaneFilter.altitudeUnits = DisplayUnits;
 
+    // Get min/max speed values from slider
+    var minSpeedFilter = document.getElementById('minSpeedText').innerHTML.trim();
+    var maxSpeedFilter = document.getElementById('maxSpeedText').innerHTML.trim();
+
+    PlaneFilter.minSpeedFilter = minSpeedFilter;
+    PlaneFilter.maxSpeedFilter = maxSpeedFilter;
+    PlaneFilter.speedUnits = DisplayUnits;
+
+    // Get aircraft type code filter from input box
     var aircraftTypeCode = $("#aircraft_type_filter").val().trim().toUpperCase()
     if (aircraftTypeCode === "") {
         aircraftTypeCode = undefined
     }
 
+    // Get aircraft ident filter from input box
     var aircraftIdent = $("#aircraft_ident_filter").val().trim().toUpperCase()
     if (aircraftIdent === "") {
         aircraftIdent = undefined
