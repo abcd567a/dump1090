@@ -495,7 +495,7 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
 					  "roll", "nav_heading", "nav_modes",
 					  "nac_p", "nac_v", "nic_baro", "sil_type", "sil",
                       "nav_qnh", "baro_rate", "geom_rate", "rc",
-                      "squawk", "category", "version"];
+                      "squawk", "category", "version", "uat_version"];
 
         for (var i = 0; i < fields.length; ++i) {
                 if (fields[i] in data) {

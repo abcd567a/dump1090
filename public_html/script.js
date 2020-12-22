@@ -18,6 +18,8 @@ var infoBoxOriginalPosition = {};
 var customAltitudeColors = true;
 var myAdsbStatsSiteUrl = null;
 
+var UAT_Enabled = false;
+
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
         '7600' : { cssClass: 'squawk7600', markerColor: 'rgb(0, 255, 255)', text: 'Radio Failure' },
@@ -42,7 +44,8 @@ var ReceiverClock = null;
 
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
-var FetchPending = null;
+var FetchPending_ADSB = null;
+var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
 var MessageRate = 0;
@@ -161,16 +164,32 @@ function processReceiverUpdate(data) {
 }
 
 function fetchData() {
-        if (FetchPending !== null && FetchPending.state() == 'pending') {
+        if (FetchPending_ADSB !== null && FetchPending_ADSB.state() == 'pending') {
                 // don't double up on fetches, let the last one resolve
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
+        // Fetch dump1090 aircraft.json
+        FetchPending_ADSB = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
-                                dataType: 'json' });
-        FetchPending.done(function(data) {
+                                dataType: 'json'
+                                });
+        if (UAT_Enabled) {
+                FetchPending_UAT = $.ajax({ url: 'data/skyaware978/aircraft.json',
+                                        timeout: 5000,
+                                        cache: false,
+                                        dataType: 'json'
+                                        });
+        } else {
+                FetchPending_UAT = null;
+        }
+
+        $.when(FetchPending_ADSB, FetchPending_UAT).done(function(result1, result2){
+        //FetchPending_ADSB.done(function(data) {
+                //console.log('Result1: \n' + JSON.stringify(result1));
+                //console.log('Result2: \n' + JSON.stringify(result2));
+                var data = result1[0];
                 var now = data.now;
 
                 processReceiverUpdate(data);
@@ -180,12 +199,12 @@ function fetchData() {
                         var plane = PlanesOrdered[i];
                         plane.updateTick(now, LastReceiverTimestamp);
                 }
-                
-		selectNewPlanes();
-		refreshTableInfo();
-		refreshSelected();
-		refreshHighlighted();
-                
+
+                selectNewPlanes();
+                refreshTableInfo();
+                refreshSelected();
+                refreshHighlighted();
+
                 if (ReceiverClock) {
                         var rcv = new Date(now * 1000);
                         ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
@@ -203,12 +222,19 @@ function fetchData() {
                         LastReceiverTimestamp = now;
                         $("#update_error").css('display','none');
                 }
-	});
+        });
 
-        FetchPending.fail(function(jqxhr, status, error) {
+        FetchPending_ADSB.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
                 $("#update_error").css('display','block');
         });
+
+        if (FetchPending_UAT) {
+                FetchPending_UAT.fail(function(jqxhr, status, error) {
+                        $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump978 is no longer running?");
+                        $("#update_error").css('display','block');
+                });
+        }
 }
 
 var PositionHistorySize = 0;
@@ -437,9 +463,26 @@ function initialize() {
         toggleTISBAircraft(false);
         refreshDataSourceFilters();
 
+        // Get 978 receiver metadata, reconfigure using it, then continue
+        // with initialization
+        $.ajax({ url: 'data/skyaware978/receiver.json',
+                 timeout: 5000,
+                 cache: false,
+                 dataType: 'json' })
+
+                .done(function(data) {
+                        console.log('SkyAware978 present')
+                        UAT_Enabled = true;
+                })
+
+                .fail(function(data) {
+                        console.log('SkyAware978 not present')
+                        UAT_Enabled = false;
+                });
+
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        $.ajax({ url: 'data/dump1090-fa/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -472,11 +515,21 @@ function start_load_history() {
 	let params = new URLSearchParams(url.search);
 	if (PositionHistorySize > 0 && params.get('nohistory') !== 'true') {
 		$("#loader_progress").attr('max',PositionHistorySize);
-		console.log("Starting to load history (" + PositionHistorySize + " items)");
+		console.log("Starting to load dump1090-fa history (" + PositionHistorySize + " items)");
 		//Load history items in parallel
 		for (var i = 0; i < PositionHistorySize; i++) {
 			load_history_item(i);
 		}
+
+                // If skyaware json directory is present, load UAT history items
+                if (UAT_Enabled) {
+                        console.log("Starting to load dump978-fa history (" + PositionHistorySize + " items)");
+                        for (var i = 0; i < PositionHistorySize; i++) {
+                                uat_load_history_item(i);
+                        }
+                } else {
+                        console.log("Skipping UAT load history")
+                }
 	} else {
 		// Nothing to load
 		end_load_history();
@@ -485,9 +538,9 @@ function start_load_history() {
 
 function load_history_item(i) {
         console.log("Loading history #" + i);
-        $("#loader_progress").attr('value',i);
+        $("#loader_progress").attr('value', i);
 
-        $.ajax({ url: 'data/history_' + i + '.json',
+        $.ajax({ url: 'data/dump1090-fa/history_' + i + '.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -495,18 +548,55 @@ function load_history_item(i) {
                 .done(function(data) {
 					PositionHistoryBuffer.push(data);
 					HistoryItemsReturned++;
-					$("#loader_progress").attr('value',HistoryItemsReturned);
+					$("#loader_progress").attr('value', HistoryItemsReturned);
 					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                                                // Check if we have UAT history to process...
+                                                if (!UAT_Enabled) {
+                                                        end_load_history();
+                                                }
+                                        }
                 })
 
                 .fail(function(jqxhr, status, error) {
 					//Doesn't matter if it failed, we'll just be missing a data point
 					HistoryItemsReturned++;
 					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                                                // Check if we have UAT history to process...
+                                                if (!UAT_Enabled) {
+                                                        end_load_history();
+                                                }
+                                        }
+
+                });
+}
+
+function uat_load_history_item(i) {
+        console.log("Loading UAT history #" + i);
+
+        $("#loader_progress").attr('value', i);
+        PositionHistorySize = 0;
+
+        $.ajax({ url: 'data/skyaware978/history_' + i + '.json',
+                 timeout: 5000,
+                 cache: false,
+                 dataType: 'json' })
+
+                .done(function(data) {
+                        UAT_Enabled = true;
+                        PositionHistoryBuffer.push(data);
+                        HistoryItemsReturned++;
+                        $("#loader_progress").attr('value',HistoryItemsReturned);
+                        if (HistoryItemsReturned == PositionHistorySize) {
+                                end_load_history();
+                        }
+                })
+
+                .fail(function(jqxhr, status, error) {
+                        //Doesn't matter if it failed, we'll just be missing a data point
+                        HistoryItemsReturned++;
+                        if (HistoryItemsReturned == PositionHistorySize) {
+                                end_load_history();
+                        }
                 });
 }
 
@@ -981,6 +1071,7 @@ function initialize_map() {
                                timeout: 5000,
                                cache: true,
                                dataType: 'json' });
+
         request.done(function(data) {
                 var ringStyle = new ol.style.Style({
                         fill: null,
@@ -1112,7 +1203,7 @@ function refreshSelected() {
                 MessageRate = null;
         }
 
-	refreshPageTitle();
+        refreshPageTitle();
        
         var selected = false;
 	if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
@@ -1331,7 +1422,18 @@ function refreshSelected() {
                 $('#selected_version').text('v' + selected.version);
         }
 
+        if (selected.uat_version == null) {
+                $('#selected_uat_version').text('none');
+        } else if (selected.uat_version == 0) {
+                $('#selected_uat_version').text('v0 (DO-282)');
+        } else if (selected.uat_version == 1) {
+                $('#selected_uat_version').text('v1 (DO-282A)');
+        } else if (selected.uat_version == 2) {
+                $('#selected_uat_version').text('v2 (DO-282B)');
+        } else {
+                $('#selected_uat_version').text('v' + selected.uat_version);
         }
+}
 
 function refreshHighlighted() {
 	// this is following nearly identical logic, etc, as the refreshSelected function, but doing less junk for the highlighted pane
