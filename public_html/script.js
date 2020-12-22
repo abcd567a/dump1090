@@ -238,6 +238,7 @@ function fetchData() {
 }
 
 var PositionHistorySize = 0;
+var UatPositionHistorySize = 0;
 function initialize() {
         // Set page basics
         document.title = PageName;
@@ -473,6 +474,7 @@ function initialize() {
                 .done(function(data) {
                         console.log('SkyAware978 present')
                         UAT_Enabled = true;
+                        UatPositionHistorySize = data.history;
                 })
 
                 .fail(function(data) {
@@ -523,12 +525,12 @@ function start_load_history() {
 
                 // If skyaware json directory is present, load UAT history items
                 if (UAT_Enabled) {
-                        console.log("Starting to load dump978-fa history (" + PositionHistorySize + " items)");
-                        for (var i = 0; i < PositionHistorySize; i++) {
+                        console.log("Starting to load dump978-fa history (" + UatPositionHistorySize + " items)");
+                        for (var i = 0; i < UatPositionHistorySize; i++) {
                                 uat_load_history_item(i);
                         }
                 } else {
-                        console.log("Skipping UAT load history")
+                        console.log("No dump978 json file directory present. Skipping UAT history loading.")
                 }
 	} else {
 		// Nothing to load
@@ -539,55 +541,22 @@ function start_load_history() {
 function load_history_item(i) {
         console.log("Loading history #" + i);
         $("#loader_progress").attr('value', i);
-
         $.ajax({ url: 'data/dump1090-fa/history_' + i + '.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
 
                 .done(function(data) {
-					PositionHistoryBuffer.push(data);
-					HistoryItemsReturned++;
-					$("#loader_progress").attr('value', HistoryItemsReturned);
-					if (HistoryItemsReturned == PositionHistorySize) {
-                                                // Check if we have UAT history to process...
-                                                if (!UAT_Enabled) {
-                                                        end_load_history();
-                                                }
-                                        }
-                })
-
-                .fail(function(jqxhr, status, error) {
-					//Doesn't matter if it failed, we'll just be missing a data point
-					HistoryItemsReturned++;
-					if (HistoryItemsReturned == PositionHistorySize) {
-                                                // Check if we have UAT history to process...
-                                                if (!UAT_Enabled) {
-                                                        end_load_history();
-                                                }
-                                        }
-
-                });
-}
-
-function uat_load_history_item(i) {
-        console.log("Loading UAT history #" + i);
-
-        $("#loader_progress").attr('value', i);
-        PositionHistorySize = 0;
-
-        $.ajax({ url: 'data/skyaware978/history_' + i + '.json',
-                 timeout: 5000,
-                 cache: false,
-                 dataType: 'json' })
-
-                .done(function(data) {
-                        UAT_Enabled = true;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
-                        $("#loader_progress").attr('value',HistoryItemsReturned);
+                        $("#loader_progress").attr('value', HistoryItemsReturned);
                         if (HistoryItemsReturned == PositionHistorySize) {
-                                end_load_history();
+                                // Check if we have UAT history to process...
+                                if (!UAT_Enabled) {
+                                        end_load_history();
+                                } else {
+                                        HistoryItemsReturned = 0;
+                                }
                         }
                 })
 
@@ -595,6 +564,42 @@ function uat_load_history_item(i) {
                         //Doesn't matter if it failed, we'll just be missing a data point
                         HistoryItemsReturned++;
                         if (HistoryItemsReturned == PositionHistorySize) {
+                                // Check if we have UAT history to process...
+                                if (!UAT_Enabled) {
+                                        end_load_history();
+                                } else {
+                                        HistoryItemsReturned = 0;
+                                }
+                        }
+                });
+}
+
+function uat_load_history_item(i) {
+        console.log("Loading UAT history #" + i);
+
+        $("#loader_progress").attr('value', i);
+        $.ajax({ url: 'data/skyaware978/history_' + i + '.json',
+                 timeout: 5000,
+                 cache: false,
+                 dataType: 'json' })
+
+                .done(function(data) {
+                        PositionHistoryBuffer.push(data);
+                        HistoryItemsReturned++;
+                        $("#loader_progress").attr('value',HistoryItemsReturned);
+                        if (HistoryItemsReturned == UatPositionHistorySize) {
+                                console.log('978 - HistoryItemsReturned - ' + HistoryItemsReturned);
+                                console.log('978 - UatPositionHistorySize - ' + UatPositionHistorySize);
+                                end_load_history();
+                        }
+                })
+
+                .fail(function(jqxhr, status, error) {
+                        //Doesn't matter if it failed, we'll just be missing a data point
+                        HistoryItemsReturned++;
+                        if (HistoryItemsReturned == UatPositionHistorySize) {
+                                console.log('978 - HistoryItemsReturned - ' + HistoryItemsReturned);
+                                console.log('978 - UatPositionHistorySize - ' + UatPositionHistorySize);
                                 end_load_history();
                         }
                 });
