@@ -187,8 +187,8 @@ function fetchData() {
 
         $.when(FetchPending_ADSB, FetchPending_UAT).done(function(result1, result2){
         //FetchPending_ADSB.done(function(data) {
-                //console.log('Result1: \n' + JSON.stringify(result1));
-                //console.log('Result2: \n' + JSON.stringify(result2));
+                console.log('Result1: \n' + JSON.stringify(result1[0]));
+                //console.log('Result2: \n' + JSON.stringify(result2[0]));
                 var data = result1[0];
                 var now = data.now;
 
@@ -464,8 +464,7 @@ function initialize() {
         toggleTISBAircraft(false);
         refreshDataSourceFilters();
 
-        // Get 978 receiver metadata, reconfigure using it, then continue
-        // with initialization
+        // Get 978 receiver metadata
         $.ajax({ url: 'data/skyaware978/receiver.json',
                  timeout: 5000,
                  cache: false,
@@ -588,8 +587,6 @@ function uat_load_history_item(i) {
                         HistoryItemsReturned++;
                         $("#loader_progress").attr('value',HistoryItemsReturned);
                         if (HistoryItemsReturned == UatPositionHistorySize) {
-                                console.log('978 - HistoryItemsReturned - ' + HistoryItemsReturned);
-                                console.log('978 - UatPositionHistorySize - ' + UatPositionHistorySize);
                                 end_load_history();
                         }
                 })
@@ -598,8 +595,6 @@ function uat_load_history_item(i) {
                         //Doesn't matter if it failed, we'll just be missing a data point
                         HistoryItemsReturned++;
                         if (HistoryItemsReturned == UatPositionHistorySize) {
-                                console.log('978 - HistoryItemsReturned - ' + HistoryItemsReturned);
-                                console.log('978 - UatPositionHistorySize - ' + UatPositionHistorySize);
                                 end_load_history();
                         }
                 });
