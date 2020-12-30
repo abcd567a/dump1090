@@ -169,60 +169,37 @@ function fetchData() {
                 return;
         }
 
+        if (FetchPending_UAT !== null && FetchPending_UAT.state() == 'pending') {
+                // don't double up on fetches, let the last one resolve
+                return;
+        }
+
         // Fetch dump1090 aircraft.json
         FetchPending_ADSB = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json'
                                 });
+
+        FetchPending_ADSB.done(function(data) {
+                console.log('Processing 1090 aircraft.json')
+                process_aircraft_json(data);
+        });
+
         if (UAT_Enabled) {
                 FetchPending_UAT = $.ajax({ url: 'data/skyaware978/aircraft.json',
                                         timeout: 5000,
                                         cache: false,
                                         dataType: 'json'
                                         });
+
+                FetchPending_UAT.done(function(data) {
+                        console.log('Processing UAT aircraft.json')
+                        process_aircraft_json(data);
+                });
         } else {
                 FetchPending_UAT = null;
         }
-
-        $.when(FetchPending_ADSB, FetchPending_UAT).done(function(result1, result2){
-        //FetchPending_ADSB.done(function(data) {
-                console.log('Result1: \n' + JSON.stringify(result1[0]));
-                //console.log('Result2: \n' + JSON.stringify(result2[0]));
-                var data = result1[0];
-                var now = data.now;
-
-                processReceiverUpdate(data);
-
-                // update timestamps, visibility, history track for all planes - not only those updated
-                for (var i = 0; i < PlanesOrdered.length; ++i) {
-                        var plane = PlanesOrdered[i];
-                        plane.updateTick(now, LastReceiverTimestamp);
-                }
-
-                selectNewPlanes();
-                refreshTableInfo();
-                refreshSelected();
-                refreshHighlighted();
-
-                if (ReceiverClock) {
-                        var rcv = new Date(now * 1000);
-                        ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-                }
-
-                // Check for stale receiver data
-                if (LastReceiverTimestamp === now) {
-                        StaleReceiverCount++;
-                        if (StaleReceiverCount > 5) {
-                                $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-                                $("#update_error").css('display','block');
-                        }
-                } else { 
-                        StaleReceiverCount = 0;
-                        LastReceiverTimestamp = now;
-                        $("#update_error").css('display','none');
-                }
-        });
 
         FetchPending_ADSB.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
@@ -237,6 +214,40 @@ function fetchData() {
         }
 }
 
+function process_aircraft_json(data) {
+        var now = data.now;
+
+        processReceiverUpdate(data);
+
+        // update timestamps, visibility, history track for all planes - not only those updated
+        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                var plane = PlanesOrdered[i];
+                plane.updateTick(now, LastReceiverTimestamp);
+        }
+
+        selectNewPlanes();
+        refreshTableInfo();
+        refreshSelected();
+        refreshHighlighted();
+
+        if (ReceiverClock) {
+                var rcv = new Date(now * 1000);
+                ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
+        }
+
+        // Check for stale receiver data
+        if (LastReceiverTimestamp === now) {
+                StaleReceiverCount++;
+                if (StaleReceiverCount > 5) {
+                        $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                }
+        } else {
+                StaleReceiverCount = 0;
+                LastReceiverTimestamp = now;
+                $("#update_error").css('display','none');
+        }
+}
 var PositionHistorySize = 0;
 var UatPositionHistorySize = 0;
 function initialize() {
