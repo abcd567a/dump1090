@@ -42,6 +42,7 @@ function PlaneObject(icao) {
         this.vert_rate      = null;
 
         this.version        = null;
+        this.uat_version    = null;
 
         this.prev_position = null;
         this.prev_position_time = null;
@@ -302,6 +303,10 @@ PlaneObject.prototype.getDataSource = function() {
     // MLAT
     if (this.position_from_mlat) {
         return 'mlat';
+    }
+
+    if (this.uat_version) {
+            return 'uat';
     }
 
     // Not MLAT, but position reported - ADSB or variants

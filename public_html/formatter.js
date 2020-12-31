@@ -252,6 +252,8 @@ function format_data_source(source) {
 			return "Mode S";
 		case 'mode_ac':
 			return "Mode A/C";
+		case 'uat':
+			return "UAT";
 	}
 
 	return "";

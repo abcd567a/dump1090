@@ -79,39 +79,39 @@ var checkbox_div_map = new Map ([
         ['#airframes_col_checkbox', '#airframes_mode_s_link'],
         ['#fa_modes_link_checkbox', '#flightaware_mode_s_link'],
         ['#fa_photo_link_checkbox', '#flightaware_photo_link'],
-
 ]);
 
+// Processes aircraft.json updates
 function processReceiverUpdate(data) {
-	// Loop through all the planes in the data packet
+        // Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
 
-        // Detect stats reset
+        // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
         if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
                 MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
                                         'messages' : 0}];
         }
 
-        // Note the message count in the history
+        // Maintain a 30 second rollinng history of message counts
         MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
         // .. and clean up any old values
         if ((now - MessageCountHistory[0].time) > 30)
                 MessageCountHistory.shift();
 
-	for (var j=0; j < acs.length; j++) {
+        // Create a Planes array of plane objects seen that includes a tr (table row) attribute, filter attribute, etc.
+        for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
                 var hex = ac.hex;
                 var squawk = ac.squawk;
                 var plane = null;
 
-		// Do we already have this plane object in Planes?
-		// If not make it.
-
-		if (Planes[hex]) {
-			plane = Planes[hex];
-		} else {
-			plane = new PlaneObject(hex);
+                // Do we already have this plane object in Planes?
+                // If not make it.
+                if (Planes[hex]) {
+                        plane = Planes[hex];
+                } else {
+                        plane = new PlaneObject(hex);
                         plane.filter = PlaneFilter;
                         plane.tr = PlaneRowTemplate.cloneNode(true);
 
@@ -123,7 +123,7 @@ function processReceiverUpdate(data) {
                                 plane.tr.cells[0].textContent = hex;
                         }
 
-                        // set flag image if available
+                        // Set flag image if available
                         if (ShowFlags && plane.icaorange.flag_image !== null) {
                                 $('img', plane.tr.cells[1]).attr('src', FlagPath + plane.icaorange.flag_image);
                                 $('img', plane.tr.cells[1]).attr('title', plane.icaorange.country);
@@ -131,6 +131,7 @@ function processReceiverUpdate(data) {
                                 $('img', plane.tr.cells[1]).css('display', 'none');
                         }
 
+                        // Add single click event listener to table row
                         plane.tr.addEventListener('click', function(h, evt) {
                                 if (evt.srcElement instanceof HTMLAnchorElement) {
                                         evt.stopPropagation();
@@ -145,6 +146,7 @@ function processReceiverUpdate(data) {
                                 evt.preventDefault();
                         }.bind(undefined, hex));
 
+                        // Add double click event listener to table row
                         plane.tr.addEventListener('dblclick', function(h, evt) {
                                 if (!$("#map_container").is(":visible")) {
                                         showMap();
@@ -156,11 +158,11 @@ function processReceiverUpdate(data) {
 
                         Planes[hex] = plane;
                         PlanesOrdered.push(plane);
-		}
+                }
 
-		// Call the function update
-		plane.updateData(now, ac);
-	}
+                // Call the function update
+                plane.updateData(now, ac);
+        }
 }
 
 function fetchData() {
@@ -182,7 +184,6 @@ function fetchData() {
                                 });
 
         FetchPending_ADSB.done(function(data) {
-                console.log('Processing 1090 aircraft.json')
                 process_aircraft_json(data);
         });
 
@@ -194,7 +195,6 @@ function fetchData() {
                                         });
 
                 FetchPending_UAT.done(function(data) {
-                        console.log('Processing UAT aircraft.json')
                         process_aircraft_json(data);
                 });
         } else {
@@ -214,6 +214,7 @@ function fetchData() {
         }
 }
 
+// Process the aircraft.json
 function process_aircraft_json(data) {
         var now = data.now;
 
@@ -1422,7 +1423,7 @@ function refreshSelected() {
 		}
 
         if (selected.version == null) {
-                $('#selected_version').text('none');
+                $('#selected_version').text('n/a');
         } else if (selected.version == 0) {
                 $('#selected_version').text('v0 (DO-260)');
         } else if (selected.version == 1) {
@@ -1434,7 +1435,7 @@ function refreshSelected() {
         }
 
         if (selected.uat_version == null) {
-                $('#selected_uat_version').text('none');
+                $('#selected_uat_version').text('n/a');
         } else if (selected.uat_version == 0) {
                 $('#selected_uat_version').text('v0 (DO-282)');
         } else if (selected.uat_version == 1) {
@@ -1548,62 +1549,64 @@ function refreshTableInfo() {
     $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
-	var tableplane = PlanesOrdered[i];
-    TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
-        tableplane.tr.className = "plane_table_row hidden";
-    } else {
-        TrackedAircraft++;
-        var classes = "plane_table_row";
-
-        if (tableplane.position !== null && tableplane.seen_pos < 60) {
-            ++TrackedAircraftPositions;
-		}
-
-		if (tableplane.getDataSource() === "adsb_icao") {
-        	classes += " vPosition";
-        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
-        	classes += " tisb";
-        } else if (tableplane.getDataSource() === "mlat") {
-        	classes += " mlat";
+        var tableplane = PlanesOrdered[i];
+        TrackedHistorySize += tableplane.history_size;
+        if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+                tableplane.tr.className = "plane_table_row hidden";
         } else {
-        	classes += " other";
-        }
+                TrackedAircraft++;
+                var classes = "plane_table_row";
 
-		if (tableplane.icao == SelectedPlane)
-            classes += " selected";
-                    
-        if (tableplane.squawk in SpecialSquawks) {
-            classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
-            show_squawk_warning = true;
-		}			                
+                if (tableplane.position !== null && tableplane.seen_pos < 60) {
+                        ++TrackedAircraftPositions;
+                }
 
-        // ICAO doesn't change
-        if (tableplane.flight) {
-                tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
-        } else {
-		// Show _registration if ident is not present
-		tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                if (tableplane.getDataSource() === "adsb_icao") {
+                        classes += " vPosition";
+                } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
+                        classes += " tisb";
+                } else if (tableplane.getDataSource() === "mlat") {
+                        classes += " mlat";
+                } else if (tableplane.getDataSource() === "uat") {
+                        classes += " uat";
+                } else {
+                        classes += " other";
+                }
+
+                if (tableplane.icao == SelectedPlane)
+                classes += " selected";
+
+                if (tableplane.squawk in SpecialSquawks) {
+                        classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
+                        show_squawk_warning = true;
+                }
+
+                // ICAO doesn't change
+                if (tableplane.flight) {
+                        tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+                } else {
+                        // Show _registration if ident is not present
+                        tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                }
+                tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
+                tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
+                tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
+                tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
+                tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
+                tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
+                tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
+                tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
+                tableplane.tr.cells[11].textContent = tableplane.messages;
+                tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
+                tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
+                tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
+                tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
+                tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
+                tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
+                tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
+                tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
+                tableplane.tr.className = classes;
         }
-        tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
-        tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
-        tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
-        tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
-        tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
-        tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
-        tableplane.tr.cells[11].textContent = tableplane.messages;
-        tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
-        tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
-        tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
-        tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-        tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
-        tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
-        tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
-        tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
-        tableplane.tr.className = classes;
-	}
 }
 
 if (show_squawk_warning) {
