@@ -542,6 +542,7 @@ function start_load_history() {
                         }
                 } else {
                         console.log("No dump978 json file directory present. Skipping UAT history loading.")
+                        end_load_history();
                 }
 	} else {
 		// Nothing to load
@@ -558,6 +559,9 @@ function load_history_item(i) {
                  dataType: 'json' })
 
                 .done(function(data) {
+                        if (!PositionHistoryBuffer) {
+                                return;
+                        }
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
                         $("#loader_progress").attr('value', HistoryItemsReturned);
@@ -595,6 +599,9 @@ function uat_load_history_item(i) {
                  dataType: 'json' })
 
                 .done(function(data) {
+                        if (!PositionHistoryBuffer) {
+                                return;
+                        }
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
                         $("#loader_progress").attr('value',HistoryItemsReturned);

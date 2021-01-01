@@ -488,17 +488,17 @@ PlaneObject.prototype.updateIcon = function() {
 
 // Update our data
 PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
-	// Update all of our data
-	this.messages	= data.messages;
+        // Update all of our data
+        this.messages	= data.messages;
         this.rssi       = data.rssi;
-	this.last_message_time = receiver_timestamp - data.seen;
+        this.last_message_time = receiver_timestamp - data.seen;
 
         // simple fields
 
         var fields = ["alt_baro", "alt_geom", "gs", "ias", "tas", "track",
                       "track_rate", "mag_heading", "true_heading", "mach",
-					  "roll", "nav_heading", "nav_modes",
-					  "nac_p", "nac_v", "nic_baro", "sil_type", "sil",
+                      "roll", "nav_heading", "nav_modes",
+                      "nac_p", "nac_v", "nic_baro", "sil_type", "sil",
                       "nav_qnh", "baro_rate", "geom_rate", "rc",
                       "squawk", "category", "version", "uat_version"];
 
