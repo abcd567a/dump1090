@@ -48,7 +48,10 @@ var FetchPending_ADSB = null;
 var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
+var MessageCountHistory_UAT = [];
+var MessageCountHistory_ADSB = [];
 var MessageRate = 0;
+var UatMessageRate = 0;
 
 var NBSP='\u00a0';
 
@@ -81,23 +84,37 @@ var checkbox_div_map = new Map ([
         ['#fa_photo_link_checkbox', '#flightaware_photo_link'],
 ]);
 
-// Processes aircraft.json updates
+// Update Plane objects from json
 function processReceiverUpdate(data) {
         // Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
 
-        // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
-        if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
-                MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
-                                        'messages' : 0}];
-        }
+        if (data.source === "UAT") {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
+                        MessageCountHistory_UAT = [{'time' : MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time,
+                                                'messages' : 0}];
+                }
 
-        // Maintain a 30 second rollinng history of message counts
-        MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
-        // .. and clean up any old values
-        if ((now - MessageCountHistory[0].time) > 30)
-                MessageCountHistory.shift();
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory_UAT.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory_UAT[0].time) > 30)
+                        MessageCountHistory_UAT.shift();
+        } else {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
+                        MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
+                                                'messages' : 0}];
+                }
+
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory[0].time) > 30)
+                        MessageCountHistory.shift();
+        }
 
         // Create a Planes array of plane objects seen that includes a tr (table row) attribute, filter attribute, etc.
         for (var j=0; j < acs.length; j++) {
@@ -106,6 +123,10 @@ function processReceiverUpdate(data) {
                 var squawk = ac.squawk;
                 var plane = null;
 
+                // Ignore rebroadcasted aircraft
+                if (ac.uat_version && (ac.type === 'tisb_trackfile' || ac.type === 'tisb_icao' || ac.type === 'tisb_other' || ac.type === 'adsr_icao' || ac.type === 'adsr_other')) {
+                        continue;
+                }
                 // Do we already have this plane object in Planes?
                 // If not make it.
                 if (Planes[hex]) {
@@ -184,6 +205,7 @@ function fetchData() {
                                 });
 
         FetchPending_ADSB.done(function(data) {
+                data["source"] = "ADSB";
                 process_aircraft_json(data);
         });
 
@@ -195,6 +217,7 @@ function fetchData() {
                                         });
 
                 FetchPending_UAT.done(function(data) {
+                        data["source"] = "UAT";
                         process_aircraft_json(data);
                 });
         } else {
@@ -213,6 +236,7 @@ function fetchData() {
                 });
         }
 }
+
 
 // Process the aircraft.json
 function process_aircraft_json(data) {
@@ -1228,6 +1252,15 @@ function refreshSelected() {
                 MessageRate = null;
         }
 
+        if (MessageCountHistory_UAT.length > 1) {
+                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
+                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
+                if (message_time_delta > 0)
+                        UatMessageRate = message_count_delta / message_time_delta;
+        } else {
+                UatMessageRate = null;
+        }
+
         refreshPageTitle();
        
         var selected = false;
@@ -1245,6 +1278,12 @@ function refreshSelected() {
                 $('#dump1090_message_rate').text(MessageRate.toFixed(1));
         } else {
                 $('#dump1090_message_rate').text("n/a");
+        }
+
+        if (UatMessageRate !== null) {
+                $('#uat_message_rate').text(UatMessageRate.toFixed(1));
+        } else {
+                $('#uat_message_rate').text("n/a");
         }
 
         setSelectedInfoBlockVisibility();
