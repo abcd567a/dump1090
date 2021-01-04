@@ -258,6 +258,7 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
 }
 
 .vPosition  { background-color: #E5F6FC; }
+.uat        { background-color: #CDF7D0; }
 .mlat       { background-color: #FDF2E5; }
 .other      { background-color: #CCD5F8; }
 .tisb       { background-color: #FFF3B8; }
@@ -627,22 +628,6 @@ select.error, textarea.error, input.error {
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
-}
-
-#adsbLegendBox {
-    background-color: #E5F6FC;
-}
-
-#mlatLegendBox {
-    background-color: #FDF2E5;
-}
-
-#otherLegendBox {
-    background-color: #E6E6E6;
-}
-
-#tisbLegendBox {
-    background-color: #CCD5DF;
 }
 
 .legendTitle {
