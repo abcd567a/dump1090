@@ -233,28 +233,37 @@ function format_latlng(p) {
 }
 
 function format_data_source(source) {
-	switch (source) {
-		case 'mlat':
-			return "MLAT";
-		case 'adsb_icao':
-		case 'adsb_other':
-			return "ADS-B";
-		case 'adsb_icao_nt':
-			return "ADS-B (non transponder)";
-		case 'adsr_icao':
-		case 'adsr_other':
-			return "ADS-R";
-		case 'tisb_icao':
-		case 'tisb_trackfile':
-		case 'tisb_other':
-			return "TIS-B";
-		case 'mode_s':
-			return "Mode S";
-		case 'mode_ac':
-			return "Mode A/C";
+	let sourceString = "";
+
+	if (source.has('mlat')) {
+		sourceString += "MLAT ";
 	}
 
-	return "";
+	if (source.has('adsb_icao') || source.has('adsb_other')) {
+		sourceString += "ADS-B ";
+	}
+
+	if (source.has('adsb_icao_nt')) {
+		sourceString += "ADS-B (non transponder)";
+	}
+
+	if (source.has('adsr_icao') || source.has('adsr_other')) {
+		sourceString += "ADS-R ";
+	}
+
+	if (source.has('tisb_icao') || source.has('tisb_trackfile') || source.has('tisb_other')) {
+		sourceString += "TIS-B ";
+	}
+
+	if (source.has('mode_s')) {
+		sourceString += "Mode S ";
+	}
+
+	if (source.has('mode_ac')) {
+		sourceString += "Mode A/C ";
+	}
+
+	return sourceString;
 }
 
 function format_nac_p (value) {

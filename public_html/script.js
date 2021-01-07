@@ -1445,19 +1445,20 @@ function refreshTableInfo() {
 
         if (tableplane.position !== null && tableplane.seen_pos < 60) {
             ++TrackedAircraftPositions;
-		}
+        }
 
-		if (tableplane.dataSource === "adsb_icao") {
-        	classes += " vPosition";
-        } else if (tableplane.dataSource === "tisb_trackfile" || tableplane.dataSource === "tisb_icao" || tableplane.dataSource === "tisb_other") {
+        // Set row color to the most reliable position data source
+        if (tableplane.dataSources.has("adsb_icao")) {
+                classes += " vPosition";
+        } else if (tableplane.dataSources.has("tisb_trackfile") || tableplane.dataSources.has("tisb_icao") || tableplane.dataSources.has("tisb_other")) {
         	classes += " tisb";
-        } else if (tableplane.dataSource === "mlat") {
+        } else if (tableplane.dataSources.has("mlat")) {
         	classes += " mlat";
         } else {
         	classes += " other";
         }
 
-		if (tableplane.icao == SelectedPlane)
+        if (tableplane.icao == SelectedPlane)
             classes += " selected";
                     
         if (tableplane.squawk in SpecialSquawks) {
@@ -1485,7 +1486,7 @@ function refreshTableInfo() {
         tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
         tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
         tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-        tableplane.tr.cells[16].textContent = format_data_source(tableplane.dataSource);
+        tableplane.tr.cells[16].textContent = format_data_source(tableplane.dataSources);
         tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
         tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
         tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
@@ -1537,7 +1538,7 @@ function sortByCountry()  { sortBy('country', compareAlpha,   function(x) { retu
 function sortByRssi()     { sortBy('rssi',    compareNumeric, function(x) { return x.rssi }); }
 function sortByLatitude()   { sortBy('lat',   compareNumeric, function(x) { return (x.position !== null ? x.position[1] : null) }); }
 function sortByLongitude()  { sortBy('lon',   compareNumeric, function(x) { return (x.position !== null ? x.position[0] : null) }); }
-function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return x.dataSource } ); }
+function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return Array.from(x.dataSources)[0] } ); }
 
 var sortId = '';
 var sortCompare = null;
