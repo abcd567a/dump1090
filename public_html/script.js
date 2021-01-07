@@ -1219,11 +1219,11 @@ function refreshSelected() {
                 }
         }
 
-        if (selected.getDataSource() === "adsb_icao") {
+        if (selected.dataSource === "adsb_icao") {
                 $('#selected_source').text("ADS-B");
-        } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
+        } else if (selected.dataSource === "tisb_trackfile" || selected.dataSource === "tisb_icao" || selected.dataSource === "tisb_other") {
                 $('#selected_source').text("TIS-B");
-        } else if (selected.getDataSource() === "mlat") {
+        } else if (selected.dataSource === "mlat") {
                 $('#selected_source').text("MLAT");
         } else {
                 $('#selected_source').text("Other");
@@ -1387,11 +1387,11 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-	if (highlighted.getDataSource() === "adsb_icao") {
+	if (highlighted.dataSource === "adsb_icao") {
 		$('#highlighted_source').text("ADS-B");
-	} else if (highlighted.getDataSource() === "tisb_trackfile" || highlighted.getDataSource() === "tisb_icao" || highlighted.getDataSource() === "tisb_other") {
+	} else if (highlighted.dataSource === "tisb_trackfile" || highlighted.dataSource === "tisb_icao" || highlighted.dataSource === "tisb_other") {
 		$('#highlighted_source').text("TIS-B");
-	} else if (highlighted.getDataSource() === "mlat") {
+	} else if (highlighted.dataSource === "mlat") {
 		$('#highlighted_source').text("MLAT");
 	} else {
 		$('#highlighted_source').text("Other");
@@ -1447,11 +1447,11 @@ function refreshTableInfo() {
             ++TrackedAircraftPositions;
 		}
 
-		if (tableplane.getDataSource() === "adsb_icao") {
+		if (tableplane.dataSource === "adsb_icao") {
         	classes += " vPosition";
-        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
+        } else if (tableplane.dataSource === "tisb_trackfile" || tableplane.dataSource === "tisb_icao" || tableplane.dataSource === "tisb_other") {
         	classes += " tisb";
-        } else if (tableplane.getDataSource() === "mlat") {
+        } else if (tableplane.dataSource === "mlat") {
         	classes += " mlat";
         } else {
         	classes += " other";
@@ -1485,7 +1485,7 @@ function refreshTableInfo() {
         tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
         tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
         tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-        tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
+        tableplane.tr.cells[16].textContent = format_data_source(tableplane.dataSource);
         tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
         tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
         tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
@@ -1537,7 +1537,7 @@ function sortByCountry()  { sortBy('country', compareAlpha,   function(x) { retu
 function sortByRssi()     { sortBy('rssi',    compareNumeric, function(x) { return x.rssi }); }
 function sortByLatitude()   { sortBy('lat',   compareNumeric, function(x) { return (x.position !== null ? x.position[1] : null) }); }
 function sortByLongitude()  { sortBy('lon',   compareNumeric, function(x) { return (x.position !== null ? x.position[0] : null) }); }
-function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return x.getDataSource() } ); }
+function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return x.dataSource } ); }
 
 var sortId = '';
 var sortCompare = null;

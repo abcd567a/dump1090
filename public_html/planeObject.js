@@ -84,6 +84,9 @@ function PlaneObject(icao) {
         this.typeDescription = null;
         this.wtc = null;
 
+        // default dataSource to Mode S
+        this.dataSource = 'mode_s';
+
         // request metadata
         getAircraftData(this.icao).done(function(data) {
                 if ("r" in data) {
@@ -123,12 +126,11 @@ PlaneObject.prototype.isFiltered = function() {
         }
     }
 
-    var dataSource = this.getDataSource();
-    if (dataSource === 'adsb_icao') {
+    if (this.dataSource === 'adsb_icao') {
         if (!this.filter.ADSB) return true;
-    } else if (dataSource === 'mlat') {
+    } else if (this.dataSource === 'mlat') {
         if (!this.filter.MLAT) return true;
-    } else if (dataSource === 'tisb_trackfile' || dataSource === 'tisb_icao' || dataSource === 'tisb_other') {
+    } else if (this.dataSource === 'tisb_trackfile' || this.dataSource === 'tisb_icao' || this.dataSource === 'tisb_other') {
         if (!this.filter.TISB) return true;
     } else {
         if (!this.filter.Other) return true;
@@ -573,6 +575,8 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         } else {
                 this.speed = null;
         }
+
+        this.dataSource = this.getDataSource();
 };
 
 PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) {
