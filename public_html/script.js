@@ -52,6 +52,9 @@ var NBSP='\u00a0';
 var layers;
 var layerGroup;
 
+var altitude_slider = null;
+var speed_slider = null;
+
 // piaware vs flightfeeder
 var isFlightFeeder = false;
 
@@ -96,19 +99,19 @@ function processReceiverUpdate(data) {
         if ((now - MessageCountHistory[0].time) > 30)
                 MessageCountHistory.shift();
 
-	for (var j=0; j < acs.length; j++) {
+        for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
                 var hex = ac.hex;
                 var squawk = ac.squawk;
                 var plane = null;
 
-		// Do we already have this plane object in Planes?
-		// If not make it.
+                // Do we already have this plane object in Planes?
+                // If not make it.
 
-		if (Planes[hex]) {
-			plane = Planes[hex];
-		} else {
-			plane = new PlaneObject(hex);
+                if (Planes[hex]) {
+                        plane = Planes[hex];
+                } else {
+                        plane = new PlaneObject(hex);
                         plane.filter = PlaneFilter;
                         plane.tr = PlaneRowTemplate.cloneNode(true);
 
@@ -153,11 +156,11 @@ function processReceiverUpdate(data) {
 
                         Planes[hex] = plane;
                         PlanesOrdered.push(plane);
-		}
+                }
 
-		// Call the function update
-		plane.updateData(now, ac);
-	}
+                // Call the function update
+                plane.updateData(now, ac);
+        }
 }
 
 function fetchData() {
@@ -180,11 +183,11 @@ function fetchData() {
                         var plane = PlanesOrdered[i];
                         plane.updateTick(now, LastReceiverTimestamp);
                 }
-                
-		selectNewPlanes();
-		refreshTableInfo();
-		refreshSelected();
-		refreshHighlighted();
+
+                selectNewPlanes();
+                refreshTableInfo();
+                refreshSelected();
+                refreshHighlighted();
                 
                 if (ReceiverClock) {
                         var rcv = new Date(now * 1000);
@@ -203,7 +206,7 @@ function fetchData() {
                         LastReceiverTimestamp = now;
                         $("#update_error").css('display','none');
                 }
-	});
+        });
 
         FetchPending.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
@@ -297,25 +300,35 @@ function initialize() {
         // Initialize other controls
         initializeUnitsSelector();
 
-        // Set up altitude filter button event handlers and validation options
-        $("#altitude_filter_form").submit(onFilterByAltitude);
-        $("#altitude_filter_form").validate({
-            errorPlacement: function(error, element) {
-                return true;
-            },
-            
-            rules: {
-                minAltitude: {
-                    number: true,
-                    min: -99999,
-                    max: 99999
+        altitude_slider = document.getElementById('altitude_slider');
+
+        noUiSlider.create(altitude_slider, {
+                start: [0, 65000],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 65000
                 },
-                maxAltitude: {
-                    number: true,
-                    min: -99999,
-                    max: 99999
+                step: 25,
+                format: {
+                        to: (v) => parseFloat(v).toFixed(0),
+                        from: (v) => parseFloat(v).toFixed(0)
+                    }
+            });
+
+        var minAltitudeInput = document.getElementById('minAltitudeText'),
+            maxAltitudeInput = document.getElementById('maxAltitudeText');
+
+        altitude_slider.noUiSlider.on('update', function (values, handle) {
+                if (handle) {
+                        maxAltitudeInput.innerHTML = values[handle];
+                } else {
+                        minAltitudeInput.innerHTML = values[handle];
                 }
-            }
+        });
+
+        altitude_slider.noUiSlider.on('set', function (values, handle) {
+                onFilterByAltitude();
         });
 
         // check if the altitude color values are default to enable the altitude filter
@@ -323,17 +336,49 @@ function initialize() {
             customAltitudeColors = false;
         }
 
+        speed_slider = document.getElementById('speed_slider');
 
+        noUiSlider.create(speed_slider, {
+                start: [0, 1000],
+                connect: true,
+                range: {
+                    'min': 0,
+                    'max': 1000
+                },
+                step: 5,
+                format: {
+                        // 'to' the formatted value. Receives a number.
+                        to: function (value) {
+                            return value;
+                        },
+                        // 'from' the formatted value.
+                        // Receives a string, should return a number.
+                        from: function (value) {
+                            return value;
+                        }
+                    }
+            });
 
-        $("#altitude_filter_reset_button").click(onResetAltitudeFilter);
+        var minSpeedInput = document.getElementById('minSpeedText'),
+            maxSpeedInput = document.getElementById('maxSpeedText');
+
+            speed_slider.noUiSlider.on('update', function (values, handle) {
+                if (handle) {
+                        maxSpeedInput.innerHTML = values[handle];
+                } else {
+                        minSpeedInput.innerHTML = values[handle];
+                }
+        });
+
+        speed_slider.noUiSlider.on('set', function (values, handle) {
+                onFilterBySpeed();
+        });
 
         $("#aircraft_type_filter_form").submit(onFilterByAircraftType);
         $("#aircraft_type_filter_reset_button").click(onResetAircraftTypeFilter);
 
-
         $("#aircraft_ident_filter_form").submit(onFilterByAircraftIdent);
         $("#aircraft_ident_filter_reset_button").click(onResetAircraftIdentFilter);
-
 
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
@@ -493,20 +538,19 @@ function load_history_item(i) {
                  dataType: 'json' })
 
                 .done(function(data) {
-					PositionHistoryBuffer.push(data);
-					HistoryItemsReturned++;
-					$("#loader_progress").attr('value',HistoryItemsReturned);
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                        PositionHistoryBuffer.push(data);
+                        HistoryItemsReturned++;
+                        if (HistoryItemsReturned == PositionHistorySize) {
+                                end_load_history();
+                        }
                 })
 
                 .fail(function(jqxhr, status, error) {
-					//Doesn't matter if it failed, we'll just be missing a data point
-					HistoryItemsReturned++;
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
+                        //Doesn't matter if it failed, we'll just be missing a data point
+                        HistoryItemsReturned++;
+                                        if (HistoryItemsReturned == PositionHistorySize) {
+                                                end_load_history();
+                                        }
                 });
 }
 
@@ -2008,8 +2052,7 @@ function setAltitudeLegend(units) {
     }
 }
 
-function onFilterByAltitude(e) {
-    e.preventDefault();
+function onFilterByAltitude() {
     updatePlaneFilter();
     refreshTableInfo();
 
@@ -2022,6 +2065,11 @@ function onFilterByAltitude(e) {
         refreshSelected();
         refreshHighlighted();
     }
+}
+
+function onFilterBySpeed() {
+        updatePlaneFilter();
+        refreshTableInfo();
 }
 
 function onFilterByAircraftType(e) {
@@ -2114,35 +2162,30 @@ function toggleAltitudeChart(switchToggle) {
 	localStorage.setItem('altitudeChart', altitudeChartDisplay);
 }
 
-function onResetAltitudeFilter(e) {
-    $("#altitude_filter_min").val("");
-    $("#altitude_filter_max").val("");
-
-    updatePlaneFilter();
-    refreshTableInfo();
-}
-
 function updatePlaneFilter() {
-    var minAltitude = parseFloat($("#altitude_filter_min").val().trim());
-    var maxAltitude = parseFloat($("#altitude_filter_max").val().trim());
-
-    if (minAltitude === NaN) {
-        minAltitude = -Infinity;
-    }
-
-    if (maxAltitude === NaN) {
-        maxAltitude = Infinity;
-    }
+    // Get min/max altitude values from slider
+    var minAltitude = document.getElementById('minAltitudeText').innerHTML.trim();
+    var maxAltitude = document.getElementById('maxAltitudeText').innerHTML.trim();
 
     PlaneFilter.minAltitude = minAltitude;
     PlaneFilter.maxAltitude = maxAltitude;
     PlaneFilter.altitudeUnits = DisplayUnits;
 
+    // Get min/max speed values from slider
+    var minSpeedFilter = document.getElementById('minSpeedText').innerHTML.trim();
+    var maxSpeedFilter = document.getElementById('maxSpeedText').innerHTML.trim();
+
+    PlaneFilter.minSpeedFilter = minSpeedFilter;
+    PlaneFilter.maxSpeedFilter = maxSpeedFilter;
+    PlaneFilter.speedUnits = DisplayUnits;
+
+    // Get aircraft type code filter from input box
     var aircraftTypeCode = $("#aircraft_type_filter").val().trim().toUpperCase()
     if (aircraftTypeCode === "") {
         aircraftTypeCode = undefined
     }
 
+    // Get aircraft ident filter from input box
     var aircraftIdent = $("#aircraft_ident_filter").val().trim().toUpperCase()
     if (aircraftIdent === "") {
         aircraftIdent = undefined
