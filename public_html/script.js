@@ -1219,11 +1219,13 @@ function refreshSelected() {
                 }
         }
 
-        if (selected.dataSource === "adsb_icao") {
+        if (selected.dataSources.has("adsb_icao")) {
                 $('#selected_source').text("ADS-B");
-        } else if (selected.dataSource === "tisb_trackfile" || selected.dataSource === "tisb_icao" || selected.dataSource === "tisb_other") {
+        } else if (selected.dataSources.has("uat")) {
+                $('#selected_source').text("UAT");
+        } else if (selected.dataSources.has("tisb_trackfile") || selected.dataSources.has("tisb_icao") || selected.dataSources.has("tisb_other")) {
                 $('#selected_source').text("TIS-B");
-        } else if (selected.dataSource === "mlat") {
+        } else if (selected.dataSources.has("mlat"))
                 $('#selected_source').text("MLAT");
         } else {
                 $('#selected_source').text("Other");
@@ -1387,11 +1389,13 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-	if (highlighted.dataSource === "adsb_icao") {
+	if (highlighted.dataSources.has("adsb_icao")) {
 		$('#highlighted_source').text("ADS-B");
-	} else if (highlighted.dataSource === "tisb_trackfile" || highlighted.dataSource === "tisb_icao" || highlighted.dataSource === "tisb_other") {
+	} else if (highlighted.dataSources.has("uat")) {
+		$('#highlighted_source').text("UAT");
+	} else if (highlighted.dataSources.has("tisb_trackfile") || highlighted.dataSources.has("tisb_icao") || highlighted.dataSources.has("tisb_other")) {
 		$('#highlighted_source').text("TIS-B");
-	} else if (highlighted.dataSource === "mlat") {
+	} else if (highlighted.dataSources.has("mlat")) {
 		$('#highlighted_source').text("MLAT");
 	} else {
 		$('#highlighted_source').text("Other");
@@ -1450,6 +1454,8 @@ function refreshTableInfo() {
         // Set row color to the most reliable position data source
         if (tableplane.dataSources.has("adsb_icao")) {
                 classes += " vPosition";
+        } else if (tableplane.dataSources.has("uat")) {
+                classes += " uat";
         } else if (tableplane.dataSources.has("tisb_trackfile") || tableplane.dataSources.has("tisb_icao") || tableplane.dataSources.has("tisb_other")) {
         	classes += " tisb";
         } else if (tableplane.dataSources.has("mlat")) {

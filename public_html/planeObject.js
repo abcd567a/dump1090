@@ -303,6 +303,8 @@ PlaneObject.prototype.getDataSource = function() {
     // MLAT
     if (this.position_from_mlat) {
        this.dataSources.add('mlat');
+    } else if (this.uat_version) {
+       this.dataSources.add('uat');
     } else if (this.position !== null) {
         // Not MLAT, but position reported - ADSB or variants
         this.dataSources.add(this.addrtype);
