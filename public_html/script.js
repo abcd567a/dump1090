@@ -94,7 +94,7 @@ function processReceiverUpdate(data, data_origin = null) {
         var acs = data.aircraft;
 
         // Detect stats reset
-        if (data_origin === "skyaware978") {
+        if (data_origin === "dump978-fa") {
                 if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
                         MessageCountHistory_UAT = [{'time' : MessageCountHistory[MessageCountHistory_UAT.length-1].time,
                                                 'messages' : 0}];
@@ -177,7 +177,7 @@ function processReceiverUpdate(data, data_origin = null) {
                 }
 
                 // Call the function update
-                plane.updateData(now, ac);
+                plane.updateData(now, ac, data_origin);
         }
 }
 
@@ -210,19 +210,20 @@ function fetchData() {
                         timeout: 5000,
                         cache: false,
                         dataType: 'json' });
+
                 FetchPending_UAT.done(function(data) {
-                        process_aircraft_json(data, 'skyaware978');
+                        process_aircraft_json(data, 'dump978-fa');
                 });
 
                 FetchPending_UAT.fail(function(jqxhr, status, error) {
-                        $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
-                        $("#update_error").css('display','block');
+                        $("#uat_update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
+                        $("#uat_update_error").css('display','block');
                 });
         }
 }
 
 // Process an aircraft.json and update Planes.
-// data_origin will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+// data_origin will specify where the aircraft.json originated from (dump1090-fa or dump978-fa)
 function process_aircraft_json(data, data_origin) {
         var now = data.now;
 
@@ -596,9 +597,9 @@ function start_load_history() {
                         load_history_item(i, 'dump1090-fa');
                         CurrentHistoryFetch++;
                 }
-                // Load skyaware978 history items
+                // Load dump978-fa history items
                 for (var i = 0; i < UatPositionHistorySize; i++) {
-                        load_history_item(i, 'skyaware978');
+                        load_history_item(i, 'dump978-fa');
                         CurrentHistoryFetch++;
                 }
         } else {
@@ -1361,6 +1362,8 @@ function refreshSelected() {
 
         if (selected.getDataSource() === "adsb_icao") {
                 $('#selected_source').text("ADS-B");
+        } else if (selected.getDataSource() === "uat") {
+                $('#selected_source').text("UAT");
         } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
                 $('#selected_source').text("TIS-B");
         } else if (selected.getDataSource() === "mlat") {
@@ -1529,6 +1532,8 @@ function refreshHighlighted() {
 
 	if (highlighted.getDataSource() === "adsb_icao") {
 		$('#highlighted_source').text("ADS-B");
+        } else if (highlighted.getDataSource() === "uat") {
+		$('#highlighted_source').text("UAT");
 	} else if (highlighted.getDataSource() === "tisb_trackfile" || highlighted.getDataSource() === "tisb_icao" || highlighted.getDataSource() === "tisb_other") {
 		$('#highlighted_source').text("TIS-B");
 	} else if (highlighted.getDataSource() === "mlat") {
@@ -1575,42 +1580,44 @@ function refreshTableInfo() {
     $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
-	var tableplane = PlanesOrdered[i];
-    TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
-        tableplane.tr.className = "plane_table_row hidden";
+        var tableplane = PlanesOrdered[i];
+        TrackedHistorySize += tableplane.history_size;
+        if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+                tableplane.tr.className = "plane_table_row hidden";
     } else {
         TrackedAircraft++;
         var classes = "plane_table_row";
 
         if (tableplane.position !== null && tableplane.seen_pos < 60) {
             ++TrackedAircraftPositions;
-		}
-
-		if (tableplane.getDataSource() === "adsb_icao") {
-        	classes += " vPosition";
-        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
-        	classes += " tisb";
-        } else if (tableplane.getDataSource() === "mlat") {
-        	classes += " mlat";
-        } else {
-        	classes += " other";
         }
 
-		if (tableplane.icao == SelectedPlane)
+        if (tableplane.getDataSource() === "adsb_icao") {
+                classes += " vPosition";
+        } else if (tableplane.getDataSource() === "uat") {
+                classes += " uat";
+        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
+                classes += " tisb";
+        } else if (tableplane.getDataSource() === "mlat") {
+                classes += " mlat";
+        } else {
+                classes += " other";
+        }
+
+        if (tableplane.icao == SelectedPlane)
             classes += " selected";
                     
         if (tableplane.squawk in SpecialSquawks) {
             classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
             show_squawk_warning = true;
-		}			                
+        }
 
         // ICAO doesn't change
         if (tableplane.flight) {
                 tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
         } else {
-		// Show _registration if ident is not present
-		tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                // Show _registration if ident is not present
+                tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
         }
         tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
         tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
@@ -1630,7 +1637,7 @@ function refreshTableInfo() {
         tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
         tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
         tableplane.tr.className = classes;
-	}
+    }
 }
 
 if (show_squawk_warning) {

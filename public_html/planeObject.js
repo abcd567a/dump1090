@@ -42,11 +42,13 @@ function PlaneObject(icao) {
         this.vert_rate      = null;
 
         this.version        = null;
+        this.uat_version    = null;
 
         this.prev_position = null;
         this.prev_position_time = null;
         this.position  = null;
-        this.position_from_mlat = false
+        this.position_from_mlat = false;
+        this.position_from_uat = false;
         this.sitedist  = null;
 
 	// Data packet numbers
@@ -319,6 +321,10 @@ PlaneObject.prototype.getDataSource = function() {
         return 'mlat';
     }
 
+    if (this.position_from_uat) {
+            return 'uat';
+    }
+
     // Not MLAT, but position reported - ADSB or variants
     if (this.position !== null) {
         return this.addrtype;
@@ -497,7 +503,7 @@ PlaneObject.prototype.updateIcon = function() {
 };
 
 // Update our data
-PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
+PlaneObject.prototype.updateData = function(receiver_timestamp, data, data_origin) {
         // Update all of our data
         this.messages = data.messages;
         this.rssi = data.rssi;
@@ -509,7 +515,7 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                       "roll", "nav_heading", "nav_modes",
                       "nac_p", "nac_v", "nic_baro", "sil_type", "sil",
                       "nav_qnh", "baro_rate", "geom_rate", "rc",
-                      "squawk", "category", "version"];
+                      "squawk", "category", "version", "uat_version"];
 
         for (var i = 0; i < fields.length; ++i) {
                 if (fields[i] in data) {
@@ -546,6 +552,12 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                                         break;
                                 }
                         }
+                }
+
+                this.position_from_uat = false;
+                // Heard position message from dump978-fa
+                if (data_origin === 'dump978-fa') {
+                        this.position_from_uat = true;
                 }
         }
 
