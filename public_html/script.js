@@ -1230,29 +1230,12 @@ function refreshPageTitle() {
 
 // Refresh the detail window about the plane
 function refreshSelected() {
-        if (MessageCountHistory.length > 1) {
-                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
-                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
-                if (message_time_delta > 0)
-                        MessageRate = message_count_delta / message_time_delta;
-        } else {
-                MessageRate = null;
-        }
-
-        if (MessageCountHistory_UAT.length > 1) {
-                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
-                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
-                if (message_time_delta > 0)
-                        UatMessageRate = message_count_delta / message_time_delta;
-        } else {
-                UatMessageRate = null;
-        }
-
-	refreshPageTitle();
+        updateMessageRates();
+        refreshPageTitle();
        
         var selected = false;
-	if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
-    	        selected = Planes[SelectedPlane];
+        if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
+                selected = Planes[SelectedPlane];
         }
         
         $('#dump1090_infoblock').css('display','block');
@@ -1278,7 +1261,7 @@ function refreshSelected() {
         if (!selected) {
                 return;
         }
-      
+
         if (selected.flight !== null && selected.flight !== "") {
                 $('#selected_callsign').text(selected.flight);
         } else {
@@ -1488,6 +1471,27 @@ function refreshSelected() {
         }
 
         }
+
+// Calculate 1090 and 978 Message rate using the rolling history of Message Counts recorded from processing aircraft.json
+function updateMessageRates () {
+        if (MessageCountHistory.length > 1) {
+                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
+                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
+                if (message_time_delta > 0)
+                        MessageRate = message_count_delta / message_time_delta;
+        } else {
+                MessageRate = null;
+        }
+
+        if (MessageCountHistory_UAT.length > 1) {
+                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
+                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
+                if (message_time_delta > 0)
+                        UatMessageRate = message_count_delta / message_time_delta;
+        } else {
+                UatMessageRate = null;
+        }
+}
 
 function refreshHighlighted() {
 	// this is following nearly identical logic, etc, as the refreshSelected function, but doing less junk for the highlighted pane
