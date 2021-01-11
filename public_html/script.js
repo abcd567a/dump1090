@@ -18,6 +18,9 @@ var infoBoxOriginalPosition = {};
 var customAltitudeColors = true;
 var myAdsbStatsSiteUrl = null;
 
+var ADSB_Enabled = true;
+var UAT_Enabled = false;
+
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
         '7600' : { cssClass: 'squawk7600', markerColor: 'rgb(0, 255, 255)', text: 'Radio Failure' },
@@ -169,7 +172,7 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
+	FetchPending = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
@@ -484,12 +487,14 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        $.ajax({ url: 'data/dump1090-fa/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
 
                 .done(function(data) {
+                        console.log('dump1090-fa enabled')
+                        ADSB_Enabled = true;
                         if (typeof data.lat !== "undefined") {
                                 SiteShow = true;
                                 SiteLat = data.lat;
@@ -503,9 +508,30 @@ function initialize() {
                         PositionHistorySize = data.history;
                 })
 
+                .fail(function(data) {
+                        console.log('Error reading dump1090-fa receiver.json. dump1090-fa may be disabled');
+                        ADSB_Enabled = false;
+                })
+
                 .always(function() {
                         initialize_map();
                         start_load_history();
+                });
+
+       // Get 978 receiver metadata
+        $.ajax({ url: 'data/skyaware978/receiver.json',
+                 timeout: 5000,
+                 cache: false,
+                 dataType: 'json' })
+
+                .done(function(data) {
+                        console.log('SkyAware978 enabled')
+                        UAT_Enabled = true;
+                })
+
+                .fail(function(data) {
+                        console.log('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
+                        UAT_Enabled = false;
                 });
 }
 
@@ -532,7 +558,7 @@ function load_history_item(i) {
         console.log("Loading history #" + i);
         $("#loader_progress").attr('value',i);
 
-        $.ajax({ url: 'data/history_' + i + '.json',
+        $.ajax({ url: 'data/dump1090-fa/history_' + i + '.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
