@@ -539,11 +539,10 @@ function initialize() {
 
 }
 
-var CurrentHistoryFetch = null;
+var CurrentHistoryFetch = 0;
 var PositionHistoryBuffer = [];
 var HistoryItemsReturned = 0;
 var TotalPositionHistorySize = 0;
-var CurrentLoadHistoryCounter = 0
 function start_load_history() {
         let url = new URL(window.location.href);
         let params = new URLSearchParams(url.search);
@@ -554,12 +553,12 @@ function start_load_history() {
                 // Load dump1090-fa history items
                 for (var i = 0; i < PositionHistorySize; i++) {
                         load_history_item(i, 'dump1090-fa');
-                        CurrentLoadHistoryCounter++;
+                        CurrentHistoryFetch++;
                 }
                 // Load skyaware978 history items
                 for (var i = 0; i < UatPositionHistorySize; i++) {
                         load_history_item(i, 'skyaware978');
-                        CurrentLoadHistoryCounter++;
+                        CurrentHistoryFetch++;
                 }
         } else {
                 // Nothing to load
@@ -571,7 +570,7 @@ function load_history_item(i, source) {
         var historyfile = 'history_' + i + '.json';
         console.log('Loading ' + source + ' ' + historyfile);
 
-        $("#loader_progress").attr('value', CurrentLoadHistoryCounter);
+        $("#loader_progress").attr('value', CurrentHistoryFetch);
 
         $.ajax({ url: 'data/' + source + '/' + historyfile,
                  timeout: 5000,
