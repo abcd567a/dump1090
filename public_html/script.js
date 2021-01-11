@@ -1463,7 +1463,7 @@ function refreshSelected() {
 		}
 
         if (selected.version == null) {
-                $('#selected_version').text('none');
+                $('#selected_version').text('N/A');
         } else if (selected.version == 0) {
                 $('#selected_version').text('v0 (DO-260)');
         } else if (selected.version == 1) {
@@ -1472,6 +1472,18 @@ function refreshSelected() {
                 $('#selected_version').text('v2 (DO-260B)');
         } else {
                 $('#selected_version').text('v' + selected.version);
+        }
+
+        if (selected.uat_version == null) {
+                $('#selected_uat_version').text('N/A');
+        } else if (selected.uat_version == 0) {
+                $('#selected_uat_version').text('v0 (DO-282)');
+        } else if (selected.uat_version == 1) {
+                $('#selected_uat_version').text('v1 (DO-282A)');
+        } else if (selected.uat_version == 2) {
+                $('#selected_uat_version').text('v2 (DO-282B)');
+        } else {
+                $('#selected_uat_version').text('v' + selected.uat_version);
         }
 
         }
