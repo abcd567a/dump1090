@@ -523,6 +523,7 @@ function initialize() {
         toggleGroupByDataType(false);
         toggleAllColumns(false);
         toggleADSBAircraft(false);
+        toggleUATAircraft(false);
         toggleMLATAircraft(false);
         toggleOtherAircraft(false);
         toggleTISBAircraft(false);
