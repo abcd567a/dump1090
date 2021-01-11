@@ -92,9 +92,8 @@ function processReceiverUpdate(data, data_origin = null) {
 	// Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
-
         // Detect stats reset
-        if (data_origin === "dump978-fa") {
+        if (data_origin === "skyaware978") {
                 if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
                         MessageCountHistory_UAT = [{'time' : MessageCountHistory[MessageCountHistory_UAT.length-1].time,
                                                 'messages' : 0}];
@@ -212,7 +211,7 @@ function fetchData() {
                         dataType: 'json' });
 
                 FetchPending_UAT.done(function(data) {
-                        process_aircraft_json(data, 'dump978-fa');
+                        process_aircraft_json(data, 'skyaware978');
                 });
 
                 FetchPending_UAT.fail(function(jqxhr, status, error) {
@@ -223,7 +222,7 @@ function fetchData() {
 }
 
 // Process an aircraft.json and update Planes.
-// data_origin will specify where the aircraft.json originated from (dump1090-fa or dump978-fa)
+// data_origin will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
 function process_aircraft_json(data, data_origin) {
         var now = data.now;
 
@@ -598,9 +597,9 @@ function start_load_history() {
                         load_history_item(i, 'dump1090-fa');
                         CurrentHistoryFetch++;
                 }
-                // Load dump978-fa history items
+                // Load skyaware978 history items
                 for (var i = 0; i < UatPositionHistorySize; i++) {
-                        load_history_item(i, 'dump978-fa');
+                        load_history_item(i, 'skyaware978');
                         CurrentHistoryFetch++;
                 }
         } else {
@@ -621,6 +620,7 @@ function load_history_item(i, source) {
                  dataType: 'json' })
 
                 .done(function(data) {
+                        data["source"] = source;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
                         if (HistoryItemsReturned == TotalPositionHistorySize) {
@@ -653,7 +653,7 @@ function end_load_history() {
                 for (var h = 0; h < PositionHistoryBuffer.length; ++h) {
                         now = PositionHistoryBuffer[h].now;
                         console.log("Applying history " + (h + 1) + "/" + PositionHistoryBuffer.length + " at: " + now);
-                        processReceiverUpdate(PositionHistoryBuffer[h], 'dump1090-fa');
+                        processReceiverUpdate(PositionHistoryBuffer[h], PositionHistoryBuffer[h].source);
 
                         // update track
                         console.log("Updating tracks at: " + now);

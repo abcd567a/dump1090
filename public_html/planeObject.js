@@ -53,7 +53,7 @@ function PlaneObject(icao) {
         this.sitedist  = null;
 
 	// Data packet numbers
-	this.messages  = null;
+        this.messages  = null;
         this.rssi      = null;
 
         // Track history as a series of line segments
@@ -559,8 +559,8 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data, data_origi
                         }
                 }
 
-                // Heard position message from dump978-fa
-                if (data_origin === 'dump978-fa') {
+                // Heard position message from skyaware978
+                if (data_origin === 'skyaware978') {
                         this.position_from_uat = true;
                 } else if (data_origin === 'dump1090-fa') {
 
