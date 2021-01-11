@@ -218,6 +218,7 @@ function fetchData() {
 }
 
 var PositionHistorySize = 0;
+var UatPositionHistorySize = 0;
 function initialize() {
         // Set page basics
         document.title = PageName;
@@ -485,6 +486,24 @@ function initialize() {
         toggleTISBAircraft(false);
         refreshDataSourceFilters();
 
+
+        // Get 978 receiver metadata if present
+        $.ajax({ url: 'data/skyaware978/receiver.json',
+                timeout: 5000,
+                cache: false,
+                dataType: 'json' })
+
+                .done(function(data) {
+                        console.log('SkyAware978 enabled')
+                        UAT_Enabled = true;
+                        UatPositionHistorySize = data.history;
+                })
+
+                .fail(function(data) {
+                        console.log('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
+                        UAT_Enabled = false;
+                });
+
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
         $.ajax({ url: 'data/dump1090-fa/receiver.json',
@@ -518,47 +537,43 @@ function initialize() {
                         start_load_history();
                 });
 
-       // Get 978 receiver metadata
-        $.ajax({ url: 'data/skyaware978/receiver.json',
-                 timeout: 5000,
-                 cache: false,
-                 dataType: 'json' })
-
-                .done(function(data) {
-                        console.log('SkyAware978 enabled')
-                        UAT_Enabled = true;
-                })
-
-                .fail(function(data) {
-                        console.log('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
-                        UAT_Enabled = false;
-                });
 }
 
 var CurrentHistoryFetch = null;
 var PositionHistoryBuffer = [];
 var HistoryItemsReturned = 0;
+var TotalPositionHistorySize = 0;
+var CurrentLoadHistoryCounter = 0
 function start_load_history() {
-	let url = new URL(window.location.href);
-	let params = new URLSearchParams(url.search);
-	if (PositionHistorySize > 0 && params.get('nohistory') !== 'true') {
-		$("#loader_progress").attr('max',PositionHistorySize);
-		console.log("Starting to load history (" + PositionHistorySize + " items)");
-		//Load history items in parallel
-		for (var i = 0; i < PositionHistorySize; i++) {
-			load_history_item(i);
-		}
-	} else {
-		// Nothing to load
-		end_load_history();
-	}
+        let url = new URL(window.location.href);
+        let params = new URLSearchParams(url.search);
+        TotalPositionHistorySize = PositionHistorySize + UatPositionHistorySize;
+        if (TotalPositionHistorySize > 0 && params.get('nohistory') !== 'true') {
+                $("#loader_progress").attr('max', TotalPositionHistorySize);
+                console.log("Starting to load history (" + TotalPositionHistorySize + " items)");
+                // Load dump1090-fa history items
+                for (var i = 0; i < PositionHistorySize; i++) {
+                        load_history_item(i, 'dump1090-fa');
+                        CurrentLoadHistoryCounter++;
+                }
+                // Load skyaware978 history items
+                for (var i = 0; i < UatPositionHistorySize; i++) {
+                        load_history_item(i, 'skyaware978');
+                        CurrentLoadHistoryCounter++;
+                }
+        } else {
+                // Nothing to load
+                end_load_history();
+        }
 }
 
-function load_history_item(i) {
-        console.log("Loading history #" + i);
-        $("#loader_progress").attr('value',i);
+function load_history_item(i, source) {
+        var historyfile = 'history_' + i + '.json';
+        console.log('Loading ' + source + ' ' + historyfile);
 
-        $.ajax({ url: 'data/dump1090-fa/history_' + i + '.json',
+        $("#loader_progress").attr('value', CurrentLoadHistoryCounter);
+
+        $.ajax({ url: 'data/' + source + '/' + historyfile,
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -566,7 +581,7 @@ function load_history_item(i) {
                 .done(function(data) {
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
-                        if (HistoryItemsReturned == PositionHistorySize) {
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
                                 end_load_history();
                         }
                 })
@@ -574,9 +589,9 @@ function load_history_item(i) {
                 .fail(function(jqxhr, status, error) {
                         //Doesn't matter if it failed, we'll just be missing a data point
                         HistoryItemsReturned++;
-                                        if (HistoryItemsReturned == PositionHistorySize) {
-                                                end_load_history();
-                                        }
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
+                                end_load_history();
+                        }
                 });
 }
 
