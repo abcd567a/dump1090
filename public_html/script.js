@@ -47,7 +47,9 @@ var FetchPending = null;
 var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
+var MessageCountHistory_UAT = [];
 var MessageRate = 0;
+var UatMessageRate = 0;
 
 var NBSP='\u00a0';
 
@@ -92,17 +94,29 @@ function processReceiverUpdate(data, data_origin = null) {
         var acs = data.aircraft;
 
         // Detect stats reset
-        if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
-                MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
-                                        'messages' : 0}];
+        if (data_origin === "skyaware978") {
+                if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
+                        MessageCountHistory_UAT = [{'time' : MessageCountHistory[MessageCountHistory_UAT.length-1].time,
+                                                'messages' : 0}];
+                }
+
+                // Note the message count in the history
+                MessageCountHistory_UAT.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory_UAT[0].time) > 30)
+                        MessageCountHistory_UAT.shift();
+        } else {
+                if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
+                        MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
+                                                'messages' : 0}];
+                }
+
+                // Note the message count in the history
+                MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory[0].time) > 30)
+                        MessageCountHistory.shift();
         }
-
-        // Note the message count in the history
-        MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
-        // .. and clean up any old values
-        if ((now - MessageCountHistory[0].time) > 30)
-                MessageCountHistory.shift();
-
         for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
                 var hex = ac.hex;
@@ -1218,6 +1232,15 @@ function refreshSelected() {
                 MessageRate = null;
         }
 
+        if (MessageCountHistory_UAT.length > 1) {
+                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
+                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
+                if (message_time_delta > 0)
+                        UatMessageRate = message_count_delta / message_time_delta;
+        } else {
+                UatMessageRate = null;
+        }
+
 	refreshPageTitle();
        
         var selected = false;
@@ -1232,9 +1255,15 @@ function refreshSelected() {
         $('#dump1090_total_history').text(TrackedHistorySize);
 
         if (MessageRate !== null) {
-                $('#dump1090_message_rate').text(MessageRate.toFixed(1));
+                $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
         } else {
-                $('#dump1090_message_rate').text("n/a");
+                $('#dump1090_message_rate').text("N/A");
+        }
+
+        if (UatMessageRate !== null) {
+                $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
+        } else {
+                $('#uat_message_rate').text("N/A");
         }
 
         setSelectedInfoBlockVisibility();
