@@ -44,6 +44,7 @@ var SitePosition = null;
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
 var FetchPending = null;
+var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
 var MessageRate = 0;
@@ -83,7 +84,9 @@ var checkbox_div_map = new Map ([
 
 ]);
 
-function processReceiverUpdate(data) {
+// Update Planes with data in aircraft json
+// data_origin will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function processReceiverUpdate(data, data_origin = null) {
 	// Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
@@ -170,44 +173,70 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
+        FetchPending = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
         FetchPending.done(function(data) {
-                var now = data.now;
-
-                processReceiverUpdate(data);
-
-                // update timestamps, visibility, history track for all planes - not only those updated
-                for (var i = 0; i < PlanesOrdered.length; ++i) {
-                        var plane = PlanesOrdered[i];
-                        plane.updateTick(now, LastReceiverTimestamp);
-                }
-
-                selectNewPlanes();
-                refreshTableInfo();
-                refreshSelected();
-                refreshHighlighted();
-
-                // Check for stale receiver data
-                if (LastReceiverTimestamp === now) {
-                        StaleReceiverCount++;
-                        if (StaleReceiverCount > 5) {
-                                $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-                                $("#update_error").css('display','block');
-                        }
-                } else { 
-                        StaleReceiverCount = 0;
-                        LastReceiverTimestamp = now;
-                        $("#update_error").css('display','none');
-                }
+                process_aircraft_json(data, 'dump1090-fa');
         });
 
         FetchPending.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
                 $("#update_error").css('display','block');
         });
+
+        if (UAT_Enabled) {
+                if (FetchPending_UAT !== null && FetchPending_UAT.state() == 'pending') {
+                        // don't double up on fetches, let the last one resolve
+                        return;
+                }
+
+                FetchPending_UAT = $.ajax({ url: 'data/skyaware978/aircraft.json',
+                        timeout: 5000,
+                        cache: false,
+                        dataType: 'json' });
+                FetchPending_UAT.done(function(data) {
+                        process_aircraft_json(data, 'skyaware978');
+                });
+
+                FetchPending_UAT.fail(function(jqxhr, status, error) {
+                        $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
+                        $("#update_error").css('display','block');
+                });
+        }
+}
+
+// Process an aircraft.json and update Planes.
+// data_origin will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function process_aircraft_json(data, data_origin) {
+        var now = data.now;
+
+        processReceiverUpdate(data, data_origin);
+
+        // update timestamps, visibility, history track for all planes - not only those updated
+        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                var plane = PlanesOrdered[i];
+                plane.updateTick(now, LastReceiverTimestamp);
+        }
+
+        selectNewPlanes();
+        refreshTableInfo();
+        refreshSelected();
+        refreshHighlighted();
+
+        // Check for stale receiver data
+        if (LastReceiverTimestamp === now) {
+                StaleReceiverCount++;
+                if (StaleReceiverCount > 5) {
+                        $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                }
+        } else {
+                StaleReceiverCount = 0;
+                LastReceiverTimestamp = now;
+                $("#update_error").css('display','none');
+        }
 }
 
 var PositionHistorySize = 0;
