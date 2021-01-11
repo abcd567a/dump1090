@@ -49,6 +49,7 @@ function PlaneObject(icao) {
         this.position  = null;
         this.position_from_mlat = false;
         this.position_from_uat = false;
+        this.position_from_1090 = false;
         this.sitedist  = null;
 
 	// Data packet numbers
@@ -85,6 +86,8 @@ function PlaneObject(icao) {
         this.icaotype = null;
         this.typeDescription = null;
         this.wtc = null;
+
+        this.dataSources = new Set();
 
         // request metadata
         getAircraftData(this.icao).done(function(data) {
@@ -126,11 +129,11 @@ PlaneObject.prototype.isFiltered = function() {
     }
 
     var dataSource = this.getDataSource();
-    if (dataSource === 'adsb_icao') {
+    if (this.dataSources.has('adsb_icao')) {
         if (!this.filter.ADSB) return true;
-    } else if (dataSource === 'mlat') {
+    } else if (this.dataSources.has('mlat')) {
         if (!this.filter.MLAT) return true;
-    } else if (dataSource === 'tisb_trackfile' || dataSource === 'tisb_icao' || dataSource === 'tisb_other') {
+    } else if (this.dataSources.has('tisb_trackfile') || this.dataSources.has('tisb_icao') || this.dataSources.has('tisb_other')) {
         if (!this.filter.TISB) return true;
     } else {
         if (!this.filter.Other) return true;
@@ -317,21 +320,23 @@ PlaneObject.prototype.clearLines = function() {
 
 PlaneObject.prototype.getDataSource = function() {
     // MLAT
-    if (this.position_from_mlat) {
-        return 'mlat';
-    }
+        if (this.position_from_mlat) {
+                this.dataSources.add('mlat');
+                return;
+        }
 
-    if (this.position_from_uat) {
-            return 'uat';
-    }
+        if (this.position_from_uat === true) {
+                this.dataSources.add('uat');
+        }
 
-    // Not MLAT, but position reported - ADSB or variants
-    if (this.position !== null) {
-        return this.addrtype;
-    }
-
-    // Otherwise Mode S
-    return 'mode_s';
+        // Not MLAT, but position reported - ADSB or variants
+        if (this.position !== null) {
+                this.dataSources.add(this.addrtype);
+                this.dataSources.delete('mode_s')
+        } else {
+                // Otherwise Mode S
+                this.dataSources.add('mode_s');
+        }
 
     // TODO: add support for Mode A/C
 };
@@ -554,10 +559,12 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data, data_origi
                         }
                 }
 
-                this.position_from_uat = false;
                 // Heard position message from dump978-fa
                 if (data_origin === 'dump978-fa') {
                         this.position_from_uat = true;
+                } else if (data_origin === 'dump1090-fa') {
+
+                        this.position_from_1090 = true;
                 }
         }
 
@@ -599,6 +606,9 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data, data_origi
         } else {
                 this.speed = null;
         }
+
+        // Populate datasources for aircraft
+        this.getDataSource();
 };
 
 PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) {

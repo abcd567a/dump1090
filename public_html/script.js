@@ -653,7 +653,7 @@ function end_load_history() {
                 for (var h = 0; h < PositionHistoryBuffer.length; ++h) {
                         now = PositionHistoryBuffer[h].now;
                         console.log("Applying history " + (h + 1) + "/" + PositionHistoryBuffer.length + " at: " + now);
-                        processReceiverUpdate(PositionHistoryBuffer[h]);
+                        processReceiverUpdate(PositionHistoryBuffer[h], 'dump1090-fa');
 
                         // update track
                         console.log("Updating tracks at: " + now);
@@ -1344,13 +1344,13 @@ function refreshSelected() {
                 }
         }
 
-        if (selected.getDataSource() === "adsb_icao") {
+        if (selected.dataSources.has("adsb_icao")) {
                 $('#selected_source').text("ADS-B");
-        } else if (selected.getDataSource() === "uat") {
+        } else if (selected.dataSources.has("uat")) {
                 $('#selected_source').text("UAT");
-        } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
+        } else if (selected.dataSources.has("tisb_trackfile") || selected.dataSources.has("tisb_icao") || selected.dataSources.has("tisb_other")) {
                 $('#selected_source').text("TIS-B");
-        } else if (selected.getDataSource() === "mlat") {
+        } else if (selected.dataSources.has("mlat")) {
                 $('#selected_source').text("MLAT");
         } else {
                 $('#selected_source').text("Other");
@@ -1547,13 +1547,13 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-	if (highlighted.getDataSource() === "adsb_icao") {
+	if (highlighted.dataSources.has("adsb_icao")) {
 		$('#highlighted_source').text("ADS-B");
-        } else if (highlighted.getDataSource() === "uat") {
+        } else if (highlighted.dataSources.has("uat")) {
 		$('#highlighted_source').text("UAT");
-	} else if (highlighted.getDataSource() === "tisb_trackfile" || highlighted.getDataSource() === "tisb_icao" || highlighted.getDataSource() === "tisb_other") {
+	} else if (highlighted.dataSources.has("tisb_trackfile") || highlighted.dataSources.has("tisb_icao") || highlighted.dataSources.has( "tisb_other")) {
 		$('#highlighted_source').text("TIS-B");
-	} else if (highlighted.getDataSource() === "mlat") {
+	} else if (highlighted.dataSources.has("mlat")) {
 		$('#highlighted_source').text("MLAT");
 	} else {
 		$('#highlighted_source').text("Other");
@@ -1601,59 +1601,59 @@ function refreshTableInfo() {
         TrackedHistorySize += tableplane.history_size;
         if (tableplane.seen >= 58 || tableplane.isFiltered()) {
                 tableplane.tr.className = "plane_table_row hidden";
-    } else {
-        TrackedAircraft++;
-        var classes = "plane_table_row";
-
-        if (tableplane.position !== null && tableplane.seen_pos < 60) {
-            ++TrackedAircraftPositions;
-        }
-
-        if (tableplane.getDataSource() === "adsb_icao") {
-                classes += " vPosition";
-        } else if (tableplane.getDataSource() === "uat") {
-                classes += " uat";
-        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
-                classes += " tisb";
-        } else if (tableplane.getDataSource() === "mlat") {
-                classes += " mlat";
         } else {
-                classes += " other";
-        }
+                TrackedAircraft++;
+                var classes = "plane_table_row";
 
-        if (tableplane.icao == SelectedPlane)
-            classes += " selected";
-                    
-        if (tableplane.squawk in SpecialSquawks) {
-            classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
-            show_squawk_warning = true;
-        }
+                if (tableplane.position !== null && tableplane.seen_pos < 60) {
+                        ++TrackedAircraftPositions;
+                }
 
-        // ICAO doesn't change
-        if (tableplane.flight) {
-                tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
-        } else {
-                // Show _registration if ident is not present
-                tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
-        }
-        tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
-        tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
-        tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
-        tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
-        tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
-        tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
-        tableplane.tr.cells[11].textContent = tableplane.messages;
-        tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
-        tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
-        tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
-        tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-        tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
-        tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
-        tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
-        tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
-        tableplane.tr.className = classes;
+                if (tableplane.dataSources.has("uat")) {
+                        classes += " uat";
+                } else if (tableplane.dataSources.has("adsb_icao") && tableplane.position_from_1090) {
+                        classes += " vPosition";
+                } else if (tableplane.dataSources.has("tisb_trackfile") || tableplane.dataSources.has("tisb_icao") || tableplane.dataSources.has("tisb_other")) {
+                        classes += " tisb";
+                } else if (tableplane.dataSources.has("mlat")) {
+                        classes += " mlat";
+                } else {
+                        classes += " other";
+                }
+
+                if (tableplane.icao == SelectedPlane)
+                        classes += " selected";
+
+                if (tableplane.squawk in SpecialSquawks) {
+                        classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
+                        show_squawk_warning = true;
+                }
+
+                // ICAO doesn't change
+                if (tableplane.flight) {
+                        tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+                } else {
+                        // Show _registration if ident is not present
+                        tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                }
+                tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
+                tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
+                tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
+                tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
+                tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
+                tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
+                tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
+                tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
+                tableplane.tr.cells[11].textContent = tableplane.messages;
+                tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
+                tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
+                tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
+                tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
+                tableplane.tr.cells[16].textContent = format_data_source(tableplane.dataSources);
+                tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
+                tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
+                tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
+                tableplane.tr.className = classes;
     }
 }
 
@@ -1701,7 +1701,7 @@ function sortByCountry()  { sortBy('country', compareAlpha,   function(x) { retu
 function sortByRssi()     { sortBy('rssi',    compareNumeric, function(x) { return x.rssi }); }
 function sortByLatitude()   { sortBy('lat',   compareNumeric, function(x) { return (x.position !== null ? x.position[1] : null) }); }
 function sortByLongitude()  { sortBy('lon',   compareNumeric, function(x) { return (x.position !== null ? x.position[0] : null) }); }
-function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return x.getDataSource() } ); }
+function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return Array.from(x.dataSources)[0] } ); }
 
 var sortId = '';
 var sortCompare = null;
