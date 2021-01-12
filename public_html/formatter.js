@@ -234,36 +234,44 @@ function format_latlng(p) {
 
 function format_data_source(source) {
 	let sourceString = "";
+	let uat = source.has('uat');
+	let adsb = source.has('adsb_icao') || source.has('adsb_other');
+	let adsb_icao_nt = source.has('adsb_icao_nt');
+	let tisb = source.has('tisb_icao') || source.has('tisb_trackfile') || source.has('tisb_other');
+	let mlat = source.has('mlat');
+	let adsr = source.has('adsr_icao') || source.has('adsr_other');
+	let mode_s = source.has('mode_s');
+	let mode_ac = source.has('mode_ac');
 
-	if (source.has('uat')) {
+	if (uat) {
 		sourceString += "UAT ";
 	}
 
-	if ((source.has('adsb_icao') || source.has('adsb_other')) && !source.has('uat')) {
+	if (adsb && !uat) {
 		sourceString += "ADS-B ";
 	}
 
-	if (source.has('adsb_icao_nt')) {
+	if (adsb_icao_nt) {
 		sourceString += "ADS-B (non transponder)";
 	}
 
-	if (source.has('tisb_icao') || source.has('tisb_trackfile') || source.has('tisb_other')) {
+	if (tisb) {
 		sourceString += "TIS-B ";
 	}
 
-	if (source.has('mlat')) {
+	if (mlat) {
 		sourceString += "MLAT ";
 	}
 
-	if (source.has('adsr_icao') || source.has('adsr_other')) {
+	if (adsr) {
 		sourceString += "ADS-R ";
 	}
 
-	if (source.has('mode_s')) {
+	if (mode_s) {
 		sourceString += "Mode S ";
 	}
 
-	if (source.has('mode_ac')) {
+	if (mode_ac) {
 		sourceString += "Mode A/C ";
 	}
 
