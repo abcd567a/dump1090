@@ -542,7 +542,7 @@ function initialize() {
                 })
 
                 .fail(function(data) {
-                        console.log('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
+                        console.warn('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
                         UAT_Enabled = false;
                 });
 
@@ -570,7 +570,7 @@ function initialize() {
                 })
 
                 .fail(function(data) {
-                        console.log('Error reading dump1090-fa receiver.json. dump1090-fa may be disabled');
+                        console.warn('Error reading dump1090-fa receiver.json. dump1090-fa may be disabled');
                         ADSB_Enabled = false;
                 })
 
