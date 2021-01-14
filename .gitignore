@@ -13,3 +13,8 @@ faup1090
 package-wheezy
 oneoff/convert_benchmark
 oneoff/decode_comm_b
+starch-benchmark
+wisdom.x86.avx2
+wisdom.x86.generic
+wisdom.arm.neon
+wisdom.arm.generic

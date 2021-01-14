@@ -1,0 +1,16 @@
+# Generic wisdom if no architecture-specific hints are available
+
+magnitude_uc8               lookup_generic
+magnitude_uc8_aligned       lookup_generic
+
+magnitude_power_uc8         lookup_generic
+magnitude_power_uc8_aligned lookup_generic
+
+magnitude_sc16              exact_generic
+magnitude_sc16_aligned      exact_generic
+
+magnitude_sc16q11           exact_generic
+magnitude_sc16q11_aligned   exact_generic
+
+mean_power_u16              u64_generic
+mean_power_u16_aligned      u64_generic
