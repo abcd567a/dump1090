@@ -111,6 +111,7 @@ static struct aircraft *trackCreateAircraft(struct modesMessage *mm) {
     F(baro_rate,       60, 70);  // ADS-B or Comm-B
     F(geom_rate,       60, 70);  // ADS-B or Comm-B
     F(squawk,          15, 70);  // ADS-B or Mode S
+    F(emergency,       60, 70);  // ADS-B only
     F(airground,       15, 70);  // ADS-B or Mode S
     F(nav_qnh,         60, 70);  // Comm-B only
     F(nav_altitude_mcp, 60, 70);  // ADS-B or Comm-B
@@ -1380,6 +1381,7 @@ static void trackRemoveStaleAircraft(uint64_t now)
             EXPIRE(baro_rate);
             EXPIRE(geom_rate);
             EXPIRE(squawk);
+            EXPIRE(emergency);
             EXPIRE(airground);
             EXPIRE(nav_qnh);
             EXPIRE(nav_altitude_mcp);
@@ -1394,6 +1396,7 @@ static void trackRemoveStaleAircraft(uint64_t now)
             EXPIRE(nic_c);
             EXPIRE(nic_baro);
             EXPIRE(nac_p);
+            EXPIRE(nac_v);
             EXPIRE(sil);
             EXPIRE(gva);
             EXPIRE(sda);
