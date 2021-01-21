@@ -2,16 +2,17 @@
 #include <endian.h>
 
 /* Convert (little-endian) SC16 values to unsigned 16-bit magnitudes */
-void STARCH_IMPL(magnitude_sc16, exact) (const sc16_t *in, uint16_t *out, unsigned len)
+
+void STARCH_IMPL(magnitude_sc16, exact_u32) (const sc16_t *in, uint16_t *out, unsigned len)
 {
     const sc16_t * restrict in_align = STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
     while (len--) {
-        float I = abs((int16_t) le16toh(in_align[0].I));
-        float Q = abs((int16_t) le16toh(in_align[0].Q));
+        uint32_t I = abs((int16_t) le16toh(in_align[0].I));
+        uint32_t Q = abs((int16_t) le16toh(in_align[0].Q));
 
-        float magsq = I * I + Q * Q;
+        uint32_t magsq = I * I + Q * Q;
         float mag = sqrtf(magsq) * 2;
         if (mag > 65535.0)
             mag = 65535.0;
@@ -22,30 +23,23 @@ void STARCH_IMPL(magnitude_sc16, exact) (const sc16_t *in, uint16_t *out, unsign
     }
 }
 
-void STARCH_IMPL(magnitude_sc16, approx) (const sc16_t *in, uint16_t *out, unsigned len)
+void STARCH_IMPL(magnitude_sc16, exact_float) (const sc16_t *in, uint16_t *out, unsigned len)
 {
     const sc16_t * restrict in_align = STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
     while (len--) {
-        float I = abs((int16_t)le16toh(in_align[0].I));
-        float Q = abs((int16_t)le16toh(in_align[0].Q));
+        float I = abs((int16_t) le16toh(in_align[0].I)) * 2;
+        float Q = abs((int16_t) le16toh(in_align[0].Q)) * 2;
 
-        float minval = (I < Q ? I : Q);
-        float maxval = (I < Q ? Q : I);
+        float magsq = I * I + Q * Q;
+        float mag = sqrtf(magsq);
+        if (mag > 65535.0)
+            mag = 65535.0;
+        out_align[0] = (uint16_t)mag;
 
-        float approx;
-        if (minval < 0.4142135 * maxval)
-            approx = (0.99 * maxval + 0.197 * minval) * 2;
-        else
-            approx = (0.84 * maxval + 0.561 * minval) * 2;
-        if (approx > 65535)
-            approx = 65535;
-
-        out_align[0] = (uint16_t)approx;
-
-        in_align += 1;
         out_align += 1;
+        in_align += 1;
     }
 }
 
