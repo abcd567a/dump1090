@@ -205,6 +205,9 @@ oneoff/convert_benchmark: oneoff/convert_benchmark.o convert.o util.o dsp/helper
 oneoff/decode_comm_b: oneoff/decode_comm_b.o comm_b.o ais_charset.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) -g -o $@ $^ -lm
 
+oneoff/dsp_error_measurement: oneoff/dsp_error_measurement.o dsp/helpers/tables.o cpu.o $(CPUFEATURES_OBJS) $(STARCH_OBJS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -g -o $@ $^ -lm
+
 oneoff/uc8_capture_stats: oneoff/uc8_capture_stats.o
 	$(CC) $(CPPFLAGS) $(CFLAGS) -g -o $@ $^ -lm
 
