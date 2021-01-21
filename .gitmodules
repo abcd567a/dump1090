@@ -1,9 +1,0 @@
-[submodule "cpu_features"]
-	path = cpu_features
-	url = https://github.com/google/cpu_features.git
-	fetchRecurseSubmodules = true
-
-[submodule "starch"]
-	path = starch
-	url = https://github.com/flightaware/starch.git
-	fetchRecurseSubmodules = true
