@@ -185,7 +185,7 @@ starch-benchmark: cpu.o dsp/helpers/tables.o $(CPUFEATURES_OBJS) $(STARCH_OBJS) 
 	$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS)
 
 clean:
-	rm -f *.o oneoff/*.o compat/clock_gettime/*.o compat/clock_nanosleep/*.o cpu_features/src/*.o dsp/generated/*.o dsp/helpers/*.o $(CPUFEATURES_OBJS) dump1090 view1090 faup1090 cprtests crctests oneoff/convert_benchmark starch-benchmark
+	rm -f *.o oneoff/*.o compat/clock_gettime/*.o compat/clock_nanosleep/*.o cpu_features/src/*.o dsp/generated/*.o dsp/helpers/*.o $(CPUFEATURES_OBJS) dump1090 view1090 faup1090 cprtests crctests oneoff/convert_benchmark oneoff/decode_comm_b oneoff/dsp_error_measurement oneoff/uc8_capture_stats starch-benchmark
 
 test: cprtests
 	./cprtests
@@ -214,22 +214,7 @@ oneoff/uc8_capture_stats: oneoff/uc8_capture_stats.o
 starchgen:
 	dsp/starchgen.py .
 
-wisdom: wisdom.$(STARCH_MIX)
-
-wisdom.generic: starch-benchmark
-	./starch-benchmark -i 5 -F generic -o wisdom.generic mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
-	./starch-benchmark -i 5 -F generic -r wisdom.generic -o wisdom.generic -t
-
-wisdom.x86: starch-benchmark
-	./starch-benchmark -i 5 -F generic -F x86_avx2 -o wisdom.x86.avx2 mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
-	./starch-benchmark -i 5 -F generic -F x86_avx2 -r wisdom.x86.avx2 -o wisdom.x86.avx2 -t
-	./starch-benchmark -i 5 -F generic -o wisdom.x86.generic mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
-	./starch-benchmark -i 5 -F generic -r wisdom.x86.generic -o wisdom.x86.generic -t
-	cat wisdom.x86.avx2 wisdom.x86.generic >wisdom.x86
-
-wisdom.arm: starch-benchmark
-	./starch-benchmark -i 5 -F generic -F armv7a_neon_vfpv4 -o wisdom.arm.neon mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
-	./starch-benchmark -i 5 -F generic -F armv7a_neon_vfpv4 -r wisdom.arm.neon -o wisdom.arm.neon -t
-	./starch-benchmark -i 5 -F generic -o wisdom.arm.generic mean_power_u16 mean_power_u16_aligned
-	./starch-benchmark -i 5 -F generic -r wisdom.arm.generic -o wisdom.arm.generic -t
-	cat wisdom.arm.neon wisdom.arm.generic >wisdom.arm
+.PHONY: wisdom.local
+wisdom.local: starch-benchmark
+	./starch-benchmark -i 15 -o wisdom.local mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
+	./starch-benchmark -i 15 -r wisdom.local -o wisdom.local
