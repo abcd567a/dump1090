@@ -16,7 +16,4 @@ oneoff/uc8_capture_stats
 oneoff/dsp_error_measurement
 oneoff/decode_comm_b
 starch-benchmark
-wisdom.x86.avx2
-wisdom.x86.generic
-wisdom.arm.neon
-wisdom.arm.generic
+wisdom.local
