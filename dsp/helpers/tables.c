@@ -55,15 +55,47 @@ const uint16_t * get_sc16q11_mag_11bit_table()
             for (int q = 0; q <= 2047; q++) {
                 float fI, fQ, magsq;
 
-                fI = i;
-                fQ = q;
+                fI = i / 2048.0;
+                fQ = q / 2048.0;
                 magsq = fI * fI + fQ * fQ;
 
-                float mag = sqrtf(magsq) * 65536 / 2048;
-                if (mag > 65535.0)
-                    mag = 65535.0;
+                float mag = round(sqrtf(magsq) * 65536.0f);
+                if (mag > 65535)
+                    mag = 65535;
 
-                table[(q << 11) | i] = (uint16_t) (mag + 0.5f);
+                table[(q << 11) | i] = mag;
+            }
+        }
+    }
+
+    return table;
+}
+
+const uint16_t * get_sc16q11_mag_12bit_table()
+{
+    static uint16_t *table = NULL;
+
+    if (!table) {
+        table = malloc(sizeof(uint16_t) * 4096 * 4096);
+        if (!table) {
+            fprintf(stderr, "can't allocate SC16Q11 conversion lookup table\n");
+            abort();
+        }
+
+        for (int i = -2048; i <= 2047; i++) {
+            for (int q = -2048; q <= 2047; q++) {
+                float fI, fQ, magsq;
+
+                fI = fabs(i) / 2048.0;
+                fQ = fabs(q) / 2048.0;
+                magsq = fI * fI + fQ * fQ;
+
+                float mag = round(sqrtf(magsq) * 65536.0f);
+                if (mag > 65535)
+                    mag = 65535;
+
+                unsigned index = ((i & 4095) << 12) | (q & 4095);
+                table[index] = mag;
             }
         }
     }

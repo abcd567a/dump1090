@@ -5,16 +5,16 @@
 
 /* Convert (little-endian) SC16 values with a range of -2048..+2047 to unsigned 16-bit magnitudes */
 
-void STARCH_IMPL(magnitude_sc16q11, exact) (const sc16_t *in, uint16_t *out, unsigned len)
+void STARCH_IMPL(magnitude_sc16q11, exact_u32) (const sc16_t *in, uint16_t *out, unsigned len)
 {
     const sc16_t * restrict in_align = STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
     while (len--) {
-        float I = abs((int16_t) le16toh(in_align[0].I));
-        float Q = abs((int16_t) le16toh(in_align[0].Q));
+        uint32_t I = abs((int16_t) le16toh(in_align[0].I));
+        uint32_t Q = abs((int16_t) le16toh(in_align[0].Q));
 
-        float magsq = I * I + Q * Q;
+        uint32_t magsq = I * I + Q * Q;
         float mag = sqrtf(magsq) * 32;
         if (mag > 65535.0)
             mag = 65535.0;
@@ -25,30 +25,23 @@ void STARCH_IMPL(magnitude_sc16q11, exact) (const sc16_t *in, uint16_t *out, uns
     }
 }
 
-void STARCH_IMPL(magnitude_sc16q11, approx) (const sc16_t *in, uint16_t *out, unsigned len)
+void STARCH_IMPL(magnitude_sc16q11, exact_float) (const sc16_t *in, uint16_t *out, unsigned len)
 {
     const sc16_t * restrict in_align = STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
     while (len--) {
-        uint16_t I = abs((int16_t)le16toh(in_align[0].I));
-        uint16_t Q = abs((int16_t)le16toh(in_align[0].Q));
+        float I = abs((int16_t) le16toh(in_align[0].I)) * 32;
+        float Q = abs((int16_t) le16toh(in_align[0].Q)) * 32;
 
-        uint16_t minval = (I < Q ? I : Q);
-        uint16_t maxval = (I < Q ? Q : I);
+        float magsq = I * I + Q * Q;
+        float mag = sqrtf(magsq);
+        if (mag > 65535.0)
+            mag = 65535.0;
+        out_align[0] = (uint16_t)mag;
 
-        float approx;
-        if (minval < 0.4142135 * maxval)
-            approx = (0.99 * maxval + 0.197 * minval) * 32;
-        else
-            approx = (0.84 * maxval + 0.561 * minval) * 32;
-        if (approx > 65535)
-            approx = 65535;
-
-        out_align[0] = (uint16_t)approx;
-
-        in_align += 1;
         out_align += 1;
+        in_align += 1;
     }
 }
 
@@ -72,89 +65,69 @@ void STARCH_IMPL(magnitude_sc16q11, 11bit_table) (const sc16_t *in, uint16_t *ou
     }
 }
 
+void STARCH_IMPL(magnitude_sc16q11, 12bit_table) (const sc16_t *in, uint16_t *out, unsigned len)
+{
+    const uint16_t * restrict table = get_sc16q11_mag_12bit_table();
+    const sc16_t * restrict in_align = STARCH_ALIGNED(in);
+    uint16_t * restrict out_align = STARCH_ALIGNED(out);
+
+    while (len--) {
+        unsigned index = ((in_align[0].I & 4095) << 12) | (in_align[0].Q & 4095);
+        out_align[0] = table[index];
+
+        in_align += 1;
+        out_align += 1;
+    }
+}
+
 #ifdef STARCH_FEATURE_NEON
 
 #include <arm_neon.h>
 
-void STARCH_IMPL_REQUIRES(magnitude_sc16q11, neon_approx, STARCH_FEATURE_NEON) (const sc16_t *in, uint16_t *out, unsigned len)
+void STARCH_IMPL_REQUIRES(magnitude_sc16q11, neon_vrsqrte, STARCH_FEATURE_NEON) (const sc16_t *in, uint16_t *out, unsigned len)
 {
     const int16_t * restrict in_align = (const int16_t *) STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
-    // This uses the same magnitude approximation as the "approx" variant above
+    /* This uses NEON's floating-point reciprocal square root estimate instruction (vrsqrte).
+     * The estimate is accurate to about 9 bits of mantissa, which is good enough for our purposes.
+     */
 
-    const int16x4_t constants0 = {
-        (int16_t)(0.99 * 32768),
-        (int16_t)(0.197 * 32768),
-        (int16_t)(0.84 * 32768),
-        (int16_t)(0.561 * 32768),
-    };
-    const unsigned constants0_lane_99 = 0;
-    const unsigned constants0_lane_197 = 1;
-    const unsigned constants0_lane_84 = 2;
-    const unsigned constants0_lane_561 = 3;
+    unsigned len4 = len >> 2;
+    while (len4--) {
+        int16x4x2_t iq = vld2_s16(in_align);
+        int16x4_t i16 = iq.val[0]; /* Q11 */
+        int16x4_t q16 = iq.val[1]; /* Q11 */
 
-    const int16x4_t constants1 = {
-        (int16_t)(0.4142135 * 32768),
-        0,
-        0,
-        0
-    };
-    const unsigned constants1_lane_4142 = 0;
+        uint32x4_t isq = vreinterpretq_u32_s32(vmull_s16(i16, i16)); /* Q22, unsigned */
+        uint32x4_t qsq = vreinterpretq_u32_s32(vmull_s16(q16, q16)); /* Q22, unsigned */
+        uint32x4_t magsq = vqaddq_u32(isq, qsq);                     /* Q22, unsigned */
 
-    unsigned len8 = len >> 3;
-    while (len8--) {
-        int16x8x2_t iq = vld2q_s16(in_align);
-        int16x8_t i16 = vshlq_n_s16(iq.val[0], 4);
-        int16x8_t q16 = vshlq_n_s16(iq.val[1], 4);
+        float32x4_t magsq_f32 = vcvtq_n_f32_u32(magsq, 22);
+        float32x4_t mag_f32 = vmulq_f32(magsq_f32, vrsqrteq_f32(magsq_f32));  /* sqrt(x) = x * (1/sqrt(x)) */
+        uint16x4_t mag_u16 = vqmovn_u32(vcvtq_n_u32_f32(mag_f32, 16));
 
-        // minval = min(|I|, |Q|)
-        // maxval = max(|I|, |Q|)
-        int16x8_t absi = vqabsq_s16(i16);
-        int16x8_t absq = vqabsq_s16(q16);
-        int16x8_t minval = vminq_s16(absi, absq);
-        int16x8_t maxval = vmaxq_s16(absi, absq);
+        vst1_u16(out_align, mag_u16);
 
-        // result =
-        //   0.99*maxval + 0.197*minval   if minval < 0.4142135 * maxval
-        //   0.84*maxval + 0.561*minval   if minval >= 0.4142135 * maxval
-        int16x8_t threshold = vqrdmulhq_lane_s16(maxval, constants1, constants1_lane_4142);
-        uint16x8_t selector = vcgeq_s16(minval, threshold);
-        int16x8_t lt_res = vqaddq_s16(vqrdmulhq_lane_s16(maxval, constants0, constants0_lane_99), vqrdmulhq_lane_s16(minval, constants0, constants0_lane_197));
-        int16x8_t ge_res = vqaddq_s16(vqrdmulhq_lane_s16(maxval, constants0, constants0_lane_84), vqrdmulhq_lane_s16(minval, constants0, constants0_lane_561));
-        uint16x8_t result = vreinterpretq_u16_s16(vbslq_s16(selector, ge_res, lt_res));
-        uint16x8_t result2 = vshlq_n_u16(result, 1);
-
-        vst1q_u16(out_align, result2);
-
-        in_align += 16;
-        out_align += 8;
+        in_align += 8;
+        out_align += 4;
     }
 
-    unsigned len1 = len & 7;
+    unsigned len1 = len & 3;
     while (len1--) {
         int16x4x2_t iq = vld2_dup_s16(in_align);
-        int16x4_t i16 = vshl_n_s16(iq.val[0], 4);
-        int16x4_t q16 = vshl_n_s16(iq.val[1], 4);
+        int16x4_t i16 = iq.val[0];
+        int16x4_t q16 = iq.val[1];
 
-        // minval = min(|I|, |Q|)
-        // maxval = max(|I|, |Q|)
-        int16x4_t absi = vqabs_s16(i16);
-        int16x4_t absq = vqabs_s16(q16);
-        int16x4_t minval = vmin_s16(absi, absq);
-        int16x4_t maxval = vmax_s16(absi, absq);
+        uint32x4_t isq = vreinterpretq_u32_s32(vmull_s16(i16, i16));
+        uint32x4_t qsq = vreinterpretq_u32_s32(vmull_s16(q16, q16));
+        uint32x4_t magsq = vqaddq_u32(isq, qsq);
 
-        // result =
-        //   0.99*maxval + 0.197*minval   if minval < 0.4142135 * maxval
-        //   0.84*maxval + 0.561*minval   if minval >= 0.4142135 * maxval
-        int16x4_t threshold = vqrdmulh_lane_s16(maxval, constants1, constants1_lane_4142);
-        uint16x4_t selector = vcge_s16(minval, threshold);
-        int16x4_t lt_res = vqadd_s16(vqrdmulh_lane_s16(maxval, constants0, constants0_lane_99), vqrdmulh_lane_s16(minval, constants0, constants0_lane_197));
-        int16x4_t ge_res = vqadd_s16(vqrdmulh_lane_s16(maxval, constants0, constants0_lane_84), vqrdmulh_lane_s16(minval, constants0, constants0_lane_561));
-        uint16x4_t result = vreinterpret_u16_s16(vbsl_s16(selector, ge_res, lt_res));
-        uint16x4_t result2 = vshl_n_u16(result, 1);
+        float32x4_t magsq_f32 = vcvtq_n_f32_u32(magsq, 22);
+        float32x4_t mag_f32 = vmulq_f32(magsq_f32, vrsqrteq_f32(magsq_f32));
+        uint16x4_t mag_u16 = vqmovn_u32(vcvtq_n_u32_f32(mag_f32, 16));
 
-        vst1_lane_u16(out_align, result2, 0);
+        vst1_lane_u16(out_align, mag_u16, 0);
 
         in_align += 2;
         out_align += 1;
