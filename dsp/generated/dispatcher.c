@@ -74,22 +74,19 @@ void starch_magnitude_uc8_set_wisdom (const char * const * received_wisdom)
 starch_magnitude_uc8_regentry starch_magnitude_uc8_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 0, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 1, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
     { 2, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 3, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
-    { 2, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 6, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 7, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 8, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
+    { 2, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 5, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 6, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
@@ -97,10 +94,8 @@ starch_magnitude_uc8_regentry starch_magnitude_uc8_registry[] = {
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
     { 2, "lookup_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_x86_avx2, cpu_supports_avx2 },
     { 3, "exact_x86_avx2", "x86_avx2", starch_magnitude_uc8_exact_x86_avx2, cpu_supports_avx2 },
-    { 4, "approx_x86_avx2", "x86_avx2", starch_magnitude_uc8_approx_x86_avx2, cpu_supports_avx2 },
-    { 5, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 6, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 7, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
+    { 4, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 5, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -160,42 +155,35 @@ void starch_magnitude_uc8_aligned_set_wisdom (const char * const * received_wisd
 starch_magnitude_uc8_aligned_regentry starch_magnitude_uc8_aligned_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 0, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 1, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
     { 2, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 3, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "lookup_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
-    { 2, "lookup_unroll_4_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "exact_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "neon_approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 6, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 7, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 8, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 9, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 10, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 11, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 12, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 13, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
+    { 2, "lookup_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "lookup_unroll_4_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "exact_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_uc8_aligned_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 5, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 6, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 7, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 8, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_uc8_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 9, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 10, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
-    { 0, "lookup_unroll_4_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
+    { 0, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
     { 2, "lookup_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_lookup_x86_avx2, cpu_supports_avx2 },
-    { 3, "exact_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_exact_x86_avx2, cpu_supports_avx2 },
-    { 4, "approx_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_approx_x86_avx2, cpu_supports_avx2 },
+    { 3, "lookup_unroll_4_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
+    { 4, "exact_x86_avx2_aligned", "x86_avx2", starch_magnitude_uc8_aligned_exact_x86_avx2, cpu_supports_avx2 },
     { 5, "lookup_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_x86_avx2, cpu_supports_avx2 },
-    { 6, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
-    { 7, "exact_x86_avx2", "x86_avx2", starch_magnitude_uc8_exact_x86_avx2, cpu_supports_avx2 },
-    { 8, "approx_x86_avx2", "x86_avx2", starch_magnitude_uc8_approx_x86_avx2, cpu_supports_avx2 },
-    { 9, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
-    { 10, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
-    { 11, "approx_generic", "generic", starch_magnitude_uc8_approx_generic, NULL },
+    { 6, "exact_x86_avx2", "x86_avx2", starch_magnitude_uc8_exact_x86_avx2, cpu_supports_avx2 },
+    { 7, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 8, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -255,27 +243,28 @@ void starch_magnitude_power_uc8_set_wisdom (const char * const * received_wisdom
 starch_magnitude_power_uc8_regentry starch_magnitude_power_uc8_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
-    { 1, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 0, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 1, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
     { 2, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
     { 2, "twopass_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_twopass_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
-    { 5, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 3, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 5, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 6, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
     { 0, "twopass_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_twopass_x86_avx2, cpu_supports_avx2 },
-    { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
+    { 1, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
     { 2, "lookup_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_lookup_x86_avx2, cpu_supports_avx2 },
     { 3, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
-    { 4, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
-    { 5, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 4, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 5, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -335,33 +324,35 @@ void starch_magnitude_power_uc8_aligned_set_wisdom (const char * const * receive
 starch_magnitude_power_uc8_aligned_regentry starch_magnitude_power_uc8_aligned_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
-    { 1, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 0, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 1, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
     { 2, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "lookup_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
     { 2, "twopass_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_twopass_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "lookup_unroll_4_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "twopass_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_twopass_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 6, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 7, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
-    { 8, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 3, "lookup_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "lookup_unroll_4_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_aligned_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 5, "twopass_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_twopass_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 6, "lookup_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 7, "lookup_unroll_4_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_lookup_unroll_4_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 8, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_power_uc8_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 9, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 10, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
     { 0, "twopass_x86_avx2_aligned", "x86_avx2", starch_magnitude_power_uc8_aligned_twopass_x86_avx2, cpu_supports_avx2 },
-    { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
+    { 1, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
     { 2, "lookup_x86_avx2_aligned", "x86_avx2", starch_magnitude_power_uc8_aligned_lookup_x86_avx2, cpu_supports_avx2 },
     { 3, "lookup_unroll_4_x86_avx2_aligned", "x86_avx2", starch_magnitude_power_uc8_aligned_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
     { 4, "twopass_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_twopass_x86_avx2, cpu_supports_avx2 },
     { 5, "lookup_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_lookup_x86_avx2, cpu_supports_avx2 },
     { 6, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
-    { 7, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
-    { 8, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 7, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 8, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -421,23 +412,23 @@ void starch_magnitude_sc16_set_wisdom (const char * const * received_wisdom)
 starch_magnitude_sc16_regentry starch_magnitude_sc16_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 1, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 1, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 2, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 2, "exact_u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "exact_float_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
-    { 0, "exact_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_x86_avx2, cpu_supports_avx2 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 2, "approx_x86_avx2", "x86_avx2", starch_magnitude_sc16_approx_x86_avx2, cpu_supports_avx2 },
-    { 3, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 2, "exact_u32_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_u32_x86_avx2, cpu_supports_avx2 },
+    { 3, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -497,28 +488,28 @@ void starch_magnitude_sc16_aligned_set_wisdom (const char * const * received_wis
 starch_magnitude_sc16_aligned_regentry starch_magnitude_sc16_aligned_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 1, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 1, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "neon_approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 2, "exact_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 4, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 6, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 7, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 2, "exact_u32_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "exact_float_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16_aligned_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "exact_u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 5, "exact_float_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 6, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 7, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
-    { 0, "exact_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16_aligned_exact_x86_avx2, cpu_supports_avx2 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16_exact_generic, NULL },
-    { 2, "approx_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16_aligned_approx_x86_avx2, cpu_supports_avx2 },
-    { 3, "exact_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_x86_avx2, cpu_supports_avx2 },
-    { 4, "approx_x86_avx2", "x86_avx2", starch_magnitude_sc16_approx_x86_avx2, cpu_supports_avx2 },
-    { 5, "approx_generic", "generic", starch_magnitude_sc16_approx_generic, NULL },
+    { 0, "exact_float_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16_aligned_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+    { 2, "exact_u32_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16_aligned_exact_u32_x86_avx2, cpu_supports_avx2 },
+    { 3, "exact_u32_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_u32_x86_avx2, cpu_supports_avx2 },
+    { 4, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 5, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -578,28 +569,33 @@ void starch_magnitude_sc16q11_set_wisdom (const char * const * received_wisdom)
 starch_magnitude_sc16q11_regentry starch_magnitude_sc16q11_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 1, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
+    { 0, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 1, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
     { 2, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 3, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 2, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 2, "exact_u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "exact_float_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 4, "11bit_table_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_11bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
-    { 6, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 5, "12bit_table_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_12bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 6, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 7, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 8, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
-    { 0, "exact_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_x86_avx2, cpu_supports_avx2 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 2, "approx_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_approx_x86_avx2, cpu_supports_avx2 },
+    { 0, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 2, "exact_u32_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_u32_x86_avx2, cpu_supports_avx2 },
     { 3, "11bit_table_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_11bit_table_x86_avx2, cpu_supports_avx2 },
-    { 4, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
-    { 5, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 4, "12bit_table_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_12bit_table_x86_avx2, cpu_supports_avx2 },
+    { 5, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 6, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 7, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -659,35 +655,42 @@ void starch_magnitude_sc16q11_aligned_set_wisdom (const char * const * received_
 starch_magnitude_sc16q11_aligned_regentry starch_magnitude_sc16q11_aligned_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 1, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
+    { 0, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 1, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
     { 2, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 3, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
-    { 0, "neon_approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 2, "exact_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 3, "approx_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 0, "neon_vrsqrte_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 2, "exact_u32_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "exact_float_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 4, "11bit_table_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_11bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 5, "exact_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 6, "approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 7, "11bit_table_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_11bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 8, "neon_approx_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_neon_approx_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
-    { 9, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
-    { 10, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 5, "12bit_table_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_aligned_12bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 6, "exact_u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 7, "exact_float_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_exact_float_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 8, "11bit_table_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_11bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 9, "12bit_table_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_12bit_table_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 10, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16q11_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 11, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 12, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 13, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
 #ifdef STARCH_MIX_X86
-    { 0, "exact_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_exact_x86_avx2, cpu_supports_avx2 },
-    { 1, "exact_generic", "generic", starch_magnitude_sc16q11_exact_generic, NULL },
-    { 2, "approx_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_approx_x86_avx2, cpu_supports_avx2 },
+    { 0, "exact_float_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 1, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 2, "exact_u32_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_exact_u32_x86_avx2, cpu_supports_avx2 },
     { 3, "11bit_table_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_11bit_table_x86_avx2, cpu_supports_avx2 },
-    { 4, "exact_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_x86_avx2, cpu_supports_avx2 },
-    { 5, "approx_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_approx_x86_avx2, cpu_supports_avx2 },
-    { 6, "11bit_table_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_11bit_table_x86_avx2, cpu_supports_avx2 },
-    { 7, "approx_generic", "generic", starch_magnitude_sc16q11_approx_generic, NULL },
-    { 8, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 4, "12bit_table_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_12bit_table_x86_avx2, cpu_supports_avx2 },
+    { 5, "exact_u32_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_u32_x86_avx2, cpu_supports_avx2 },
+    { 6, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_float_x86_avx2, cpu_supports_avx2 },
+    { 7, "11bit_table_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_11bit_table_x86_avx2, cpu_supports_avx2 },
+    { 8, "12bit_table_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_12bit_table_x86_avx2, cpu_supports_avx2 },
+    { 9, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 10, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 11, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_X86 */
     { 0, NULL, NULL, NULL, NULL }
 };
@@ -747,9 +750,9 @@ void starch_mean_power_u16_set_wisdom (const char * const * received_wisdom)
 starch_mean_power_u16_regentry starch_mean_power_u16_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
+    { 0, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
     { 1, "float_generic", "generic", starch_mean_power_u16_float_generic, NULL },
-    { 2, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
+    { 2, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM
@@ -828,9 +831,9 @@ void starch_mean_power_u16_aligned_set_wisdom (const char * const * received_wis
 starch_mean_power_u16_aligned_regentry starch_mean_power_u16_aligned_registry[] = {
   
 #ifdef STARCH_MIX_GENERIC
-    { 0, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
+    { 0, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
     { 1, "float_generic", "generic", starch_mean_power_u16_float_generic, NULL },
-    { 2, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
+    { 2, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
 #endif /* STARCH_MIX_GENERIC */
   
 #ifdef STARCH_MIX_ARM

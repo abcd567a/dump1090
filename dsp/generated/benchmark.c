@@ -42,6 +42,8 @@ static starch_benchmark_flavor_list *starch_benchmark_flavor_whitelist = NULL;
 static starch_benchmark_flavor_list *starch_benchmark_flavor_blacklist = NULL;
 
 static bool starch_benchmark_list_only = false;
+static bool starch_benchmark_validate_only = false;
+static bool starch_benchmark_validation_failed = false;
 static bool starch_benchmark_top_only = false;
 static unsigned starch_benchmark_iterations = 1;
 
@@ -149,6 +151,12 @@ static void starch_benchmark_one_magnitude_uc8( starch_magnitude_uc8_regentry * 
     /* verify correctness of the output */
     if (! starch_magnitude_uc8_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -256,6 +264,12 @@ static void starch_benchmark_one_magnitude_uc8_aligned( starch_magnitude_uc8_ali
     /* verify correctness of the output */
     if (! starch_magnitude_uc8_aligned_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -363,6 +377,12 @@ static void starch_benchmark_one_magnitude_power_uc8( starch_magnitude_power_uc8
     /* verify correctness of the output */
     if (! starch_magnitude_power_uc8_benchmark_verify ( arg0, arg1, arg2, arg3, arg4 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -470,6 +490,12 @@ static void starch_benchmark_one_magnitude_power_uc8_aligned( starch_magnitude_p
     /* verify correctness of the output */
     if (! starch_magnitude_power_uc8_aligned_benchmark_verify ( arg0, arg1, arg2, arg3, arg4 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -577,6 +603,12 @@ static void starch_benchmark_one_magnitude_sc16( starch_magnitude_sc16_regentry 
     /* verify correctness of the output */
     if (! starch_magnitude_sc16_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -684,6 +716,12 @@ static void starch_benchmark_one_magnitude_sc16_aligned( starch_magnitude_sc16_a
     /* verify correctness of the output */
     if (! starch_magnitude_sc16_aligned_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -791,6 +829,12 @@ static void starch_benchmark_one_magnitude_sc16q11( starch_magnitude_sc16q11_reg
     /* verify correctness of the output */
     if (! starch_magnitude_sc16q11_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -898,6 +942,12 @@ static void starch_benchmark_one_magnitude_sc16q11_aligned( starch_magnitude_sc1
     /* verify correctness of the output */
     if (! starch_magnitude_sc16q11_aligned_benchmark_verify ( arg0, arg1, arg2 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -1005,6 +1055,12 @@ static void starch_benchmark_one_mean_power_u16( starch_mean_power_u16_regentry 
     /* verify correctness of the output */
     if (! starch_mean_power_u16_benchmark_verify ( arg0, arg1, arg2, arg3 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -1112,6 +1168,12 @@ static void starch_benchmark_one_mean_power_u16_aligned( starch_mean_power_u16_a
     /* verify correctness of the output */
     if (! starch_mean_power_u16_aligned_benchmark_verify ( arg0, arg1, arg2, arg3 )) {
         fprintf(stderr, "skipped (verification failed)\n");
+        starch_benchmark_validation_failed = true;
+        return;
+    }
+
+    if (starch_benchmark_validate_only) {
+        fprintf(stderr, "validation ok\n");
         return;
     }
 
@@ -1308,6 +1370,7 @@ static void starch_benchmark_usage(const char *argv0)
         "  -N FLAVOR        Add FLAVOR to blacklist\n"
         "                     (default: no blacklist, run all runtime-supported flavors)\n"
         "  -l               List compiled-in implementations but don't benchmark them\n"
+        "  -V               Run validation tests, but don't run benchmarks\n"
         "  -t               Include only the top candidate per function in wisdom output\n"
         "  -i ITERS         Run benchmark ITERS times and use the mean. If ITERS > 2, ignore\n"
         "                   the smallest and largest runs when calculating the mean.\n"
@@ -1359,7 +1422,7 @@ int main(int argc, char **argv)
     const char *output_path = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "r:o:F:N:i:lht")) != -1) {
+    while ((opt = getopt(argc, argv, "r:o:F:N:i:lhtV")) != -1) {
         switch (opt) {
         case 'r':
             if (starch_read_wisdom(optarg) < 0) {
@@ -1399,6 +1462,10 @@ int main(int argc, char **argv)
 
         case 'i':
             starch_benchmark_iterations = atoi(optarg);
+            break;
+
+        case 'V':
+            starch_benchmark_validate_only = true;
             break;
 
         case 'h':
@@ -1519,5 +1586,5 @@ int main(int argc, char **argv)
         fprintf(stderr, "%s: wrote sorted wisdom to %s\n", argv[0], output_path);
     }
 
-    return 0;
+    return starch_benchmark_validation_failed ? 1 : 0;
 }
