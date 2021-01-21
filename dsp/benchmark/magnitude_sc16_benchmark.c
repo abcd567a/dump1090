@@ -50,27 +50,27 @@ void STARCH_BENCHMARK(magnitude_sc16) (void)
 
 bool STARCH_BENCHMARK_VERIFY(magnitude_sc16) (const sc16_t *in, uint16_t *out, unsigned len)
 {
-    const double max_error = 0.025; // tolerate 2.5% error
-    const double epsilon = 2.0;
+    const double max_error = 0.015; // tolerate 1.5% error
+    const double epsilon = 3.0;
     bool okay = true;
 
     for (unsigned i = 0; i < len; ++i) {
         double I = in[i].I / 32768.0;
         double Q = in[i].Q / 32768.0;
-        double expected = sqrt(I * I + Q * Q) * 65536;
+        double expected = round(sqrt(I * I + Q * Q) * 65536.0);
         if (expected > 65535.0)
-            expected = 65535;
-        expected = round(expected);
+            expected = 65535.0;
         double actual = out[i];
 
         double error = fabs(expected - actual);
         double error_fraction = error / (expected > epsilon ? expected : epsilon);
-        if (fabs(error) > epsilon && fabs(error_fraction) > max_error) {
-            fprintf(stderr, "verification failed: in[%u].I=%d in[%u].Q=%d out[%u]=%u expected=%.0f, error=%.2f%%\n",
+        if (error > epsilon && error_fraction > max_error) {
+            fprintf(stderr, "verification failed: in[%u].I=%d in[%u].Q=%d out[%u]=%u, expected=%.0f, error=%.2f%%\n",
                     i, in[i].I,
                     i, in[i].Q,
                     i, out[i],
-                    expected, error_fraction * 100.0);
+                    expected,
+                    error_fraction * 100.0);
             okay = false;
         }
     }
