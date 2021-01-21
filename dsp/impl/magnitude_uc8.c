@@ -88,31 +88,12 @@ void STARCH_IMPL(magnitude_uc8, exact) (const uc8_t *in, uint16_t *out, unsigned
 
 #include <arm_neon.h>
 
-void STARCH_IMPL_REQUIRES(magnitude_uc8, neon_approx, STARCH_FEATURE_NEON) (const uc8_t *in, uint16_t *out, unsigned len)
+void STARCH_IMPL_REQUIRES(magnitude_uc8, neon_vrsqrte, STARCH_FEATURE_NEON) (const uc8_t *in, uint16_t *out, unsigned len)
 {
     const uint8_t * restrict in_align = (const uint8_t *) STARCH_ALIGNED(in);
     uint16_t * restrict out_align = STARCH_ALIGNED(out);
 
-    const uint16x8_t offset = vdupq_n_u16((uint16_t) (127.5 * 256));
-
-    const int16x4_t constants0 = {
-        (int16_t)(0.99 * 32768),
-        (int16_t)(0.197 * 32768),
-        (int16_t)(0.84 * 32768),
-        (int16_t)(0.561 * 32768),
-    };
-    const unsigned constants0_lane_99 = 0;
-    const unsigned constants0_lane_197 = 1;
-    const unsigned constants0_lane_84 = 2;
-    const unsigned constants0_lane_561 = 3;
-
-    const int16x4_t constants1 = {
-        (int16_t)(0.4142135 * 32768),
-        0,
-        0,
-        0
-    };
-    const unsigned constants1_lane_4142 = 0;
+    const uint16x8_t offset = vdupq_n_u16((uint16_t) (127.4 * 256));
 
     unsigned len8 = len >> 3;
     while (len8--) {
@@ -124,24 +105,29 @@ void STARCH_IMPL_REQUIRES(magnitude_uc8, neon_approx, STARCH_FEATURE_NEON) (cons
         int16x8_t i_s16 = vreinterpretq_s16_u16(vsubq_u16(i_u16, offset));
         int16x8_t q_s16 = vreinterpretq_s16_u16(vsubq_u16(q_u16, offset));
 
-        // minval = min(|I|, |Q|)
-        // maxval = max(|I|, |Q|)
-        int16x8_t absi = vabsq_s16(i_s16);
-        int16x8_t absq = vabsq_s16(q_s16);
-        int16x8_t minval = vminq_s16(absi, absq);
-        int16x8_t maxval = vmaxq_s16(absi, absq);
+        // low half
+        int16x4_t i_s16_low = vget_low_s16(i_s16);
+        int16x4_t q_s16_low = vget_low_s16(q_s16);
+        uint32x4_t isq_low = vreinterpretq_u32_s32(vmull_s16(i_s16_low, i_s16_low));
+        uint32x4_t qsq_low = vreinterpretq_u32_s32(vmull_s16(q_s16_low, q_s16_low));
+        uint32x4_t magsq_low = vqaddq_u32(isq_low, qsq_low);
+        float32x4_t magsq_f32_low = vcvtq_n_f32_u32(magsq_low, 30);                      /* input values are Q15, magsq is Q30 */
+        float32x4_t mag_f32_low = vmulq_f32(vrsqrteq_f32(magsq_f32_low), magsq_f32_low); /* sqrt(x) = x * (1/sqrt(x)) */
+        uint16x4_t mag_u16_low = vqmovn_u32(vcvtq_n_u32_f32(mag_f32_low, 16));
 
-        // result =
-        //   0.99*maxval + 0.197*minval   if minval < 0.4142135 * maxval
-        //   0.84*maxval + 0.561*minval   if minval >= 0.4142135 * maxval
-        int16x8_t threshold = vqdmulhq_lane_s16(maxval, constants1, constants1_lane_4142);
-        int16x8_t lt_res = vqaddq_s16(vqrdmulhq_lane_s16(maxval, constants0, constants0_lane_99), vqrdmulhq_lane_s16(minval, constants0, constants0_lane_197));
-        int16x8_t ge_res = vqaddq_s16(vqrdmulhq_lane_s16(maxval, constants0, constants0_lane_84), vqrdmulhq_lane_s16(minval, constants0, constants0_lane_561));
-        uint16x8_t selector = vcgeq_s16(minval, threshold);
-        uint16x8_t result = vreinterpretq_u16_s16(vbslq_s16(selector, ge_res, lt_res));
-        uint16x8_t result2 = vqshlq_n_u16(result, 1);
+        // high half
+        int16x4_t i_s16_high = vget_high_s16(i_s16);
+        int16x4_t q_s16_high = vget_high_s16(q_s16);
+        uint32x4_t isq_high = vreinterpretq_u32_s32(vmull_s16(i_s16_high, i_s16_high));
+        uint32x4_t qsq_high = vreinterpretq_u32_s32(vmull_s16(q_s16_high, q_s16_high));
+        uint32x4_t magsq_high = vqaddq_u32(isq_high, qsq_high);
+        float32x4_t magsq_f32_high = vcvtq_n_f32_u32(magsq_high, 30);
+        float32x4_t mag_f32_high = vmulq_f32(vrsqrteq_f32(magsq_f32_high), magsq_f32_high);
+        uint16x4_t mag_u16_high = vqmovn_u32(vcvtq_n_u32_f32(mag_f32_high, 16));
 
-        vst1q_u16(out_align, result2);
+        // store
+        uint16x8_t result = vcombine_u16(mag_u16_low, mag_u16_high);
+        vst1q_u16(out_align, result);
 
         in_align += 16;
         out_align += 8;
@@ -152,30 +138,23 @@ void STARCH_IMPL_REQUIRES(magnitude_uc8, neon_approx, STARCH_FEATURE_NEON) (cons
         uint8x8x2_t iq = vld2_dup_u8(in_align);
 
         // widen to 16 bits, convert to signed
-        uint16x4_t i_u16 = vget_low_u16(vshll_n_u8(iq.val[0], 8));
-        uint16x4_t q_u16 = vget_low_u16(vshll_n_u8(iq.val[1], 8));
-        int16x4_t i_s16 = vreinterpret_s16_u16(vsub_u16(i_u16, vget_low_u16(offset)));
-        int16x4_t q_s16 = vreinterpret_s16_u16(vsub_u16(q_u16, vget_low_u16(offset)));
+        uint16x8_t i_u16 = vshll_n_u8(iq.val[0], 8);
+        uint16x8_t q_u16 = vshll_n_u8(iq.val[1], 8);
+        int16x8_t i_s16 = vreinterpretq_s16_u16(vsubq_u16(i_u16, offset));
+        int16x8_t q_s16 = vreinterpretq_s16_u16(vsubq_u16(q_u16, offset));
 
-        // minval = min(|I|, |Q|)
-        // maxval = max(|I|, |Q|)
-        int16x4_t absi = vabs_s16(i_s16);
-        int16x4_t absq = vabs_s16(q_s16);
-        int16x4_t minval = vmin_s16(absi, absq);
-        int16x4_t maxval = vmax_s16(absi, absq);
-
-        // result =
-        //   0.99*maxval + 0.197*minval   if minval < 0.4142135 * maxval
-        //   0.84*maxval + 0.561*minval   if minval >= 0.4142135 * maxval
-        int16x4_t threshold = vqdmulh_lane_s16(maxval, constants1, constants1_lane_4142);
-        int16x4_t lt_res = vqadd_s16(vqrdmulh_lane_s16(maxval, constants0, constants0_lane_99), vqrdmulh_lane_s16(minval, constants0, constants0_lane_197));
-        int16x4_t ge_res = vqadd_s16(vqrdmulh_lane_s16(maxval, constants0, constants0_lane_84), vqrdmulh_lane_s16(minval, constants0, constants0_lane_561));
-        uint16x4_t selector = vcge_s16(minval, threshold);
-        uint16x4_t result = vreinterpret_u16_s16(vbsl_s16(selector, ge_res, lt_res));
-        uint16x4_t result2 = vqshl_n_u16(result, 1);
+        // low half (don't care about high half)
+        int16x4_t i_s16_low = vget_low_s16(i_s16);
+        int16x4_t q_s16_low = vget_low_s16(q_s16);
+        uint32x4_t isq_low = vreinterpretq_u32_s32(vmull_s16(i_s16_low, i_s16_low));
+        uint32x4_t qsq_low = vreinterpretq_u32_s32(vmull_s16(q_s16_low, q_s16_low));
+        uint32x4_t magsq_low = vqaddq_u32(isq_low, qsq_low);
+        float32x4_t magsq_f32_low = vcvtq_n_f32_u32(magsq_low, 30); /* input values are Q15, magsq is Q30 */
+        float32x4_t mag_f32_low = vmulq_f32(vrsqrteq_f32(magsq_f32_low), magsq_f32_low); /* sqrt(x) = x * (1/sqrt(x)) */
+        uint16x4_t mag_u16_low = vqmovn_u32(vcvtq_n_u32_f32(mag_f32_low, 16));
 
         // store 1 lane only
-        vst1_lane_u16(out_align, result2, 0);
+        vst1_lane_u16(out_align, mag_u16_low, 0);
 
         in_align += 2;
         out_align += 1;
