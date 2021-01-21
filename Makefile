@@ -31,12 +31,22 @@ ifeq ($(PKGCONFIG), yes)
   ifndef LIMESDR
     LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
   endif
+
+  ifndef PXSDR
+    # no pkg-config support yet
+    ifdef LIBPXSDR_DIR
+      PXSDR := yes
+    else
+      PXSDR := no
+    endif
+  endif
 else
   # pkg-config not available. Only use explicitly enabled libraries.
   RTLSDR ?= no
   BLADERF ?= no
   HACKRF ?= no
   LIMESDR ?= no
+  PXSDR ?= no
 endif
 
 UNAME := $(shell uname)
@@ -78,9 +88,6 @@ ifeq ($(CPUFEATURES),yes)
   include Makefile.cpufeatures
   CPPFLAGS += -DENABLE_CPUFEATURES -Icpu_features/include
 endif
-
-RTLSDR ?= yes
-BLADERF ?= yes
 
 ifeq ($(RTLSDR), yes)
   SDR_OBJ += sdr_rtlsdr.o
@@ -132,6 +139,12 @@ ifeq ($(LIMESDR), yes)
   LIBS_SDR += $(shell pkg-config --libs LimeSuite)
 endif
 
+ifeq ($(PXSDR), yes)
+  SDR_OBJ += sdr_pxsdr.o
+  CPPFLAGS += -DENABLE_PXSDR
+  CFLAGS += -I$(LIBPXSDR_DIR)
+  LIBS_SDR += -L$(LIBPXSDR_DIR) -lpxsdr $(LIBS_USB)
+endif
 
 ##
 ## starch (runtime DSP code selection) mix, architecture-specific
@@ -168,6 +181,7 @@ showconfig:
 	@echo "  BladeRF support: $(BLADERF)" >&2
 	@echo "  HackRF support:  $(HACKRF)" >&2
 	@echo "  LimeSDR support: $(LIMESDR)" >&2
+	@echo "  PXSDR support:   $(PXSDR)" >&2
 
 %.o: %.c *.h
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
