@@ -155,7 +155,7 @@ else
   CPPFLAGS += -DSTARCH_MIX_GENERIC
 endif
 
-all: showconfig dump1090 view1090
+all: showconfig dump1090 view1090 starch-benchmark
 
 STARCH_COMPILE := $(CC) $(CPPFLAGS) $(CFLAGS) -c
 include dsp/generated/makefile.$(STARCH_MIX)
