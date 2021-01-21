@@ -69,44 +69,15 @@ void STARCH_IMPL(magnitude_uc8, exact) (const uc8_t *in, uint16_t *out, unsigned
     unsigned len1 = len;
 
     while (len1--) {
-        float I = (in_align[0].I - 127.5);
-        float Q = (in_align[0].Q - 127.5);
+        float I = (in_align[0].I - 127.4);
+        float Q = (in_align[0].Q - 127.4);
 
         float magsq = I * I + Q * Q;
-        float mag = sqrtf(magsq) * 65535.0 / 127.5;
+        float mag = sqrtf(magsq) * 65536.0 / 128.0;
         if (mag > 65535.0)
             mag = 65535.0;
 
         out_align[0] = (uint16_t)mag;
-
-        in_align += 1;
-        out_align += 1;
-    }
-}
-
-void STARCH_IMPL(magnitude_uc8, approx) (const uc8_t *in, uint16_t *out, unsigned len)
-{
-    const uc8_t * restrict in_align = STARCH_ALIGNED(in);
-    uint16_t * restrict out_align = STARCH_ALIGNED(out);
-
-    unsigned len1 = len;
-
-    while (len1--) {
-        float I = fabsf(in_align[0].I - 127.5);
-        float Q = fabsf(in_align[0].Q - 127.5);
-
-        float minval = (I < Q ? I : Q);
-        float maxval = (I < Q ? Q : I);
-
-        float approx;
-        if (minval < 0.4142135 * maxval)
-            approx = (0.99 * maxval + 0.197 * minval)  * 65535 / 127.5;
-        else
-            approx = (0.84 * maxval + 0.561 * minval)  * 65535 / 127.5;
-        if (approx > 65535)
-            approx = 65535;
-
-        out_align[0] = (uint16_t)approx;
 
         in_align += 1;
         out_align += 1;

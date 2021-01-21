@@ -21,17 +21,18 @@ const uint16_t * get_uc8_mag_table()
             for (int q = 0; q <= 255; q++) {
                 float fI, fQ, magsq;
 
-                fI = (i - 127.5) / 127.5;
-                fQ = (q - 127.5) / 127.5;
+                fI = (i - 127.4) / 128;
+                fQ = (q - 127.4) / 128;
                 magsq = fI * fI + fQ * fQ;
-                if (magsq > 1)
-                    magsq = 1;
-                float mag = sqrtf(magsq);
+
+                float mag = round(sqrtf(magsq) * 65536.0f);
+                if (mag > 65535)
+                    mag = 65535;
 
                 uc8_u16_t u;
                 u.uc8.I = i;
                 u.uc8.Q = q;
-                table[u.u16] = round(mag * 65535.0f);
+                table[u.u16] = mag;
             }
         }
     }
