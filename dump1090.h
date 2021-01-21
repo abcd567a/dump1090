@@ -81,6 +81,7 @@
 #include <limits.h>
 
 #include "compat/compat.h"
+#include "dsp/generated/starch.h"
 
 // ============================= #defines ===============================
 

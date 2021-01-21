@@ -48,6 +48,7 @@
 //   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dump1090.h"
+#include "cpu.h"
 
 #include <stdarg.h>
 
@@ -258,16 +259,35 @@ static void showVersion()
 #ifdef ENABLE_LIMESDR
            "ENABLE_LIMESDR "
 #endif
-#ifdef SC16Q11_TABLE_BITS
-    // This is a little silly, but that's how the preprocessor works..
-#define _stringize(x) #x
-#define stringize(x) _stringize(x)
-           "SC16Q11_TABLE_BITS=" stringize(SC16Q11_TABLE_BITS)
-#undef stringize
-#undef _stringize
-#endif
            );
     printf("-----------------------------------------------------------------------------\n");
+}
+
+static void showDSP()
+{
+    printf("  detected runtime CPU features: ");
+    if (cpu_supports_avx())
+        printf("AVX ");
+    if (cpu_supports_avx2())
+        printf("AVX2 ");
+    if (cpu_supports_armv7_neon_vfpv4())
+        printf("ARMv7+NEON+VFPv4 ");
+    printf("\n");
+
+    printf("  selected DSP implementations: \n");
+#define SHOW(x) do {                                                    \
+        printf("    %-40s %s\n", #x , starch_ ## x ## _select()->name);  \
+        printf("    %-40s %s\n", #x "_aligned", starch_ ## x ## _aligned_select()->name); \
+    } while(0)
+
+    SHOW(magnitude_uc8);
+    SHOW(magnitude_power_uc8);
+    SHOW(magnitude_sc16);
+    SHOW(magnitude_sc16q11);
+    SHOW(mean_power_u16);
+
+#undef SHOW
+
     printf("\n");
 }
 
@@ -327,8 +347,11 @@ static void showHelp(void)
 "--write-json <dir>       Periodically write json output to <dir> (for serving by a separate webserver)\n"
 "--write-json-every <t>   Write json output every t seconds (default 1)\n"
 "--json-location-accuracy <n>  Accuracy of receiver location in json metadata: 0=no location, 1=approximate, 2=exact\n"
+#if 0
 "--dcfilter               Apply a 1Hz DC filter to input data (requires more CPU)\n"
-"--version                Show version and build options\n"
+#endif
+"--wisdom <path>          Read DSP wisdom from given path\n"
+"--version                Show version, build and DSP options\n"
 "--help                   Show this help\n"
     );
 }
@@ -488,7 +511,11 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--gain") && more) {
             Modes.gain = (int) (atof(argv[++j])*10); // Gain is in tens of DBs
         } else if (!strcmp(argv[j],"--dcfilter")) {
+#if 0
             Modes.dc_filter = 1;
+#else
+            fprintf(stderr, "--dcfilter option ignored (please raise an issue on github if you have a usecase that needs this)\n");
+#endif
         } else if (!strcmp(argv[j],"--measure-noise")) {
             // Ignored
         } else if (!strcmp(argv[j],"--fix")) {
@@ -612,6 +639,7 @@ int main(int argc, char **argv) {
             exit(0);
         } else if (!strcmp(argv[j],"--version")) {
             showVersion();
+            showDSP();
             exit(0);
         } else if (!strcmp(argv[j],"--quiet")) {
             Modes.quiet = 1;
@@ -629,6 +657,12 @@ int main(int argc, char **argv) {
                 Modes.json_interval = 100;
         } else if (!strcmp(argv[j], "--json-location-accuracy") && more) {
             Modes.json_location_accuracy = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--wisdom") && more) {
+            if (starch_read_wisdom (argv[++j]) < 0) {
+                fprintf(stderr,
+                        "Failed to read wisdom file %s: %s\n", argv[j], strerror(errno));
+                exit(1);
+            }
         } else if (sdrHandleOption(argc, argv, &j)) {
             /* handled */
         } else {
