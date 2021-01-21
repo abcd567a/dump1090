@@ -1,37 +1,31 @@
-#
-# AVX2 path, based on results from a i7-6500U
-#
+# derived from wisdom.i7-6500u / wisdom.i7-6500u.generic
 
-magnitude_uc8                            lookup_unroll_4_x86_avx2                  # 55244 ns/call
-magnitude_uc8_aligned                    lookup_unroll_4_x86_avx2_aligned          # 55201 ns/call
+magnitude_power_uc8                      twopass_x86_avx2                          # 65331 ns/call
+magnitude_power_uc8                      twopass_generic                           # 72679 ns/call
 
-magnitude_power_uc8                      twopass_x86_avx2                          # 67864 ns/call
-magnitude_power_uc8_aligned              twopass_x86_avx2_aligned                  # 67620 ns/call
+magnitude_power_uc8_aligned              twopass_x86_avx2_aligned                  # 66294 ns/call
+magnitude_power_uc8_aligned              twopass_generic                           # 68415 ns/call
 
-magnitude_sc16                           exact_x86_avx2                            # 237362 ns/call
-magnitude_sc16_aligned                   exact_x86_avx2_aligned                    # 201979 ns/call
+magnitude_sc16                           exact_float_x86_avx2                      # 238602 ns/call
+magnitude_sc16                           exact_float_generic                       # 1359997 ns/call
 
-magnitude_sc16q11                        exact_x86_avx2                            # 58762 ns/call
-magnitude_sc16q11_aligned                exact_x86_avx2_aligned                    # 50139 ns/call
+magnitude_sc16_aligned                   exact_float_x86_avx2_aligned              # 202484 ns/call
+magnitude_sc16_aligned                   exact_float_generic                       # 1351564 ns/call
 
-mean_power_u16                           u32_x86_avx2                              # 11580 ns/call
-mean_power_u16_aligned                   u32_x86_avx2_aligned                      # 11584 ns/call
+magnitude_sc16q11                        exact_float_x86_avx2                      # 65311 ns/call
+magnitude_sc16q11                        exact_float_generic                       # 513012 ns/call
 
-#
-# Generic path, again based on an i7-6500U
-#
+magnitude_sc16q11_aligned                exact_float_x86_avx2_aligned              # 56217 ns/call
+magnitude_sc16q11_aligned                exact_float_generic                       # 510226 ns/call
 
-magnitude_uc8                            lookup_unroll_4_generic                   # 55209 ns/call
-magnitude_uc8_aligned                    lookup_unroll_4_generic                   # 55200 ns/call
+magnitude_uc8                            lookup_unroll_4_x86_avx2                  # 53581 ns/call
+magnitude_uc8                            lookup_unroll_4_generic                   # 52709 ns/call
 
-magnitude_power_uc8                      lookup_unroll_4_generic                   # 71936 ns/call
-magnitude_power_uc8_aligned              lookup_unroll_4_generic                   # 71443 ns/call
+magnitude_uc8_aligned                    lookup_unroll_4_x86_avx2                  # 53870 ns/call
+magnitude_uc8_aligned                    lookup_unroll_4_generic                   # 54033 ns/call
 
-magnitude_sc16                           exact_generic                             # 1348246 ns/call
-magnitude_sc16_aligned                   exact_generic                             # 1338196 ns/call
+mean_power_u16                           u32_x86_avx2                              # 11627 ns/call
+mean_power_u16                           u32_generic                               # 18252 ns/call
 
-magnitude_sc16q11                        exact_generic                             # 529186 ns/call
-magnitude_sc16q11_aligned                exact_generic                             # 526736 ns/call
-
-mean_power_u16                           u32_generic                               # 18148 ns/call
-mean_power_u16_aligned                   u32_generic                               # 18164 ns/call
+mean_power_u16_aligned                   u32_x86_avx2_aligned                      # 11572 ns/call
+mean_power_u16_aligned                   u32_generic                               # 18207 ns/call

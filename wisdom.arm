@@ -1,56 +1,31 @@
-#
-# ARMv7 with NEON - based on results from a Pi 4B.
-#
+# derived from wisdom.pi4b and wisdom.pi0w
 
-# For the UC8 cases, we prefer the non-approximation cases as the absolute performance difference is
-# not much and it's hard to confirm that there's no significant change in demodulator behavior when
-# the approximation path is used
+magnitude_power_uc8                      neon_vrsqrte_armv7a_neon_vfpv4            # 225511 ns/call
+magnitude_power_uc8                      lookup_unroll_4_generic                   # 5464685 ns/call
 
-# magnitude_uc8                            neon_approx_armv7a_neon_vfpv4           # 187307 ns/call
-magnitude_uc8                            lookup_armv7a_neon_vfpv4                  # 290975 ns/call
+magnitude_power_uc8_aligned              neon_vrsqrte_armv7a_neon_vfpv4_aligned    # 212204 ns/call
+magnitude_power_uc8_aligned              lookup_unroll_4_generic                   # 5516196 ns/call
 
-# magnitude_uc8_aligned                    neon_approx_armv7a_neon_vfpv4_aligned   # 187049 ns/call
-magnitude_uc8_aligned                    lookup_armv7a_neon_vfpv4_aligned          # 282056 ns/call
+magnitude_sc16                           neon_vrsqrte_armv7a_neon_vfpv4            # 684978 ns/call
+magnitude_sc16                           exact_float_generic                       # 28623479 ns/call
 
-# nb: if the faster magnitude_uc8 path is used, then the twopass versions may be faster than the combined version here
-magnitude_power_uc8                      lookup_armv7a_neon_vfpv4                  # 312744 ns/call
-magnitude_power_uc8_aligned              lookup_armv7a_neon_vfpv4_aligned          # 304113 ns/call
+magnitude_sc16_aligned                   neon_vrsqrte_armv7a_neon_vfpv4_aligned    # 639779 ns/call
+magnitude_sc16_aligned                   exact_float_generic                       # 28613950 ns/call
 
-# For the SC16 / SC16Q11 cases, the approximation paths are a lot faster and we don't have the
-# same regression testing issue, so so use the fast version
+magnitude_sc16q11                        neon_vrsqrte_armv7a_neon_vfpv4            # 166113 ns/call
+magnitude_sc16q11                        exact_float_generic                       # 7131190 ns/call
 
-magnitude_sc16                           neon_approx_armv7a_neon_vfpv4             # 674111 ns/call
-magnitude_sc16_aligned                   neon_approx_armv7a_neon_vfpv4_aligned     # 638790 ns/call
-# best exact paths:
-#  magnitude_sc16                        exact_armv7a_neon_vfpv4                   # 3019698 ns/call
-#  magnitude_sc16_aligned                exact_armv7a_neon_vfpv4_aligned           # 3025770 ns/call
+magnitude_sc16q11_aligned                neon_vrsqrte_armv7a_neon_vfpv4_aligned    # 155221 ns/call
+magnitude_sc16q11_aligned                exact_float_generic                       # 7124159 ns/call
 
-magnitude_sc16q11                        neon_approx_armv7a_neon_vfpv4             # 174727 ns/call
-magnitude_sc16q11_aligned                neon_approx_armv7a_neon_vfpv4_aligned     # 166310 ns/call
-# best exact paths:
-#  magnitude_sc16q11                     exact_armv7a_neon_vfpv4                   # 770079 ns/call
-#  magnitude_sc16q11_aligned             exact_armv7a_neon_vfpv4_aligned           # 765758 ns/call
+magnitude_uc8                            neon_vrsqrte_armv7a_neon_vfpv4            # 188746 ns/call
+magnitude_uc8                            lookup_unroll_4_generic                   # 4179036 ns/call
 
-mean_power_u16                           u32_armv7a_neon_vfpv4                     # 45596 ns/call
-mean_power_u16_aligned                   u32_armv7a_neon_vfpv4_aligned             # 44924 ns/call
+magnitude_uc8_aligned                    neon_vrsqrte_armv7a_neon_vfpv4_aligned    # 187209 ns/call
+magnitude_uc8_aligned                    lookup_unroll_4_generic                   # 4445877 ns/call
 
+mean_power_u16                           u32_armv7a_neon_vfpv4                     # 45484 ns/call
+mean_power_u16                           u64_generic                               # 990367 ns/call
 
-#
-# Pre-ARMv7 (no NEON) generic path - based on results from a Pi 0W
-#
-
-magnitude_power_uc8                      lookup_unroll_4_generic                   # 5776111 ns/call
-magnitude_power_uc8_aligned              lookup_unroll_4_generic                   # 5843967 ns/call
-
-magnitude_uc8                            lookup_unroll_4_generic                   # 4550043 ns/call
-magnitude_uc8_aligned                    lookup_unroll_4_generic                   # 4776662 ns/call
-
-mean_power_u16                           u64_generic                               # 976285 ns/call
-mean_power_u16_aligned                   u64_generic                               # 983152 ns/call
-
-magnitude_sc16                           exact_generic                             # 30550572 ns/call
-magnitude_sc16_aligned                   exact_generic                             # 30844884 ns/call
-
-magnitude_sc16q11                        exact_generic                             # 7634715 ns/call
-magnitude_sc16q11_aligned                exact_generic                             # 7719737 ns/call
-
+mean_power_u16_aligned                   u32_armv7a_neon_vfpv4_aligned             # 44929 ns/call
+mean_power_u16_aligned                   u64_generic                               # 934445 ns/call
