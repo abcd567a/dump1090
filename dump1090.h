@@ -336,6 +336,7 @@ struct _Modes {                             // Internal state
     uint32_t show_only;              // Only show messages from this ICAO
     int   interactive;               // Interactive mode
     uint64_t interactive_display_ttl;// Interactive mode: TTL display
+    int interactive_display_size;    // Size of TTL display
     uint64_t stats;                  // Interval (millis) between stats dumps,
     int   stats_range_histo;         // Collect/show a range histogram?
     int   onlyaddr;                  // Print only ICAO addresses

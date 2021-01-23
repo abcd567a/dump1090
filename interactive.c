@@ -180,10 +180,11 @@ void interactiveShowData(void) {
                 snprintf(strFl, 7, "%5d ", convert_altitude(a->altitude_baro));
             }
 
-            mvprintw(row, 0, "%s%06X %-4s  %-4s  %-8s %6s %3s  %3s  %7s %8s %5.1f %5d %2.0f",
+            mvprintw(row, 0, "%s%06X %-4s  %-4s  %-8s %6s %3s  %3s  %7s %8s %5.1f %5d %*.0f",
                      (a->addr & MODES_NON_ICAO_ADDRESS) ? "~" : " ", (a->addr & 0xffffff),
                      strMode, strSquawk, a->callsign, strFl, strGs, strTt,
-                     strLat, strLon, 10 * log10(signalAverage), msgs, (now - a->seen)/1000.0);
+                     strLat, strLon, 10 * log10(signalAverage), msgs,
+                     Modes.interactive_display_size, (now - a->seen)/1000.0);
             ++row;
         }
         a = a->next;

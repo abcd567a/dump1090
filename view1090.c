@@ -168,6 +168,7 @@ int main(int argc, char **argv) {
             Modes.interactive = 0;
         } else if (!strcmp(argv[j],"--interactive-ttl") && more) {
             Modes.interactive_display_ttl = (uint64_t)(1000 * atof(argv[++j]));
+	    Modes.interactive_display_size = strlen(argv[j]);
         } else if (!strcmp(argv[j],"--lat") && more) {
             Modes.fUserLat = atof(argv[++j]);
         } else if (!strcmp(argv[j],"--lon") && more) {
