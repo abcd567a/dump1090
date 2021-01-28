@@ -29,3 +29,11 @@ mean_power_u16                           u64_generic                            
 
 mean_power_u16_aligned                   u32_armv7a_neon_vfpv4_aligned             # 44929 ns/call
 mean_power_u16_aligned                   u64_generic                               # 934445 ns/call
+
+boxcar_u16                               u32_armv7a_neon_vfpv4                     # 176317 ns/call
+
+boxcar_u16_aligned                       u32_armv7a_neon_vfpv4_aligned             # 175564 ns/call
+
+preamble_u16                             u32_single_armv7a_neon_vfpv4              # 77703 ns/call
+
+preamble_u16_aligned                     u32_single_armv7a_neon_vfpv4_aligned      # 74147 ns/call

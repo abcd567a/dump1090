@@ -864,6 +864,302 @@ starch_mean_power_u16_aligned_regentry starch_mean_power_u16_aligned_registry[] 
     { 0, NULL, NULL, NULL, NULL }
 };
 
+/* dispatcher / registry for boxcar_u16 */
+
+starch_boxcar_u16_regentry * starch_boxcar_u16_select() {
+    for (starch_boxcar_u16_regentry *entry = starch_boxcar_u16_registry;
+         entry->name;
+         ++entry)
+    {
+        if (entry->flavor_supported && !(entry->flavor_supported()))
+            continue;
+        return entry;
+    }
+    return NULL;
+}
+
+static void starch_boxcar_u16_dispatch ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 ) {
+    starch_boxcar_u16_regentry *entry = starch_boxcar_u16_select();
+    if (!entry)
+        abort();
+
+    starch_boxcar_u16 = entry->callable;
+    starch_boxcar_u16 ( arg0, arg1, arg2, arg3 );
+}
+
+starch_boxcar_u16_ptr starch_boxcar_u16 = starch_boxcar_u16_dispatch;
+
+void starch_boxcar_u16_set_wisdom (const char * const * received_wisdom)
+{
+    /* re-rank the registry based on received wisdom */
+    starch_boxcar_u16_regentry *entry;
+    for (entry = starch_boxcar_u16_registry; entry->name; ++entry) {
+        const char * const *search;
+        for (search = received_wisdom; *search; ++search) {
+            if (!strcmp(*search, entry->name)) {
+                break;
+            }
+        }
+        if (*search) {
+            /* matches an entry in the wisdom list, order by position in the list */
+            entry->rank = search - received_wisdom;
+        } else {
+            /* no match, rank after all possible matches, retaining existing order */
+            entry->rank = (search - received_wisdom) + (entry - starch_boxcar_u16_registry);
+        }
+    }
+
+    /* re-sort based on the new ranking */
+    qsort(starch_boxcar_u16_registry, entry - starch_boxcar_u16_registry, sizeof(starch_boxcar_u16_regentry), starch_regentry_rank_compare);
+
+    /* reset the implementation pointer so the next call will re-select */
+    starch_boxcar_u16 = starch_boxcar_u16_dispatch;
+}
+
+starch_boxcar_u16_regentry starch_boxcar_u16_registry[] = {
+  
+#ifdef STARCH_MIX_GENERIC
+    { 0, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_GENERIC */
+  
+#ifdef STARCH_MIX_ARM
+    { 0, "u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_boxcar_u16_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_X86
+    { 0, "u32_x86_avx2", "x86_avx2", starch_boxcar_u16_u32_x86_avx2, cpu_supports_avx2 },
+    { 1, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_X86 */
+    { 0, NULL, NULL, NULL, NULL }
+};
+
+/* dispatcher / registry for boxcar_u16_aligned */
+
+starch_boxcar_u16_aligned_regentry * starch_boxcar_u16_aligned_select() {
+    for (starch_boxcar_u16_aligned_regentry *entry = starch_boxcar_u16_aligned_registry;
+         entry->name;
+         ++entry)
+    {
+        if (entry->flavor_supported && !(entry->flavor_supported()))
+            continue;
+        return entry;
+    }
+    return NULL;
+}
+
+static void starch_boxcar_u16_aligned_dispatch ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 ) {
+    starch_boxcar_u16_aligned_regentry *entry = starch_boxcar_u16_aligned_select();
+    if (!entry)
+        abort();
+
+    starch_boxcar_u16_aligned = entry->callable;
+    starch_boxcar_u16_aligned ( arg0, arg1, arg2, arg3 );
+}
+
+starch_boxcar_u16_aligned_ptr starch_boxcar_u16_aligned = starch_boxcar_u16_aligned_dispatch;
+
+void starch_boxcar_u16_aligned_set_wisdom (const char * const * received_wisdom)
+{
+    /* re-rank the registry based on received wisdom */
+    starch_boxcar_u16_aligned_regentry *entry;
+    for (entry = starch_boxcar_u16_aligned_registry; entry->name; ++entry) {
+        const char * const *search;
+        for (search = received_wisdom; *search; ++search) {
+            if (!strcmp(*search, entry->name)) {
+                break;
+            }
+        }
+        if (*search) {
+            /* matches an entry in the wisdom list, order by position in the list */
+            entry->rank = search - received_wisdom;
+        } else {
+            /* no match, rank after all possible matches, retaining existing order */
+            entry->rank = (search - received_wisdom) + (entry - starch_boxcar_u16_aligned_registry);
+        }
+    }
+
+    /* re-sort based on the new ranking */
+    qsort(starch_boxcar_u16_aligned_registry, entry - starch_boxcar_u16_aligned_registry, sizeof(starch_boxcar_u16_aligned_regentry), starch_regentry_rank_compare);
+
+    /* reset the implementation pointer so the next call will re-select */
+    starch_boxcar_u16_aligned = starch_boxcar_u16_aligned_dispatch;
+}
+
+starch_boxcar_u16_aligned_regentry starch_boxcar_u16_aligned_registry[] = {
+  
+#ifdef STARCH_MIX_GENERIC
+    { 0, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_GENERIC */
+  
+#ifdef STARCH_MIX_ARM
+    { 0, "u32_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_boxcar_u16_aligned_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "u32_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_boxcar_u16_u32_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 2, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_X86
+    { 0, "u32_x86_avx2_aligned", "x86_avx2", starch_boxcar_u16_aligned_u32_x86_avx2, cpu_supports_avx2 },
+    { 1, "u32_x86_avx2", "x86_avx2", starch_boxcar_u16_u32_x86_avx2, cpu_supports_avx2 },
+    { 2, "u32_generic", "generic", starch_boxcar_u16_u32_generic, NULL },
+#endif /* STARCH_MIX_X86 */
+    { 0, NULL, NULL, NULL, NULL }
+};
+
+/* dispatcher / registry for preamble_u16 */
+
+starch_preamble_u16_regentry * starch_preamble_u16_select() {
+    for (starch_preamble_u16_regentry *entry = starch_preamble_u16_registry;
+         entry->name;
+         ++entry)
+    {
+        if (entry->flavor_supported && !(entry->flavor_supported()))
+            continue;
+        return entry;
+    }
+    return NULL;
+}
+
+static void starch_preamble_u16_dispatch ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 ) {
+    starch_preamble_u16_regentry *entry = starch_preamble_u16_select();
+    if (!entry)
+        abort();
+
+    starch_preamble_u16 = entry->callable;
+    starch_preamble_u16 ( arg0, arg1, arg2, arg3 );
+}
+
+starch_preamble_u16_ptr starch_preamble_u16 = starch_preamble_u16_dispatch;
+
+void starch_preamble_u16_set_wisdom (const char * const * received_wisdom)
+{
+    /* re-rank the registry based on received wisdom */
+    starch_preamble_u16_regentry *entry;
+    for (entry = starch_preamble_u16_registry; entry->name; ++entry) {
+        const char * const *search;
+        for (search = received_wisdom; *search; ++search) {
+            if (!strcmp(*search, entry->name)) {
+                break;
+            }
+        }
+        if (*search) {
+            /* matches an entry in the wisdom list, order by position in the list */
+            entry->rank = search - received_wisdom;
+        } else {
+            /* no match, rank after all possible matches, retaining existing order */
+            entry->rank = (search - received_wisdom) + (entry - starch_preamble_u16_registry);
+        }
+    }
+
+    /* re-sort based on the new ranking */
+    qsort(starch_preamble_u16_registry, entry - starch_preamble_u16_registry, sizeof(starch_preamble_u16_regentry), starch_regentry_rank_compare);
+
+    /* reset the implementation pointer so the next call will re-select */
+    starch_preamble_u16 = starch_preamble_u16_dispatch;
+}
+
+starch_preamble_u16_regentry starch_preamble_u16_registry[] = {
+  
+#ifdef STARCH_MIX_GENERIC
+    { 0, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 1, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_GENERIC */
+  
+#ifdef STARCH_MIX_ARM
+    { 0, "u32_single_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_preamble_u16_u32_single_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "u32_separate_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_preamble_u16_u32_separate_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 2, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 3, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_X86
+    { 0, "u32_single_x86_avx2", "x86_avx2", starch_preamble_u16_u32_single_x86_avx2, cpu_supports_avx2 },
+    { 1, "u32_separate_x86_avx2", "x86_avx2", starch_preamble_u16_u32_separate_x86_avx2, cpu_supports_avx2 },
+    { 2, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 3, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_X86 */
+    { 0, NULL, NULL, NULL, NULL }
+};
+
+/* dispatcher / registry for preamble_u16_aligned */
+
+starch_preamble_u16_aligned_regentry * starch_preamble_u16_aligned_select() {
+    for (starch_preamble_u16_aligned_regentry *entry = starch_preamble_u16_aligned_registry;
+         entry->name;
+         ++entry)
+    {
+        if (entry->flavor_supported && !(entry->flavor_supported()))
+            continue;
+        return entry;
+    }
+    return NULL;
+}
+
+static void starch_preamble_u16_aligned_dispatch ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 ) {
+    starch_preamble_u16_aligned_regentry *entry = starch_preamble_u16_aligned_select();
+    if (!entry)
+        abort();
+
+    starch_preamble_u16_aligned = entry->callable;
+    starch_preamble_u16_aligned ( arg0, arg1, arg2, arg3 );
+}
+
+starch_preamble_u16_aligned_ptr starch_preamble_u16_aligned = starch_preamble_u16_aligned_dispatch;
+
+void starch_preamble_u16_aligned_set_wisdom (const char * const * received_wisdom)
+{
+    /* re-rank the registry based on received wisdom */
+    starch_preamble_u16_aligned_regentry *entry;
+    for (entry = starch_preamble_u16_aligned_registry; entry->name; ++entry) {
+        const char * const *search;
+        for (search = received_wisdom; *search; ++search) {
+            if (!strcmp(*search, entry->name)) {
+                break;
+            }
+        }
+        if (*search) {
+            /* matches an entry in the wisdom list, order by position in the list */
+            entry->rank = search - received_wisdom;
+        } else {
+            /* no match, rank after all possible matches, retaining existing order */
+            entry->rank = (search - received_wisdom) + (entry - starch_preamble_u16_aligned_registry);
+        }
+    }
+
+    /* re-sort based on the new ranking */
+    qsort(starch_preamble_u16_aligned_registry, entry - starch_preamble_u16_aligned_registry, sizeof(starch_preamble_u16_aligned_regentry), starch_regentry_rank_compare);
+
+    /* reset the implementation pointer so the next call will re-select */
+    starch_preamble_u16_aligned = starch_preamble_u16_aligned_dispatch;
+}
+
+starch_preamble_u16_aligned_regentry starch_preamble_u16_aligned_registry[] = {
+  
+#ifdef STARCH_MIX_GENERIC
+    { 0, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 1, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_GENERIC */
+  
+#ifdef STARCH_MIX_ARM
+    { 0, "u32_single_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_preamble_u16_aligned_u32_single_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 1, "u32_separate_armv7a_neon_vfpv4_aligned", "armv7a_neon_vfpv4", starch_preamble_u16_aligned_u32_separate_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 2, "u32_single_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_preamble_u16_u32_single_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 3, "u32_separate_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_preamble_u16_u32_separate_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
+    { 4, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 5, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_X86
+    { 0, "u32_single_x86_avx2_aligned", "x86_avx2", starch_preamble_u16_aligned_u32_single_x86_avx2, cpu_supports_avx2 },
+    { 1, "u32_separate_x86_avx2_aligned", "x86_avx2", starch_preamble_u16_aligned_u32_separate_x86_avx2, cpu_supports_avx2 },
+    { 2, "u32_single_x86_avx2", "x86_avx2", starch_preamble_u16_u32_single_x86_avx2, cpu_supports_avx2 },
+    { 3, "u32_separate_x86_avx2", "x86_avx2", starch_preamble_u16_u32_separate_x86_avx2, cpu_supports_avx2 },
+    { 4, "u32_single_generic", "generic", starch_preamble_u16_u32_single_generic, NULL },
+    { 5, "u32_separate_generic", "generic", starch_preamble_u16_u32_separate_generic, NULL },
+#endif /* STARCH_MIX_X86 */
+    { 0, NULL, NULL, NULL, NULL }
+};
+
 
 int starch_read_wisdom (const char * path)
 {
@@ -910,6 +1206,22 @@ int starch_read_wisdom (const char * path)
     }
     int rank_mean_power_u16_aligned = 0;
     for (starch_mean_power_u16_aligned_regentry *entry = starch_mean_power_u16_aligned_registry; entry->name; ++entry) {
+        entry->rank = 0;
+    }
+    int rank_boxcar_u16 = 0;
+    for (starch_boxcar_u16_regentry *entry = starch_boxcar_u16_registry; entry->name; ++entry) {
+        entry->rank = 0;
+    }
+    int rank_boxcar_u16_aligned = 0;
+    for (starch_boxcar_u16_aligned_regentry *entry = starch_boxcar_u16_aligned_registry; entry->name; ++entry) {
+        entry->rank = 0;
+    }
+    int rank_preamble_u16 = 0;
+    for (starch_preamble_u16_regentry *entry = starch_preamble_u16_registry; entry->name; ++entry) {
+        entry->rank = 0;
+    }
+    int rank_preamble_u16_aligned = 0;
+    for (starch_preamble_u16_aligned_regentry *entry = starch_preamble_u16_aligned_registry; entry->name; ++entry) {
         entry->rank = 0;
     }
 
@@ -1035,6 +1347,42 @@ int starch_read_wisdom (const char * path)
             }
             continue;
         }
+        if (!strcmp(name, "boxcar_u16")) {
+            for (starch_boxcar_u16_regentry *entry = starch_boxcar_u16_registry; entry->name; ++entry) {
+                if (!strcmp(impl, entry->name)) {
+                    entry->rank = ++rank_boxcar_u16;
+                    break;
+                }
+            }
+            continue;
+        }
+        if (!strcmp(name, "boxcar_u16_aligned")) {
+            for (starch_boxcar_u16_aligned_regentry *entry = starch_boxcar_u16_aligned_registry; entry->name; ++entry) {
+                if (!strcmp(impl, entry->name)) {
+                    entry->rank = ++rank_boxcar_u16_aligned;
+                    break;
+                }
+            }
+            continue;
+        }
+        if (!strcmp(name, "preamble_u16")) {
+            for (starch_preamble_u16_regentry *entry = starch_preamble_u16_registry; entry->name; ++entry) {
+                if (!strcmp(impl, entry->name)) {
+                    entry->rank = ++rank_preamble_u16;
+                    break;
+                }
+            }
+            continue;
+        }
+        if (!strcmp(name, "preamble_u16_aligned")) {
+            for (starch_preamble_u16_aligned_regentry *entry = starch_preamble_u16_aligned_registry; entry->name; ++entry) {
+                if (!strcmp(impl, entry->name)) {
+                    entry->rank = ++rank_preamble_u16_aligned;
+                    break;
+                }
+            }
+            continue;
+        }
     }
 
     if (ferror(fp)) {
@@ -1154,6 +1502,50 @@ int starch_read_wisdom (const char * path)
 
         /* reset the implementation pointer so the next call will re-select */
         starch_mean_power_u16_aligned = starch_mean_power_u16_aligned_dispatch;
+    }
+    {
+        starch_boxcar_u16_regentry *entry;
+        for (entry = starch_boxcar_u16_registry; entry->name; ++entry) {
+            if (!entry->rank)
+                entry->rank = ++rank_boxcar_u16;
+        }
+        qsort(starch_boxcar_u16_registry, entry - starch_boxcar_u16_registry, sizeof(starch_boxcar_u16_regentry), starch_regentry_rank_compare);
+
+        /* reset the implementation pointer so the next call will re-select */
+        starch_boxcar_u16 = starch_boxcar_u16_dispatch;
+    }
+    {
+        starch_boxcar_u16_aligned_regentry *entry;
+        for (entry = starch_boxcar_u16_aligned_registry; entry->name; ++entry) {
+            if (!entry->rank)
+                entry->rank = ++rank_boxcar_u16_aligned;
+        }
+        qsort(starch_boxcar_u16_aligned_registry, entry - starch_boxcar_u16_aligned_registry, sizeof(starch_boxcar_u16_aligned_regentry), starch_regentry_rank_compare);
+
+        /* reset the implementation pointer so the next call will re-select */
+        starch_boxcar_u16_aligned = starch_boxcar_u16_aligned_dispatch;
+    }
+    {
+        starch_preamble_u16_regentry *entry;
+        for (entry = starch_preamble_u16_registry; entry->name; ++entry) {
+            if (!entry->rank)
+                entry->rank = ++rank_preamble_u16;
+        }
+        qsort(starch_preamble_u16_registry, entry - starch_preamble_u16_registry, sizeof(starch_preamble_u16_regentry), starch_regentry_rank_compare);
+
+        /* reset the implementation pointer so the next call will re-select */
+        starch_preamble_u16 = starch_preamble_u16_dispatch;
+    }
+    {
+        starch_preamble_u16_aligned_regentry *entry;
+        for (entry = starch_preamble_u16_aligned_registry; entry->name; ++entry) {
+            if (!entry->rank)
+                entry->rank = ++rank_preamble_u16_aligned;
+        }
+        qsort(starch_preamble_u16_aligned_registry, entry - starch_preamble_u16_aligned_registry, sizeof(starch_preamble_u16_aligned_regentry), starch_regentry_rank_compare);
+
+        /* reset the implementation pointer so the next call will re-select */
+        starch_preamble_u16_aligned = starch_preamble_u16_aligned_dispatch;
     }
 
     return 0;

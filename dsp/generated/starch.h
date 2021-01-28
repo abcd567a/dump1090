@@ -188,18 +188,81 @@ extern starch_mean_power_u16_aligned_regentry starch_mean_power_u16_aligned_regi
 starch_mean_power_u16_aligned_regentry * starch_mean_power_u16_aligned_select();
 void starch_mean_power_u16_aligned_set_wisdom( const char * const * received_wisdom );
 
+typedef void (* starch_boxcar_u16_ptr) ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+extern starch_boxcar_u16_ptr starch_boxcar_u16;
+
+typedef struct {
+    int rank;
+    const char *name;
+    const char *flavor;
+    starch_boxcar_u16_ptr callable;
+    int (*flavor_supported)();
+} starch_boxcar_u16_regentry;
+
+extern starch_boxcar_u16_regentry starch_boxcar_u16_registry[];
+starch_boxcar_u16_regentry * starch_boxcar_u16_select();
+void starch_boxcar_u16_set_wisdom( const char * const * received_wisdom );
+
+typedef void (* starch_boxcar_u16_aligned_ptr) ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+extern starch_boxcar_u16_aligned_ptr starch_boxcar_u16_aligned;
+
+typedef struct {
+    int rank;
+    const char *name;
+    const char *flavor;
+    starch_boxcar_u16_aligned_ptr callable;
+    int (*flavor_supported)();
+} starch_boxcar_u16_aligned_regentry;
+
+extern starch_boxcar_u16_aligned_regentry starch_boxcar_u16_aligned_registry[];
+starch_boxcar_u16_aligned_regentry * starch_boxcar_u16_aligned_select();
+void starch_boxcar_u16_aligned_set_wisdom( const char * const * received_wisdom );
+
+typedef void (* starch_preamble_u16_ptr) ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+extern starch_preamble_u16_ptr starch_preamble_u16;
+
+typedef struct {
+    int rank;
+    const char *name;
+    const char *flavor;
+    starch_preamble_u16_ptr callable;
+    int (*flavor_supported)();
+} starch_preamble_u16_regentry;
+
+extern starch_preamble_u16_regentry starch_preamble_u16_registry[];
+starch_preamble_u16_regentry * starch_preamble_u16_select();
+void starch_preamble_u16_set_wisdom( const char * const * received_wisdom );
+
+typedef void (* starch_preamble_u16_aligned_ptr) ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+extern starch_preamble_u16_aligned_ptr starch_preamble_u16_aligned;
+
+typedef struct {
+    int rank;
+    const char *name;
+    const char *flavor;
+    starch_preamble_u16_aligned_ptr callable;
+    int (*flavor_supported)();
+} starch_preamble_u16_aligned_regentry;
+
+extern starch_preamble_u16_aligned_regentry starch_preamble_u16_aligned_registry[];
+starch_preamble_u16_aligned_regentry * starch_preamble_u16_aligned_select();
+void starch_preamble_u16_aligned_set_wisdom( const char * const * received_wisdom );
+
 /* flavors and prototypes */
 
 #ifdef STARCH_FLAVOR_GENERIC
 void starch_mean_power_u16_float_generic ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_u32_generic ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_u64_generic ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
+void starch_preamble_u16_u32_single_generic ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_u32_separate_generic ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_power_uc8_twopass_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_lookup_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_lookup_unroll_4_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_uc8_lookup_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_lookup_unroll_4_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_exact_generic ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
+void starch_boxcar_u16_u32_generic ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_sc16q11_exact_u32_generic ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_exact_float_generic ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_11bit_table_generic ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
@@ -220,6 +283,10 @@ void starch_mean_power_u16_u64_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsign
 void starch_mean_power_u16_aligned_u64_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_neon_float_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_aligned_neon_float_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
+void starch_preamble_u16_u32_single_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_aligned_u32_single_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_u32_separate_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_aligned_u32_separate_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_power_uc8_twopass_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_aligned_twopass_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_lookup_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
@@ -236,6 +303,8 @@ void starch_magnitude_uc8_exact_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t
 void starch_magnitude_uc8_aligned_exact_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_neon_vrsqrte_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_aligned_neon_vrsqrte_armv7a_neon_vfpv4 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
+void starch_boxcar_u16_u32_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_boxcar_u16_aligned_u32_armv7a_neon_vfpv4 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_sc16q11_exact_u32_armv7a_neon_vfpv4 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_aligned_exact_u32_armv7a_neon_vfpv4 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_exact_float_armv7a_neon_vfpv4 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
@@ -264,6 +333,10 @@ void starch_mean_power_u16_u32_x86_avx2 ( const uint16_t * arg0, unsigned arg1, 
 void starch_mean_power_u16_aligned_u32_x86_avx2 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_u64_x86_avx2 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
 void starch_mean_power_u16_aligned_u64_x86_avx2 ( const uint16_t * arg0, unsigned arg1, double * arg2, double * arg3 );
+void starch_preamble_u16_u32_single_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_aligned_u32_single_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_u32_separate_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_preamble_u16_aligned_u32_separate_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_power_uc8_twopass_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_aligned_twopass_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
 void starch_magnitude_power_uc8_lookup_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2, double * arg3, double * arg4 );
@@ -276,6 +349,8 @@ void starch_magnitude_uc8_lookup_unroll_4_x86_avx2 ( const uc8_t * arg0, uint16_
 void starch_magnitude_uc8_aligned_lookup_unroll_4_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_exact_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_uc8_aligned_exact_x86_avx2 ( const uc8_t * arg0, uint16_t * arg1, unsigned arg2 );
+void starch_boxcar_u16_u32_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
+void starch_boxcar_u16_aligned_u32_x86_avx2 ( const uint16_t * arg0, unsigned arg1, unsigned arg2, uint16_t * arg3 );
 void starch_magnitude_sc16q11_exact_u32_x86_avx2 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_aligned_exact_u32_x86_avx2 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
 void starch_magnitude_sc16q11_exact_float_x86_avx2 ( const sc16_t * arg0, uint16_t * arg1, unsigned arg2 );
