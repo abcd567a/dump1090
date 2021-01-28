@@ -112,6 +112,7 @@ static void modesInitConfig(void) {
     // Now initialise things that should not be 0/NULL to their defaults
     Modes.gain                    = MODES_MAX_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
+    Modes.sample_rate             = 2400000.0;
     Modes.check_crc               = 1;
     Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
@@ -127,8 +128,6 @@ static void modesInitConfig(void) {
 //
 static void modesInit(void) {
     int i;
-
-    Modes.sample_rate = 2400000.0;
 
     // Allocate the various buffers used by Modes
     Modes.trailing_samples = (MODES_PREAMBLE_US + MODES_LONG_MSG_BITS + 16) * 1e-6 * Modes.sample_rate;
@@ -301,7 +300,8 @@ static void showHelp(void)
 "      Common options\n"
 "\n"
 "--gain <db>              Set gain (default: max gain. Use -10 for auto-gain)\n"
-"--freq <hz>              Set frequency (default: 1090 Mhz)\n"
+"--freq <hz>              Set frequency (default: 1090 MHz)\n"
+"--rate <hz>              Set sample rate (default: 2.4 MHz)\n"
 "--interactive            Interactive mode refreshing data on screen. Implies --throttle\n"
 "--interactive-ttl <sec>  Remove from list if idle for <sec> (default: 60)\n"
 "--interactive-show-distance   Show aircraft distance and bearing instead of lat/lon\n"
@@ -506,6 +506,8 @@ int main(int argc, char **argv) {
 
         if (!strcmp(argv[j],"--freq") && more) {
             Modes.freq = (int) strtoll(argv[++j],NULL,10);
+        } else if (!strcmp(argv[j],"--rate") && more) {
+            Modes.sample_rate = (int) strtoll(argv[++j],NULL,10);
         } else if ( (!strcmp(argv[j], "--device") || !strcmp(argv[j], "--device-index")) && more) {
             Modes.dev_name = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--gain") && more) {
@@ -744,9 +746,9 @@ int main(int argc, char **argv) {
                 // Process one buffer
 
                 start_cpu_timing(&start_time);
-                demodulate2400(buf);
+                demodulateMulti(buf);
                 if (Modes.mode_ac) {
-                    demodulate2400AC(buf);
+                    demodulateMultiAC(buf);
                 }
 
                 Modes.stats_current.samples_processed += buf->validLength - buf->overlap;
