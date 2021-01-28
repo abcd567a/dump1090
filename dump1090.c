@@ -113,6 +113,7 @@ static void modesInitConfig(void) {
     Modes.gain                    = MODES_MAX_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.sample_rate             = 2400000.0;
+    Modes.preamble_threshold      = pow(10.0, 0.15);
     Modes.check_crc               = 1;
     Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
@@ -302,6 +303,7 @@ static void showHelp(void)
 "--gain <db>              Set gain (default: max gain. Use -10 for auto-gain)\n"
 "--freq <hz>              Set frequency (default: 1090 MHz)\n"
 "--rate <hz>              Set sample rate (default: 2.4 MHz)\n"
+"--preamble-threshold <n> Set multirate demodulator preamble threshold in dB (default: 3dB)\n"
 "--interactive            Interactive mode refreshing data on screen. Implies --throttle\n"
 "--interactive-ttl <sec>  Remove from list if idle for <sec> (default: 60)\n"
 "--interactive-show-distance   Show aircraft distance and bearing instead of lat/lon\n"
@@ -508,6 +510,8 @@ int main(int argc, char **argv) {
             Modes.freq = (int) strtoll(argv[++j],NULL,10);
         } else if (!strcmp(argv[j],"--rate") && more) {
             Modes.sample_rate = (int) strtoll(argv[++j],NULL,10);
+        } else if (!strcmp(argv[j],"--preamble-threshold") && more) {
+            Modes.preamble_threshold = pow(10.0, atof(argv[++j]) / 20.0);
         } else if ( (!strcmp(argv[j], "--device") || !strcmp(argv[j], "--device-index")) && more) {
             Modes.dev_name = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--gain") && more) {

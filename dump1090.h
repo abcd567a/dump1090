@@ -287,6 +287,7 @@ struct _Modes {                             // Internal state
 
     unsigned        trailing_samples;                     // extra trailing samples in magnitude buffers
     double          sample_rate;                          // actual sample rate in use (in hz)
+    double          preamble_threshold;                   // preamble detection threshold, as a multiplier of the noise-level
 
     uint16_t       *log10lut;        // Magnitude -> log10 lookup table
     atomic_int      exit;            // Exit from the main loop when true (2 = unclean exit)

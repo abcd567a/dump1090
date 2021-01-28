@@ -27,7 +27,7 @@ static void DEMOD_FN (struct mag_buf *mag)
     /* set threshold from mean of averaged data */
     double mean_level, mean_power;
     starch_mean_power_u16(averaged, averaged_avail, &mean_level, &mean_power);
-    const uint32_t threshold = 65536.0 * mean_level * 2.0; /* 6dB above noise */
+    const uint32_t threshold = 65536.0 * mean_level * Modes.preamble_threshold;
 
     const unsigned limit = mag->validLength - mag->overlap;
 
