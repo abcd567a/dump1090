@@ -66,7 +66,7 @@ void pxsdrInitConfig()
     PXSDR.context = NULL;
     PXSDR.dev = NULL;
     PXSDR.firmware_path = NULL;
-    PXSDR.decimation = 4;
+    PXSDR.decimation = 0;
     PXSDR.converter = NULL;
     PXSDR.converter_state = NULL;
     PXSDR.lna_gain = PXSDR.vga_gain = PXSDR.mixer_gain = -1;
@@ -82,7 +82,11 @@ bool pxsdrHandleOption(int argc, char **argv, int *jptr)
         free(PXSDR.firmware_path);
         PXSDR.firmware_path = strdup(argv[++j]);
     } else if (!strcmp(argv[j], "--pxsdr-decimation") && more) {
-        PXSDR.decimation = atoi(argv[++j]);
+        ++j;
+        if (!strcmp(argv[j], "auto"))
+            PXSDR.decimation = 0;
+        else
+            PXSDR.decimation = atoi(argv[j]);
     } else if (!strcmp(argv[j], "--pxsdr-vga-gain") && more) {
         PXSDR.vga_gain = atoi(argv[++j]);
     } else if (!strcmp(argv[j], "--pxsdr-lna-gain") && more) {
@@ -106,7 +110,7 @@ void pxsdrShowHelp()
     printf("--device <serial>        use PXSDR dongle with this serial number\n");
     printf("--pxsdr-firmware <path>  set path to PXSDR firmware image\n");
     printf("--pxsdr-index <index>    use PXSDR dongle with this index (1 = first detected device, etc)\n");
-    printf("--pxsdr-decimation <n>   set decimation factor (must be a power of 2); default 1\n");
+    printf("--pxsdr-decimation <n>   set decimation factor (must be a power of 2 or 'auto')); default auto\n");
     printf("\n");
 }
 
