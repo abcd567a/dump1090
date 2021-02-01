@@ -86,8 +86,8 @@ const uint16_t * get_sc16q11_mag_12bit_table()
             for (int q = -2048; q <= 2047; q++) {
                 float fI, fQ, magsq;
 
-                fI = fabs(i) / 2048.0;
-                fQ = fabs(q) / 2048.0;
+                fI = abs(i) / 2048.0;
+                fQ = abs(q) / 2048.0;
                 magsq = fI * fI + fQ * fQ;
 
                 float mag = round(sqrtf(magsq) * 65536.0f);
