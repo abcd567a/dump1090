@@ -264,12 +264,12 @@ void interactiveShowData(void) {
             signalMean += signalDisplay;
 
             if (row < rows) {
-                mvprintw(row, 0, "%s%06X %-4s  %-4s  %-8s %6s %3s  %3s  %7s %8s %5.1f %5d %2.0f",
+                mvprintw(row, 0, "%s%06X %-4s  %-4s  %-8s %6s %3s  %3s  %7s %8s %5.1f %5d %*.0f",
                      (a->addr & MODES_NON_ICAO_ADDRESS) ? "~" : " ", (a->addr & 0xffffff),
                      strMode, strSquawk, a->callsign, strFl, strGs, strTt,
                      Modes.interactive_show_distance ? strDistance : strLat,
                      Modes.interactive_show_distance ? strBearing : strLon,
-                     signalDisplay, msgs, (now - a->seen)/1000.0);
+                     signalDisplay, msgs, Modes.interactive_display_size, (now - a->seen)/1000.0);
 
                 if (signalDisplay >= signalMax) {
                     rowMaxRSSI = row;

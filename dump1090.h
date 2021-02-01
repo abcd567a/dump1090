@@ -343,6 +343,7 @@ struct _Modes {                             // Internal state
     uint32_t show_only;              // Only show messages from this ICAO
     int   interactive;               // Interactive mode
     uint64_t interactive_display_ttl;// Interactive mode: TTL display
+    int interactive_display_size;    // Size of TTL display
     int   interactive_show_distance; // Show aircraft distance and bearing instead of lat/lon
     interactive_distance_unit_t interactive_distance_units; // Units for interactive distance display
     char *interactive_callsign_filter; // Filter for interactive display callsigns
