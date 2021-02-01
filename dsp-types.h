@@ -6,7 +6,7 @@
 typedef struct {
     uint8_t I;
     uint8_t Q;
-} __attribute__((packed)) uc8_t;
+} __attribute__((__packed__, __aligned__(2))) uc8_t;
 
 typedef union {
     uc8_t uc8;
@@ -16,6 +16,6 @@ typedef union {
 typedef struct {
     int16_t I;
     int16_t Q;
-} __attribute__((packed)) sc16_t;
+} __attribute__((__packed__)) sc16_t;
 
 #endif
