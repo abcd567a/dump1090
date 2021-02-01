@@ -81,6 +81,7 @@
 #include <limits.h>
 
 #include "compat/compat.h"
+#include "dsp/generated/starch.h"
 
 // ============================= #defines ===============================
 
@@ -162,6 +163,12 @@ typedef enum {
     UNIT_FEET,
     UNIT_METERS
 } altitude_unit_t;
+
+typedef enum {
+    UNIT_NAUTICAL_MILES,
+    UNIT_STATUTE_MILES,
+    UNIT_KILOMETERS,
+} interactive_distance_unit_t;
 
 typedef enum {
     ALTITUDE_BARO,
@@ -337,6 +344,9 @@ struct _Modes {                             // Internal state
     int   interactive;               // Interactive mode
     uint64_t interactive_display_ttl;// Interactive mode: TTL display
     int interactive_display_size;    // Size of TTL display
+    int   interactive_show_distance; // Show aircraft distance and bearing instead of lat/lon
+    interactive_distance_unit_t interactive_distance_units; // Units for interactive distance display
+    char *interactive_callsign_filter; // Filter for interactive display callsigns
     uint64_t stats;                  // Interval (millis) between stats dumps,
     int   stats_range_histo;         // Collect/show a range histogram?
     int   onlyaddr;                  // Print only ICAO addresses
