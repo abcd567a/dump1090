@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
             Modes.interactive = 0;
         } else if (!strcmp(argv[j],"--interactive-ttl") && more) {
             Modes.interactive_display_ttl = (uint64_t)(1000 * atof(argv[++j]));
-	           Modes.interactive_display_size = strlen(argv[j]);
+            Modes.interactive_display_size = strlen(argv[j]);
         } else if (!strcmp(argv[j], "--interactive-show-distance")) {
             Modes.interactive_show_distance = 1;
         } else if (!strcmp(argv[j], "--interactive-distance-units") && more) {
