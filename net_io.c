@@ -1820,8 +1820,13 @@ static char * appendStatsJson(char *p,
 }
 
 char *generateStatsJson(const char *url_path, int *len) {
-    struct stats add;
-    char *buf = (char *) malloc(4096), *p = buf, *end = buf + 4096;
+    const size_t bufsize = 4096;
+    char *buf = malloc(bufsize), *p = buf, *end = buf + bufsize;
+    if (!buf) {
+        // allocation failed, give up
+        *len = 0;
+        return NULL;
+    }
 
     MODES_NOTUSED(url_path);
 
@@ -1842,9 +1847,12 @@ char *generateStatsJson(const char *url_path, int *len) {
     p = appendStatsJson(p, end, &add, "total");
     p = safe_snprintf(p, end, "\n}\n");
 
-    assert(p < end);
+    if (p <= end) {
+        *len = p-buf;
+    } else {
+        *len = 0; // ran out of buffer space, give up
+    }
 
-    *len = p-buf;
     return buf;
 }
 
