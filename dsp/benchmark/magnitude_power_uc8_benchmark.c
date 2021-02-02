@@ -8,7 +8,7 @@ void STARCH_BENCHMARK(magnitude_power_uc8) (void)
     const unsigned len = 65536;
     double out_level, out_power;
 
-    if (!(in = STARCH_BENCHMARK_ALLOC(len, *in)) || !(out_mag = STARCH_BENCHMARK_ALLOC(len, *out_mag))) {
+    if (!(in = STARCH_BENCHMARK_ALLOC(len, uc8_t)) || !(out_mag = STARCH_BENCHMARK_ALLOC(len, uint16_t))) {
         goto done;
     }
 
