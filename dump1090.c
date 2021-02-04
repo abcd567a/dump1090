@@ -803,9 +803,10 @@ int main(int argc, char **argv) {
 
     interactiveCleanup();
 
-    // If --stats was given, print final statistics
+    // Write final stats
+    flush_stats(0);
+    writeJsonToFile("stats.json", generateStatsJson);
     if (Modes.stats) {
-        flush_stats(0);
         display_stats(&Modes.stats_alltime);
     }
 
