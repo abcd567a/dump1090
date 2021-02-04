@@ -385,8 +385,11 @@ static void backgroundTasks(void) {
 
     uint64_t now = mstime();
 
-    icaoFilterExpire();
-    trackPeriodicUpdate();
+    if (Modes.sdr_type != SDR_IFILE) {
+        // don't run these if processing data from a file
+        icaoFilterExpire();
+        trackPeriodicUpdate();
+    }
 
     if (Modes.net) {
         modesNetPeriodicWork();
