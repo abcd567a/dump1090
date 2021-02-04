@@ -1791,7 +1791,7 @@ static char * appendStatsJson(char *p,
                            ",\"tracks\":{\"all\":%u"
                            ",\"single_message\":%u"
                            ",\"unreliable\":%u}"
-                           ",\"messages\":%u}",
+                           ",\"messages\":%u",
                            st->cpr_surface,
                            st->cpr_airborne,
                            st->cpr_global_ok,
@@ -1813,7 +1813,15 @@ static char * appendStatsJson(char *p,
                            st->unique_aircraft,
                            st->single_message_aircraft,
                            st->unreliable_aircraft,
-                           st->messages_total);
+                          st->messages_total);
+
+        for (i = 0; i < 32; ++i) {
+            if (i == 0)
+                p = safe_snprintf(p, end, ",\"messages_by_df\":[%u", st->messages_by_df[i]);
+            else
+                p = safe_snprintf(p, end, ",%u", st->messages_by_df[i]);
+        }
+        p = safe_snprintf(p, end, "]}");
     }
 
     return p;

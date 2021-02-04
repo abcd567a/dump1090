@@ -125,8 +125,13 @@ void display_stats(struct stats *st) {
             printf("    %8u accepted with %d-bit error repaired\n", st->remote_accepted[j], j);
     }
 
-    printf("%u total usable messages\n",
+    printf("%8u total usable messages\n",
            st->messages_total);
+
+    for (unsigned i = 0; i < 32; ++i) {
+        if (st->messages_by_df[i])
+            printf("  %8u DF%u messages\n", st->messages_by_df[i], i);
+    }
 
     printf("%8u surface position messages received\n"
            "%8u airborne position messages received\n"
@@ -310,6 +315,8 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
 
     // total messages:
     target->messages_total = st1->messages_total + st2->messages_total;
+    for (i = 0; i < 32; ++i)
+        target->messages_by_df[i] = st1->messages_by_df[i] + st2->messages_by_df[i];
 
     // CPR decoding:
     target->cpr_surface = st1->cpr_surface + st2->cpr_surface;
