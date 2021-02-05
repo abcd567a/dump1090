@@ -71,6 +71,7 @@
 static int handleBeastCommand(struct client *c, char *p);
 static int decodeBinMessage(struct client *c, char *p);
 static int decodeHexMessage(struct client *c, char *hex);
+static int handleFaupCommand(struct client *c, char *hex);
 
 static void moveNetClient(struct client *c, struct net_service *new_service);
 
@@ -248,6 +249,11 @@ struct net_service *makeBeastInputService(void)
 struct net_service *makeFatsvOutputService(void)
 {
     return serviceInit("FATSV TCP output", &Modes.fatsv_out, NULL, READ_MODE_IGNORE, NULL, NULL);
+}
+
+struct net_service *makeFaCmdInputService(void)
+{
+    return serviceInit("faup Command input", NULL, NULL, READ_MODE_ASCII, "\n", handleFaupCommand);
 }
 
 void modesInitNet(void) {
@@ -1107,6 +1113,27 @@ static void moveNetClient(struct client *c, struct net_service *new_service)
     }
 
     c->service = new_service;
+}
+
+static int handleFaupCommand(struct client *c, char *p) {
+    if (c == NULL || p == NULL)
+        return 0;
+
+    char* token;
+    token = strtok (p, "\t");
+    char str1[] = "upload_rate_multiplier";
+    while (token != NULL) {
+        fprintf(stderr, "%s\n", token);
+        if (strcmp(token, str1) == 0) {
+            token = strtok (NULL, "\t");
+            fprintf(stderr, "Setting emitRate: %s\n", token);
+            Modes.faup_rate_multiplier = atoi(token);
+            break;
+        }
+        token = strtok (NULL, "\t");
+    }
+
+    return 0;
 }
 
 //
@@ -2441,6 +2468,8 @@ static void writeFATSV()
             (airgroundValid && a->airground == AG_GROUND && a->fatsv_emitted_airground == AG_AIRBORNE) ||
             (squawkValid && a->squawk != a->fatsv_emitted_squawk) ||
             (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
+
+        fprintf(stderr, "emitrate: %.2f\n", Modes.faup_rate_multiplier);
 
         uint64_t minAge;
         if (immediate) {

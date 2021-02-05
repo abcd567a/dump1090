@@ -249,6 +249,9 @@ typedef enum {
 #define MAX_AMPLITUDE 65535.0
 #define MAX_POWER (MAX_AMPLITUDE * MAX_AMPLITUDE)
 
+#define FAUP_DEFAULT_RATE_MULTIPLIER    1.0                  // FA Upload rate multiplier
+
+
 // Include subheaders after all the #defines are in place
 
 #include "util.h"
@@ -345,6 +348,7 @@ struct _Modes {                             // Internal state
     char *json_dir;                  // Path to json base directory, or NULL not to write json.
     uint64_t json_interval;          // Interval between rewriting the json aircraft file, in milliseconds; also the advertised map refresh interval
     int   json_location_accuracy;    // Accuracy of location metadata: 0=none, 1=approx, 2=exact
+    double faup_rate_multiplier;     // Multiplier to adjust rate of faup1090 messages emitted
 
     int   json_aircraft_history_next;
     struct {

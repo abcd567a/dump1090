@@ -77,6 +77,7 @@ static void faupInitConfig(void) {
     Modes.quiet                   = 1;
     Modes.net_output_flush_size   = MODES_OUT_FLUSH_SIZE;
     Modes.net_output_flush_interval = 200; // milliseconds
+    Modes.faup_rate_multiplier    = FAUP_DEFAULT_RATE_MULTIPLIER;
 }
 
 //
@@ -149,7 +150,7 @@ int main(int argc, char **argv) {
     char *bo_connect_ipaddr = "127.0.0.1";
     int bo_connect_port = 30005;
     struct client *c;
-    struct net_service *beast_input, *fatsv_output;
+    struct net_service *beast_input, *fatsv_output, *fa_cmd_input;
 
     // Set sane defaults
     faupInitConfig();
@@ -206,6 +207,9 @@ int main(int argc, char **argv) {
     // Set up output connection on stdout
     fatsv_output = makeFatsvOutputService();
     createGenericClient(fatsv_output, STDOUT_FILENO);
+
+    fa_cmd_input = makeFaCmdInputService();
+    createGenericClient(fa_cmd_input, STDIN_FILENO);
 
     // Run it until we've lost either connection
     while (!Modes.exit && beast_input->connections && fatsv_output->connections) {
