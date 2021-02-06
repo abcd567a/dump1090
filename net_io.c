@@ -1127,7 +1127,7 @@ static int handleFaupCommand(struct client *c, char *p) {
         if (strcmp(token, str1) == 0) {
             token = strtok (NULL, "\t");
             fprintf(stderr, "Setting emitRate: %s\n", token);
-            Modes.faup_rate_multiplier = atoi(token);
+            Modes.faup_rate_multiplier = atof(token);
             break;
         }
         token = strtok (NULL, "\t");
@@ -2470,6 +2470,7 @@ static void writeFATSV()
             (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
 
         uint64_t minAge;
+        double adjustedMinAge;
         if (immediate) {
             // a change we want to emit right away
             minAge = 0;
@@ -2490,10 +2491,11 @@ static void writeFATSV()
         }
 
         // Adjust rate for multiplier
-        minAge = minAge / Modes.faup_rate_multiplier;
+        adjustedMinAge = minAge / Modes.faup_rate_multiplier;
 
-        if ((now - a->fatsv_last_emitted) < minAge)
+        if ((now - a->fatsv_last_emitted) < adjustedMinAge) {
             continue;
+        }
 
         char *p = prepareWrite(&Modes.fatsv_out, TSV_MAX_PACKET_SIZE);
         if (!p)
