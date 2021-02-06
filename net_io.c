@@ -2469,8 +2469,6 @@ static void writeFATSV()
             (squawkValid && a->squawk != a->fatsv_emitted_squawk) ||
             (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
 
-        fprintf(stderr, "emitrate: %.2f\n", Modes.faup_rate_multiplier);
-
         uint64_t minAge;
         if (immediate) {
             // a change we want to emit right away
@@ -2490,6 +2488,9 @@ static void writeFATSV()
             // Above 10000 feet, emit up to every 10s when changing, 30s otherwise
             minAge = (changed ? 10000 : 30000);
         }
+
+        // Adjust rate for multiplier
+        minAge = minAge / Modes.faup_rate_multiplier;
 
         if ((now - a->fatsv_last_emitted) < minAge)
             continue;
