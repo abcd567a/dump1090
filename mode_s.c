@@ -2142,6 +2142,9 @@ void useModesMessage(struct modesMessage *mm) {
     struct aircraft *a;
 
     ++Modes.stats_current.messages_total;
+    if (mm->msgtype >= 0 && mm->msgtype < 32) {
+        ++Modes.stats_current.messages_by_df[mm->msgtype];
+    }
 
     // Track aircraft state
     a = trackUpdateFromMessage(mm);
