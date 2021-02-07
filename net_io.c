@@ -1119,18 +1119,18 @@ static int handleFaupCommand(struct client *c, char *p) {
     if (c == NULL || p == NULL)
         return 0;
 
-    char* token;
-    token = strtok (p, "\t");
+    char* msg_field;
+    msg_field = strtok (p, "\t");
 
     // Traverse through message for commands
-    while (token != NULL) {
-        if (strcmp(token, "upload_rate_multiplier") == 0) {
-            token = strtok (NULL, "\t");
-            fprintf(stderr, "Adjusting message rate to FlightAware by %sx\n", token);
-            Modes.faup_rate_multiplier = atof(token);
+    while (msg_field != NULL) {
+        if (strcmp(msg_field, "upload_rate_multiplier") == 0) {
+            msg_field = strtok (NULL, "\t");
+            fprintf(stderr, "Adjusting message rate to FlightAware by %sx\n", msg_field);
+            Modes.faup_rate_multiplier = atof(msg_field);
             break;
         }
-        token = strtok (NULL, "\t");
+        msg_field = strtok (NULL, "\t");
     }
 
     return 0;
