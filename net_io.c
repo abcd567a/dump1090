@@ -1116,9 +1116,10 @@ static void moveNetClient(struct client *c, struct net_service *new_service)
 }
 
 static int handleFaupCommand(struct client *c, char *p) {
-    if (c == NULL || p == NULL)
+    if (p == NULL)
         return 0;
 
+    MODES_NOTUSED(c);
     char* msg_field;
     msg_field = strtok (p, "\t");
 
