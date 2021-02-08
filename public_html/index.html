@@ -197,13 +197,16 @@
 									<table style="width: 100%">
 										<tr class="infoblock_heading">
 											<td>
-												<div class="button buttonTable" id="show_map_button"><span class="buttonText">Show Map</span></div>
+												<button id="stats_page_button" class="stats_button">Go to My ADS-B Statistics Page</button>
+											</td>
 											</td>
 											<td style="text-align: right">
 												<a href="https://github.com/flightaware/dump1090" id="skyaware_version" target="_blank"></a>
 											</td>
 										</tr>
-			
+										<tr>
+											<div class="button buttonTable" id="show_map_button"><span class="buttonText">Show Map</span></div>
+										</tr>
 										<tr class="infoblock_body">
 											<td><span class="infoBlockTitleText">Total Aircraft:</span> <span id="dump1090_total_ac">n/a</span></td>
 											<td><span class="infoBlockTitleText">Messages:</span> <span id="dump1090_message_rate">n/a</span>/sec</td>
@@ -219,7 +222,6 @@
 								<div class="config_button_row">
 									<button id="filter_button" class="config_button">Filters</button>
 									<button id="column_select_button" class="config_button">Select Columns</button>
-									<button id="stats_page_button" class="config_button">Go to My ADS-B Statistics Page</button>
 								</div>
 
 								<div id="filter_panel" class="panel">
