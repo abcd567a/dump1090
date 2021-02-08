@@ -89,6 +89,15 @@ starch_magnitude_uc8_regentry starch_magnitude_uc8_registry[] = {
     { 6, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "lookup_armv8_a", "armv8_a", starch_magnitude_uc8_lookup_armv8_a, NULL },
+    { 1, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 2, "lookup_unroll_4_armv8_a", "armv8_a", starch_magnitude_uc8_lookup_unroll_4_armv8_a, NULL },
+    { 3, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 4, "exact_armv8_a", "armv8_a", starch_magnitude_uc8_exact_armv8_a, NULL },
+    { 5, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
@@ -174,6 +183,18 @@ starch_magnitude_uc8_aligned_regentry starch_magnitude_uc8_aligned_registry[] = 
     { 10, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "lookup_armv8_a", "armv8_a", starch_magnitude_uc8_lookup_armv8_a, NULL },
+    { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
+    { 2, "lookup_generic", "generic", starch_magnitude_uc8_lookup_generic, NULL },
+    { 3, "lookup_armv8_a_aligned", "armv8_a", starch_magnitude_uc8_aligned_lookup_armv8_a, NULL },
+    { 4, "lookup_unroll_4_armv8_a_aligned", "armv8_a", starch_magnitude_uc8_aligned_lookup_unroll_4_armv8_a, NULL },
+    { 5, "lookup_unroll_4_armv8_a", "armv8_a", starch_magnitude_uc8_lookup_unroll_4_armv8_a, NULL },
+    { 6, "exact_armv8_a_aligned", "armv8_a", starch_magnitude_uc8_aligned_exact_armv8_a, NULL },
+    { 7, "exact_armv8_a", "armv8_a", starch_magnitude_uc8_exact_armv8_a, NULL },
+    { 8, "exact_generic", "generic", starch_magnitude_uc8_exact_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "lookup_unroll_4_x86_avx2", "x86_avx2", starch_magnitude_uc8_lookup_unroll_4_x86_avx2, cpu_supports_avx2 },
     { 1, "lookup_unroll_4_generic", "generic", starch_magnitude_uc8_lookup_unroll_4_generic, NULL },
@@ -257,6 +278,15 @@ starch_magnitude_power_uc8_regentry starch_magnitude_power_uc8_registry[] = {
     { 5, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
     { 6, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
 #endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_AARCH64
+    { 0, "twopass_armv8_a", "armv8_a", starch_magnitude_power_uc8_twopass_armv8_a, NULL },
+    { 1, "lookup_armv8_a", "armv8_a", starch_magnitude_power_uc8_lookup_armv8_a, NULL },
+    { 2, "lookup_unroll_4_armv8_a", "armv8_a", starch_magnitude_power_uc8_lookup_unroll_4_armv8_a, NULL },
+    { 3, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 4, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 5, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
   
 #ifdef STARCH_MIX_X86
     { 0, "twopass_x86_avx2", "x86_avx2", starch_magnitude_power_uc8_twopass_x86_avx2, cpu_supports_avx2 },
@@ -343,6 +373,18 @@ starch_magnitude_power_uc8_aligned_regentry starch_magnitude_power_uc8_aligned_r
     { 10, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "twopass_armv8_a_aligned", "armv8_a", starch_magnitude_power_uc8_aligned_twopass_armv8_a, NULL },
+    { 1, "lookup_armv8_a_aligned", "armv8_a", starch_magnitude_power_uc8_aligned_lookup_armv8_a, NULL },
+    { 2, "lookup_unroll_4_armv8_a_aligned", "armv8_a", starch_magnitude_power_uc8_aligned_lookup_unroll_4_armv8_a, NULL },
+    { 3, "twopass_armv8_a", "armv8_a", starch_magnitude_power_uc8_twopass_armv8_a, NULL },
+    { 4, "lookup_armv8_a", "armv8_a", starch_magnitude_power_uc8_lookup_armv8_a, NULL },
+    { 5, "lookup_unroll_4_armv8_a", "armv8_a", starch_magnitude_power_uc8_lookup_unroll_4_armv8_a, NULL },
+    { 6, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
+    { 7, "lookup_generic", "generic", starch_magnitude_power_uc8_lookup_generic, NULL },
+    { 8, "lookup_unroll_4_generic", "generic", starch_magnitude_power_uc8_lookup_unroll_4_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "twopass_x86_avx2_aligned", "x86_avx2", starch_magnitude_power_uc8_aligned_twopass_x86_avx2, cpu_supports_avx2 },
     { 1, "twopass_generic", "generic", starch_magnitude_power_uc8_twopass_generic, NULL },
@@ -424,6 +466,13 @@ starch_magnitude_sc16_regentry starch_magnitude_sc16_registry[] = {
     { 4, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "exact_u32_armv8_a", "armv8_a", starch_magnitude_sc16_exact_u32_armv8_a, NULL },
+    { 1, "exact_float_armv8_a", "armv8_a", starch_magnitude_sc16_exact_float_armv8_a, NULL },
+    { 2, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
+    { 3, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16_exact_float_x86_avx2, cpu_supports_avx2 },
     { 1, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
@@ -502,6 +551,15 @@ starch_magnitude_sc16_aligned_regentry starch_magnitude_sc16_aligned_registry[] 
     { 6, "neon_vrsqrte_armv7a_neon_vfpv4", "armv7a_neon_vfpv4", starch_magnitude_sc16_neon_vrsqrte_armv7a_neon_vfpv4, cpu_supports_armv7_neon_vfpv4 },
     { 7, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_AARCH64
+    { 0, "exact_u32_armv8_a_aligned", "armv8_a", starch_magnitude_sc16_aligned_exact_u32_armv8_a, NULL },
+    { 1, "exact_float_armv8_a_aligned", "armv8_a", starch_magnitude_sc16_aligned_exact_float_armv8_a, NULL },
+    { 2, "exact_u32_armv8_a", "armv8_a", starch_magnitude_sc16_exact_u32_armv8_a, NULL },
+    { 3, "exact_float_armv8_a", "armv8_a", starch_magnitude_sc16_exact_float_armv8_a, NULL },
+    { 4, "exact_u32_generic", "generic", starch_magnitude_sc16_exact_u32_generic, NULL },
+    { 5, "exact_float_generic", "generic", starch_magnitude_sc16_exact_float_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
   
 #ifdef STARCH_MIX_X86
     { 0, "exact_float_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16_aligned_exact_float_x86_avx2, cpu_supports_avx2 },
@@ -586,6 +644,17 @@ starch_magnitude_sc16q11_regentry starch_magnitude_sc16q11_registry[] = {
     { 7, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
     { 8, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_AARCH64
+    { 0, "exact_u32_armv8_a", "armv8_a", starch_magnitude_sc16q11_exact_u32_armv8_a, NULL },
+    { 1, "exact_float_armv8_a", "armv8_a", starch_magnitude_sc16q11_exact_float_armv8_a, NULL },
+    { 2, "11bit_table_armv8_a", "armv8_a", starch_magnitude_sc16q11_11bit_table_armv8_a, NULL },
+    { 3, "12bit_table_armv8_a", "armv8_a", starch_magnitude_sc16q11_12bit_table_armv8_a, NULL },
+    { 4, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 5, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 6, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 7, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
   
 #ifdef STARCH_MIX_X86
     { 0, "exact_float_x86_avx2", "x86_avx2", starch_magnitude_sc16q11_exact_float_x86_avx2, cpu_supports_avx2 },
@@ -678,6 +747,21 @@ starch_magnitude_sc16q11_aligned_regentry starch_magnitude_sc16q11_aligned_regis
     { 13, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "exact_u32_armv8_a_aligned", "armv8_a", starch_magnitude_sc16q11_aligned_exact_u32_armv8_a, NULL },
+    { 1, "exact_float_armv8_a_aligned", "armv8_a", starch_magnitude_sc16q11_aligned_exact_float_armv8_a, NULL },
+    { 2, "11bit_table_armv8_a_aligned", "armv8_a", starch_magnitude_sc16q11_aligned_11bit_table_armv8_a, NULL },
+    { 3, "12bit_table_armv8_a_aligned", "armv8_a", starch_magnitude_sc16q11_aligned_12bit_table_armv8_a, NULL },
+    { 4, "exact_u32_armv8_a", "armv8_a", starch_magnitude_sc16q11_exact_u32_armv8_a, NULL },
+    { 5, "exact_float_armv8_a", "armv8_a", starch_magnitude_sc16q11_exact_float_armv8_a, NULL },
+    { 6, "11bit_table_armv8_a", "armv8_a", starch_magnitude_sc16q11_11bit_table_armv8_a, NULL },
+    { 7, "12bit_table_armv8_a", "armv8_a", starch_magnitude_sc16q11_12bit_table_armv8_a, NULL },
+    { 8, "exact_u32_generic", "generic", starch_magnitude_sc16q11_exact_u32_generic, NULL },
+    { 9, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
+    { 10, "11bit_table_generic", "generic", starch_magnitude_sc16q11_11bit_table_generic, NULL },
+    { 11, "12bit_table_generic", "generic", starch_magnitude_sc16q11_12bit_table_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "exact_float_x86_avx2_aligned", "x86_avx2", starch_magnitude_sc16q11_aligned_exact_float_x86_avx2, cpu_supports_avx2 },
     { 1, "exact_float_generic", "generic", starch_magnitude_sc16q11_exact_float_generic, NULL },
@@ -765,6 +849,15 @@ starch_mean_power_u16_regentry starch_mean_power_u16_registry[] = {
     { 6, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
   
+#ifdef STARCH_MIX_AARCH64
+    { 0, "float_armv8_a", "armv8_a", starch_mean_power_u16_float_armv8_a, NULL },
+    { 1, "u32_armv8_a", "armv8_a", starch_mean_power_u16_u32_armv8_a, NULL },
+    { 2, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
+    { 3, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
+    { 4, "u64_armv8_a", "armv8_a", starch_mean_power_u16_u64_armv8_a, NULL },
+    { 5, "float_generic", "generic", starch_mean_power_u16_float_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
+  
 #ifdef STARCH_MIX_X86
     { 0, "u32_x86_avx2", "x86_avx2", starch_mean_power_u16_u32_x86_avx2, cpu_supports_avx2 },
     { 1, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
@@ -849,6 +942,18 @@ starch_mean_power_u16_aligned_regentry starch_mean_power_u16_aligned_registry[] 
     { 9, "float_generic", "generic", starch_mean_power_u16_float_generic, NULL },
     { 10, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
 #endif /* STARCH_MIX_ARM */
+  
+#ifdef STARCH_MIX_AARCH64
+    { 0, "u32_armv8_a", "armv8_a", starch_mean_power_u16_u32_armv8_a, NULL },
+    { 1, "u32_armv8_a_aligned", "armv8_a", starch_mean_power_u16_aligned_u32_armv8_a, NULL },
+    { 2, "u64_armv8_a", "armv8_a", starch_mean_power_u16_u64_armv8_a, NULL },
+    { 3, "u64_armv8_a_aligned", "armv8_a", starch_mean_power_u16_aligned_u64_armv8_a, NULL },
+    { 4, "float_armv8_a", "armv8_a", starch_mean_power_u16_float_armv8_a, NULL },
+    { 5, "u32_generic", "generic", starch_mean_power_u16_u32_generic, NULL },
+    { 6, "u64_generic", "generic", starch_mean_power_u16_u64_generic, NULL },
+    { 7, "float_armv8_a_aligned", "armv8_a", starch_mean_power_u16_aligned_float_armv8_a, NULL },
+    { 8, "float_generic", "generic", starch_mean_power_u16_float_generic, NULL },
+#endif /* STARCH_MIX_AARCH64 */
   
 #ifdef STARCH_MIX_X86
     { 0, "u32_x86_avx2_aligned", "x86_avx2", starch_mean_power_u16_aligned_u32_x86_avx2, cpu_supports_avx2 },

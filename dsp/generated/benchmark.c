@@ -1247,10 +1247,10 @@ static void starch_benchmark_run_mean_power_u16_aligned( const uint16_t * arg0, 
 #define STARCH_BENCHMARK_FREE(_ptr) starch_benchmark_aligned_free(_ptr)
 
 #include "../benchmark/magnitude_sc16_benchmark.c"
-#include "../benchmark/magnitude_uc8_benchmark.c"
-#include "../benchmark/magnitude_power_uc8_benchmark.c"
-#include "../benchmark/mean_power_u16_benchmark.c"
 #include "../benchmark/magnitude_sc16q11_benchmark.c"
+#include "../benchmark/magnitude_uc8_benchmark.c"
+#include "../benchmark/mean_power_u16_benchmark.c"
+#include "../benchmark/magnitude_power_uc8_benchmark.c"
 
 #undef STARCH_ALIGNMENT
 #undef STARCH_ALIGNED
@@ -1275,10 +1275,10 @@ static void starch_benchmark_run_mean_power_u16_aligned( const uint16_t * arg0, 
 #define STARCH_BENCHMARK_FREE(_ptr) starch_benchmark_aligned_free(_ptr)
 
 #include "../benchmark/magnitude_sc16_benchmark.c"
-#include "../benchmark/magnitude_uc8_benchmark.c"
-#include "../benchmark/magnitude_power_uc8_benchmark.c"
-#include "../benchmark/mean_power_u16_benchmark.c"
 #include "../benchmark/magnitude_sc16q11_benchmark.c"
+#include "../benchmark/magnitude_uc8_benchmark.c"
+#include "../benchmark/mean_power_u16_benchmark.c"
+#include "../benchmark/magnitude_power_uc8_benchmark.c"
 
 static void starch_benchmark_all_magnitude_uc8(void)
 {
@@ -1374,6 +1374,9 @@ static void starch_benchmark_usage(const char *argv0)
 #endif
 #ifdef STARCH_FLAVOR_ARMV7A_NEON_VFPV4
           "armv7a_neon_vfpv4 "
+#endif
+#ifdef STARCH_FLAVOR_ARMV8_A
+          "armv8_a "
 #endif
 #ifdef STARCH_FLAVOR_X86_AVX2
           "x86_avx2 "

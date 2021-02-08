@@ -142,19 +142,23 @@ ifneq ($(CPUFEATURES),yes)
   # need to be able to detect CPU features at runtime to enable any non-standard compiler flags
   STARCH_MIX := generic
   CPPFLAGS += -DSTARCH_MIX_GENERIC
-else ifeq ($(ARCH),x86_64)
-  # AVX, AVX2
-  STARCH_MIX := x86
-  CPPFLAGS += -DSTARCH_MIX_X86
-else ifneq (,$(findstring arm,$(ARCH)))
-  # ARMv7 NEON
-  STARCH_MIX := arm
-  CPPFLAGS += -DSTARCH_MIX_ARM
 else
-  STARCH_MIX := generic
-  CPPFLAGS += -DSTARCH_MIX_GENERIC
+  ifeq ($(ARCH),x86_64)
+    # AVX, AVX2
+    STARCH_MIX := x86
+    CPPFLAGS += -DSTARCH_MIX_X86
+  else ifeq ($(findstring arm,$(ARCH)),arm)
+    # ARMv7 NEON
+    STARCH_MIX := arm
+    CPPFLAGS += -DSTARCH_MIX_ARM
+  else ifeq ($(findstring aarch,$(ARCH)),aarch)
+    STARCH_MIX := aarch64
+    CPPFLAGS += -DSTARCH_MIX_AARCH64
+  else
+    STARCH_MIX := generic
+    CPPFLAGS += -DSTARCH_MIX_GENERIC
+  endif
 endif
-
 all: showconfig dump1090 view1090 starch-benchmark
 
 STARCH_COMPILE := $(CC) $(CPPFLAGS) $(CFLAGS) -c

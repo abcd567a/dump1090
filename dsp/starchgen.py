@@ -32,6 +32,11 @@ gen.add_flavor(name = 'armv7a_neon_vfpv4',
                features = ['neon'],
                test_function = 'cpu_supports_armv7_neon_vfpv4',
                alignment = 16)
+gen.add_flavor(name = 'armv8_a',
+               description = 'ARMv8-A',
+               compile_flags = ['-ffast-math'],
+               features = [],
+               alignment = 32)
 gen.add_flavor(name = 'x86_avx2',
                description = 'x86 with AVX2',
                compile_flags = ['-mavx2', '-ffast-math'],
@@ -47,6 +52,11 @@ gen.add_mix(name = 'arm',
             description = 'ARM',
             flavors = ['armv7a_neon_vfpv4', 'generic'],
             wisdom_file = 'wisdom.arm')
+
+gen.add_mix(name = 'aarch64',
+            description = 'AARCH64',
+            flavors = ['armv8_a', 'generic'],
+            wisdom_file = 'wisdom.aarch64')
 
 gen.add_mix(name = 'x86',
             description = 'x64',
