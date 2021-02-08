@@ -1121,14 +1121,23 @@ static int handleFaupCommand(struct client *c, char *p) {
 
     MODES_NOTUSED(c);
     char* msg_field;
+    double multiplier;
     msg_field = strtok (p, "\t");
 
     // Traverse through message for commands
     while (msg_field != NULL) {
         if (strcmp(msg_field, "upload_rate_multiplier") == 0) {
             msg_field = strtok (NULL, "\t");
-            fprintf(stderr, "Adjusting message rate to FlightAware by %sx\n", msg_field);
-            Modes.faup_rate_multiplier = atof(msg_field);
+            multiplier = atof(msg_field);
+
+            // Sanity check on multiplier value
+            if (!(multiplier > 0 && multiplier <= 100)) {
+                fprintf(stderr, "handleFaupCommand(): upload_rate_multiplier (%0.2f) out of range\n", multiplier);
+                return 0;
+            }
+
+            fprintf(stderr, "handleFaupCommand(): Adjusting message rate to FlightAware by %0.2fx\n", multiplier);
+            Modes.faup_rate_multiplier = multiplier;
             break;
         }
         msg_field = strtok (NULL, "\t");
