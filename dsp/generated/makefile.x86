@@ -33,7 +33,7 @@ dsp/generated/dispatcher.o: dsp/generated/dispatcher.c dsp/impl/magnitude_power_
 STARCH_OBJS := dsp/generated/flavor.x86_avx2.o dsp/generated/flavor.generic.o dsp/generated/dispatcher.o
 
 
-dsp/generated/benchmark.o: dsp/generated/benchmark.c dsp/benchmark/magnitude_sc16_benchmark.c dsp/benchmark/magnitude_sc16q11_benchmark.c dsp/benchmark/magnitude_uc8_benchmark.c dsp/benchmark/mean_power_u16_benchmark.c dsp/benchmark/magnitude_power_uc8_benchmark.c
+dsp/generated/benchmark.o: dsp/generated/benchmark.c dsp/benchmark/magnitude_power_uc8_benchmark.c dsp/benchmark/magnitude_sc16_benchmark.c dsp/benchmark/magnitude_sc16q11_benchmark.c dsp/benchmark/magnitude_uc8_benchmark.c dsp/benchmark/mean_power_u16_benchmark.c
 	$(STARCH_COMPILE) $(STARCH_CFLAGS) dsp/generated/benchmark.c -o dsp/generated/benchmark.o
 
 STARCH_BENCHMARK_OBJ := dsp/generated/benchmark.o
