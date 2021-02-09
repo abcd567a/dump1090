@@ -858,6 +858,10 @@ select.error, textarea.error, input.error {
     -moz-border-radius: 4px;
 }
 
+.italicize {
+    font-style: italic;
+}
+
 .stats_button {
     position: relative;
     background-color: rgba(0, 160, 226, 1);
