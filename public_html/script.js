@@ -53,6 +53,8 @@ var NBSP='\u00a0';
 var layers;
 var layerGroup;
 
+var ActiveFilterCount = 0;
+
 var altitude_slider = null;
 var speed_slider = null;
 
@@ -100,31 +102,15 @@ function processReceiverUpdate(data) {
 	if ((now - MessageCountHistory[0].time) > 30)
 		MessageCountHistory.shift();
 
-<<<<<<< HEAD
-	for (var j=0; j < acs.length; j++) {
-		var ac = acs[j];
-		var hex = ac.hex;
-		var squawk = ac.squawk;
-		var plane = null;
-=======
         for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
                 var hex = ac.hex;
                 var squawk = ac.squawk;
                 var plane = null;
->>>>>>> 9950e72... Fix minimum width of sidebar and more spacing cleanup
 
                 // Do we already have this plane object in Planes?
                 // If not make it.
 
-<<<<<<< HEAD
-		if (Planes[hex]) {
-			plane = Planes[hex];
-		} else {
-			plane = new PlaneObject(hex);
-			plane.filter = PlaneFilter;
-			plane.tr = PlaneRowTemplate.cloneNode(true);
-=======
                 if (Planes[hex]) {
                         plane = Planes[hex];
                 } else {
@@ -139,7 +125,6 @@ function processReceiverUpdate(data) {
                         } else {
                                 plane.tr.cells[0].textContent = hex;
                         }
->>>>>>> 9950e72... Fix minimum width of sidebar and more spacing cleanup
 
 			if (hex[0] === '~') {
 				// Non-ICAO address
@@ -163,7 +148,6 @@ function processReceiverUpdate(data) {
 					return;
 				}
 
-<<<<<<< HEAD
 				if (!$("#map_container").is(":visible")) {
 					showMap();
 				}
@@ -184,11 +168,6 @@ function processReceiverUpdate(data) {
 			Planes[hex] = plane;
 			PlanesOrdered.push(plane);
 		}
-=======
-                        Planes[hex] = plane;
-                        PlanesOrdered.push(plane);
-                }
->>>>>>> 9950e72... Fix minimum width of sidebar and more spacing cleanup
 
                 // Call the function update
                 plane.updateData(now, ac);
@@ -216,21 +195,6 @@ function onNewData(data) {
                         ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
                 }
 
-<<<<<<< HEAD
-	// Check for stale receiver data
-	if (LastReceiverTimestamp === now) {
-		StaleReceiverCount++;
-		if (StaleReceiverCount > 5) {
-			$("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-			$("#update_error").css('display','block');
-		}
-	} else { 
-		StaleReceiverCount = 0;
-		LastReceiverTimestamp = now;
-		$("#update_error").css('display','none');
-	}
-}
-=======
                 // Check for stale receiver data
                 if (LastReceiverTimestamp === now) {
                         StaleReceiverCount++;
@@ -244,7 +208,6 @@ function onNewData(data) {
                         $("#update_error").css('display','none');
                 }
         });
->>>>>>> 9950e72... Fix minimum width of sidebar and more spacing cleanup
 
 function onDataError(errMsg) {
 	$("#update_error_detail").text(errMsg);
@@ -341,8 +304,8 @@ function initialize() {
                 start: [0, 65000],
                 connect: true,
                 range: {
-                    'min': 0,
-                    'max': 65000
+                    'min': DefaultMinAltitudeFilter,
+                    'max': DefaultMaxAltitudeFilter
                 },
                 step: 25,
                 format: {
@@ -377,8 +340,8 @@ function initialize() {
                 start: [0, 1000],
                 connect: true,
                 range: {
-                    'min': 0,
-                    'max': 1000
+                    'min': DefaultMinSpeedFilter,
+                    'max': DefaultMaxSpeedFilter
                 },
                 step: 5,
                 format: {
@@ -574,24 +537,6 @@ function load_history_item(i) {
 		 cache: false,
 		 dataType: 'json' })
 
-<<<<<<< HEAD
-		.done(function(data) {
-					PositionHistoryBuffer.push(data);
-					HistoryItemsReturned++;
-					$("#loader_progress").attr('value',HistoryItemsReturned);
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
-		})
-
-		.fail(function(jqxhr, status, error) {
-					//Doesn't matter if it failed, we'll just be missing a data point
-					HistoryItemsReturned++;
-					if (HistoryItemsReturned == PositionHistorySize) {
-						end_load_history();
-					}
-		});
-=======
                 .done(function(data) {
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
@@ -607,7 +552,6 @@ function load_history_item(i) {
                                                 end_load_history();
                                         }
                 });
->>>>>>> 9950e72... Fix minimum width of sidebar and more spacing cleanup
 }
 
 function end_load_history() {
@@ -1226,20 +1170,21 @@ function refreshSelected() {
        
 	var selected = false;
 	if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
-    		selected = Planes[SelectedPlane];
-	}
-	
-	$('#dump1090_infoblock').css('display','block');
-	$('#dump1090_version').text(Dump1090Version);
-	$('#dump1090_total_ac').text(TrackedAircraft);
-	$('#dump1090_total_ac_positions').text(TrackedAircraftPositions);
-	$('#dump1090_total_history').text(TrackedHistorySize);
+    	        selected = Planes[SelectedPlane];
+        }
+        
+        $('#dump1090_infoblock').css('display','block');
+        $('#skyaware_version').text('SkyAware ' + SkyAwareVersion);
+        $('#dump1090_total_ac').text(TrackedAircraft);
+        $('#dump1090_total_ac_positions').text(TrackedAircraftPositions);
+        $('#dump1090_total_history').text(TrackedHistorySize);
+        $('#active_filter_count').text(ActiveFilterCount);
 
-	if (MessageRate !== null) {
-		$('#dump1090_message_rate').text(MessageRate.toFixed(1));
-	} else {
-		$('#dump1090_message_rate').text("n/a");
-	}
+        if (MessageRate !== null) {
+                $('#dump1090_message_rate').text(MessageRate.toFixed(1));
+        } else {
+                $('#dump1090_message_rate').text("n/a");
+        }
 
 	setSelectedInfoBlockVisibility();
 
@@ -2281,6 +2226,13 @@ function updatePlaneFilter() {
 
     PlaneFilter.aircraftTypeCode = aircraftTypeCode;
     PlaneFilter.aircraftIdent = aircraftIdent;
+
+    var altitudeFilterSet = (PlaneFilter.minAltitude == DefaultMinAltitudeFilter && PlaneFilter.maxAltitude == DefaultMaxAltitudeFilter) ? 0 : 1;
+    var speedFilterSet = (PlaneFilter.minSpeedFilter == DefaultMinSpeedFilter && PlaneFilter.maxSpeedFilter == DefaultMaxSpeedFilter) ? 0 : 1;
+    var aircraftTypeFilterSet = (PlaneFilter.aircraftTypeCode == undefined) ? 0 : 1;
+    var aircraftIdentFilterSet = (PlaneFilter.aircraftIdent == undefined) ? 0 : 1;
+
+    ActiveFilterCount = altitudeFilterSet + speedFilterSet + aircraftTypeFilterSet + aircraftIdentFilterSet;
 }
 
 function refreshDataSourceFilters () {
