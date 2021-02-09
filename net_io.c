@@ -71,6 +71,7 @@
 static int handleBeastCommand(struct client *c, char *p);
 static int decodeBinMessage(struct client *c, char *p);
 static int decodeHexMessage(struct client *c, char *hex);
+static int handleFaupCommand(struct client *c, char *hex);
 
 static void moveNetClient(struct client *c, struct net_service *new_service);
 
@@ -248,6 +249,11 @@ struct net_service *makeBeastInputService(void)
 struct net_service *makeFatsvOutputService(void)
 {
     return serviceInit("FATSV TCP output", &Modes.fatsv_out, NULL, READ_MODE_IGNORE, NULL, NULL);
+}
+
+struct net_service *makeFaCmdInputService(void)
+{
+    return serviceInit("faup Command input", NULL, NULL, READ_MODE_ASCII, "\n", handleFaupCommand);
 }
 
 void modesInitNet(void) {
@@ -1107,6 +1113,37 @@ static void moveNetClient(struct client *c, struct net_service *new_service)
     }
 
     c->service = new_service;
+}
+
+static int handleFaupCommand(struct client *c, char *p) {
+    if (p == NULL)
+        return 0;
+
+    MODES_NOTUSED(c);
+    char* msg_field;
+    double multiplier;
+    msg_field = strtok (p, "\t");
+
+    // Traverse through message for commands
+    while (msg_field != NULL) {
+        if (strcmp(msg_field, "upload_rate_multiplier") == 0) {
+            msg_field = strtok (NULL, "\t");
+            multiplier = atof(msg_field);
+
+            // Sanity check on multiplier value
+            if (!(multiplier > 0 && multiplier <= 100)) {
+                fprintf(stderr, "handleFaupCommand(): upload_rate_multiplier (%0.2f) out of range\n", multiplier);
+                return 0;
+            }
+
+            fprintf(stderr, "handleFaupCommand(): Adjusting message rate to FlightAware by %0.2fx\n", multiplier);
+            Modes.faup_rate_multiplier = multiplier;
+            break;
+        }
+        msg_field = strtok (NULL, "\t");
+    }
+
+    return 0;
 }
 
 //
@@ -2466,6 +2503,7 @@ static void writeFATSV()
             (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
 
         uint64_t minAge;
+        double adjustedMinAge;
         if (immediate) {
             // a change we want to emit right away
             minAge = 0;
@@ -2485,8 +2523,12 @@ static void writeFATSV()
             minAge = (changed ? 10000 : 30000);
         }
 
-        if ((now - a->fatsv_last_emitted) < minAge)
+        // Adjust rate for multiplier
+        adjustedMinAge = minAge / Modes.faup_rate_multiplier;
+
+        if ((now - a->fatsv_last_emitted) < adjustedMinAge) {
             continue;
+        }
 
         char *p = prepareWrite(&Modes.fatsv_out, TSV_MAX_PACKET_SIZE);
         if (!p)
