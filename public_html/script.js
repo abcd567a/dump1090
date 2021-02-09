@@ -52,6 +52,8 @@ var NBSP='\u00a0';
 var layers;
 var layerGroup;
 
+var ActiveFilterCount = 0;
+
 var altitude_slider = null;
 var speed_slider = null;
 
@@ -306,8 +308,8 @@ function initialize() {
                 start: [0, 65000],
                 connect: true,
                 range: {
-                    'min': 0,
-                    'max': 65000
+                    'min': DefaultMinAltitudeFilter,
+                    'max': DefaultMaxAltitudeFilter
                 },
                 step: 25,
                 format: {
@@ -342,8 +344,8 @@ function initialize() {
                 start: [0, 1000],
                 connect: true,
                 range: {
-                    'min': 0,
-                    'max': 1000
+                    'min': DefaultMinSpeedFilter,
+                    'max': DefaultMaxSpeedFilter
                 },
                 step: 5,
                 format: {
@@ -1168,6 +1170,7 @@ function refreshSelected() {
         $('#dump1090_total_ac').text(TrackedAircraft);
         $('#dump1090_total_ac_positions').text(TrackedAircraftPositions);
         $('#dump1090_total_history').text(TrackedHistorySize);
+        $('#active_filter_count').text(ActiveFilterCount);
 
         if (MessageRate !== null) {
                 $('#dump1090_message_rate').text(MessageRate.toFixed(1));
@@ -2193,6 +2196,13 @@ function updatePlaneFilter() {
 
     PlaneFilter.aircraftTypeCode = aircraftTypeCode;
     PlaneFilter.aircraftIdent = aircraftIdent;
+
+    var altitudeFilterSet = (PlaneFilter.minAltitude == DefaultMinAltitudeFilter && PlaneFilter.maxAltitude == DefaultMaxAltitudeFilter) ? 0 : 1;
+    var speedFilterSet = (PlaneFilter.minSpeedFilter == DefaultMinSpeedFilter && PlaneFilter.maxSpeedFilter == DefaultMaxSpeedFilter) ? 0 : 1;
+    var aircraftTypeFilterSet = (PlaneFilter.aircraftTypeCode == undefined) ? 0 : 1;
+    var aircraftIdentFilterSet = (PlaneFilter.aircraftIdent == undefined) ? 0 : 1;
+
+    ActiveFilterCount = altitudeFilterSet + speedFilterSet + aircraftTypeFilterSet + aircraftIdentFilterSet;
 }
 
 function refreshDataSourceFilters () {
