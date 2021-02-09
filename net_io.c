@@ -1828,15 +1828,20 @@ static char * appendStatsJson(char *p,
 }
 
 char *generateStatsJson(const char *url_path, int *len) {
-    const size_t bufsize = 4096;
-    char *buf = malloc(bufsize), *p = buf, *end = buf + bufsize;
-    if (!buf) {
+    MODES_NOTUSED(url_path);
+
+    int buflen = 8192;
+    char *buf, *p, *end;
+
+ retry:
+    if (!(buf = malloc(buflen))) {
         // allocation failed, give up
         *len = 0;
         return NULL;
     }
 
-    MODES_NOTUSED(url_path);
+    p = buf;
+    end = buf + buflen;
 
     p = safe_snprintf(p, end, "{\n");
     p = appendStatsJson(p, end, &Modes.stats_latest, "latest");
@@ -1854,12 +1859,15 @@ char *generateStatsJson(const char *url_path, int *len) {
     p = appendStatsJson(p, end, &Modes.stats_alltime, "total");
     p = safe_snprintf(p, end, "\n}\n");
 
-    if (p <= end) {
-        *len = p-buf;
-    } else {
-        *len = 0; // ran out of buffer space, give up
+    int used = p - buf;
+    if (p >= end) {
+        // overran the buffer
+        buflen = used + 50;
+        free(buf);
+        goto retry;
     }
 
+    *len = used;
     return buf;
 }
 

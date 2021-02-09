@@ -42,7 +42,6 @@ endif
 UNAME := $(shell uname)
 
 ifeq ($(UNAME), Linux)
-  include Makefile.cpufeatures
   CPPFLAGS += -D_DEFAULT_SOURCE
   LIBS += -lrt
   LIBS_USB += -lusb-1.0
