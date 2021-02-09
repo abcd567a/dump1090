@@ -875,6 +875,27 @@ select.error, textarea.error, input.error {
     -moz-border-radius: 4px;
 }
 
+.italicize {
+    font-style: italic;
+}
+
+.stats_button {
+    position: relative;
+    background-color: rgba(0, 160, 226, 1);
+    color: #FFFFFF;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    width: auto;
+    border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    margin-top: 5px;
+    padding: 5px 8px 5px 8px;
+
+}
+
 .config_button:hover, .config_button_active {
     background-color: #abcad8;
 }
