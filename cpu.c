@@ -76,3 +76,34 @@ int cpu_supports_armv7_neon_vfpv4(void)
     return 0;
 #endif
 }
+
+//
+// AARCH64
+//
+
+#ifdef CPU_FEATURES_ARCH_AARCH64
+#include "cpuinfo_aarch64.h"
+
+static Aarch64Info *aarch64_info()
+{
+    static bool valid = false;
+    static Aarch64Info cache;
+
+    if (!valid) {
+        cache = GetAarch64Info();
+        valid = true;
+    }
+
+    return &cache;
+}
+
+#endif
+
+int cpu_supports_armv8_simd(void)
+{
+#ifdef CPU_FEATURES_ARCH_AARCH64
+    return aarch64_info()->features.asimd;
+#else
+    return 0;
+#endif
+}
