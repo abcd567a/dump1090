@@ -8,8 +8,9 @@ import sys
 import re
 import os
 import mako.lookup
+from functools import total_ordering
 
-from typing import Optional, Union, Iterable, Sequence, MutableSequence, Mapping, MutableMapping, FrozenSet
+from typing import Optional, Union, Iterable, Sequence, MutableSequence, Mapping, MutableMapping, FrozenSet, Dict, List
 
 class Feature(object):
     """Feature represents a type of code that can only be built with
@@ -35,7 +36,7 @@ themselves using the STARCH_IMPL_REQUIRES macro."""
     def macro(self) -> str:
         return 'STARCH_FEATURE_' + self.name.upper()
 
-
+@total_ordering
 class BuildFlavor(object):
     """BuildFlavor models code built with specific compiler flags.
 Shared implementation code will be built multiple times, once per flavor.
@@ -89,7 +90,13 @@ intrinsics)"""
     def cflags(self) -> str:
         return ' '.join(self.compile_flags)
 
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, BuildFlavor):
+            return NotImplemented
+        return self.name < other.name
 
+
+@total_ordering
 class Function(object):
     """A user-callable function that will be dispatched to
 one of the many possible implementations based on runtime feature
@@ -175,6 +182,11 @@ support."""
     def benchmark_verify_symbol(self) -> str:
         return self.gen.sym(self.name + '_benchmark_verify')
 
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, Function):
+            return NotImplemented
+        return self.name < other.name
+
 
 class FunctionImpl(object):
     """A possible implementation of a function, not built in any particular way yet."""
@@ -210,6 +222,7 @@ class FunctionImpl(object):
         return self.gen.sym(self.function.name + '_' + self.name + '_' + flavor.name)
 
 
+@total_ordering
 class SourceFile(object):
     """A scanned source file that contains implementation code."""
 
@@ -220,7 +233,13 @@ class SourceFile(object):
         self.path = path
         self.impls = []
 
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, SourceFile):
+            return NotImplemented
+        return self.path < other.path
 
+
+@total_ordering
 class BuildMix(object):
     """A combination of build flavors that make up one possible way of building all
 the code. The output of a mix is a library that dispatches functions within the
@@ -253,6 +272,12 @@ specified first."""
 
     def function_wisdom(self, function) -> Sequence[str]:
         return self.wisdom.get(function, [])
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, BuildMix):
+            return NotImplemented
+        return self.name < other.name
+
 
 class Generator(object):
     functions: MutableMapping[str, Function]
@@ -380,8 +405,8 @@ class Generator(object):
             return key
         return self.flavors[key]                        
 
-    def load_wisdom(self, path: str) -> Mapping[str,Sequence[str]]:
-        results: Mapping[Function,Sequence[str]] = {}
+    def load_wisdom(self, path: str) -> Mapping[Function,Sequence[str]]:
+        results: Dict[Function,List[str]] = {}
 
         try:
             f = open(path, 'r')
@@ -420,7 +445,7 @@ class Generator(object):
         if wisdom_file:
             resolved_wisdom = self.load_wisdom(wisdom_file)
         else:
-            resolved_wisdom = dict( (self.get_function(name), values) for name,values in wisdom.items() )
+            resolved_wisdom = dict( (self.get_function(name), list(values)) for name,values in wisdom.items() )
         self.mixes[name] = BuildMix(name, description, resolved_flavors, resolved_wisdom)
 
     def sym(self, symbol: str) -> str:
