@@ -71,6 +71,7 @@
 static int handleBeastCommand(struct client *c, char *p);
 static int decodeBinMessage(struct client *c, char *p);
 static int decodeHexMessage(struct client *c, char *hex);
+static int handleFaupCommand(struct client *c, char *hex);
 
 static void moveNetClient(struct client *c, struct net_service *new_service);
 
@@ -248,6 +249,11 @@ struct net_service *makeBeastInputService(void)
 struct net_service *makeFatsvOutputService(void)
 {
     return serviceInit("FATSV TCP output", &Modes.fatsv_out, NULL, READ_MODE_IGNORE, NULL, NULL);
+}
+
+struct net_service *makeFaCmdInputService(void)
+{
+    return serviceInit("faup Command input", NULL, NULL, READ_MODE_ASCII, "\n", handleFaupCommand);
 }
 
 void modesInitNet(void) {
@@ -1109,6 +1115,37 @@ static void moveNetClient(struct client *c, struct net_service *new_service)
     c->service = new_service;
 }
 
+static int handleFaupCommand(struct client *c, char *p) {
+    if (p == NULL)
+        return 0;
+
+    MODES_NOTUSED(c);
+    char* msg_field;
+    double multiplier;
+    msg_field = strtok (p, "\t");
+
+    // Traverse through message for commands
+    while (msg_field != NULL) {
+        if (strcmp(msg_field, "upload_rate_multiplier") == 0) {
+            msg_field = strtok (NULL, "\t");
+            multiplier = atof(msg_field);
+
+            // Sanity check on multiplier value
+            if (!(multiplier > 0 && multiplier <= 100)) {
+                fprintf(stderr, "handleFaupCommand(): upload_rate_multiplier (%0.2f) out of range\n", multiplier);
+                return 0;
+            }
+
+            fprintf(stderr, "handleFaupCommand(): Adjusting message rate to FlightAware by %0.2fx\n", multiplier);
+            Modes.faup_rate_multiplier = multiplier;
+            break;
+        }
+        msg_field = strtok (NULL, "\t");
+    }
+
+    return 0;
+}
+
 //
 // Handle a Beast command message.
 // Currently, we just look for the Mode A/C command message
@@ -1791,7 +1828,7 @@ static char * appendStatsJson(char *p,
                            ",\"tracks\":{\"all\":%u"
                            ",\"single_message\":%u"
                            ",\"unreliable\":%u}"
-                           ",\"messages\":%u}",
+                           ",\"messages\":%u",
                            st->cpr_surface,
                            st->cpr_airborne,
                            st->cpr_global_ok,
@@ -1813,23 +1850,41 @@ static char * appendStatsJson(char *p,
                            st->unique_aircraft,
                            st->single_message_aircraft,
                            st->unreliable_aircraft,
-                           st->messages_total);
+                          st->messages_total);
+
+        for (i = 0; i < 32; ++i) {
+            if (i == 0)
+                p = safe_snprintf(p, end, ",\"messages_by_df\":[%u", st->messages_by_df[i]);
+            else
+                p = safe_snprintf(p, end, ",%u", st->messages_by_df[i]);
+        }
+        p = safe_snprintf(p, end, "]}");
     }
 
     return p;
 }
 
 char *generateStatsJson(const char *url_path, int *len) {
-    struct stats add;
-    char *buf = (char *) malloc(4096), *p = buf, *end = buf + 4096;
-
     MODES_NOTUSED(url_path);
 
+    int buflen = 8192;
+    char *buf, *p, *end;
+
+ retry:
+    if (!(buf = malloc(buflen))) {
+        // allocation failed, give up
+        *len = 0;
+        return NULL;
+    }
+
+    p = buf;
+    end = buf + buflen;
+
     p = safe_snprintf(p, end, "{\n");
-    p = appendStatsJson(p, end, &Modes.stats_current, "latest");
+    p = appendStatsJson(p, end, &Modes.stats_latest, "latest");
     p = safe_snprintf(p, end, ",\n");
 
-    p = appendStatsJson(p, end, &Modes.stats_1min[Modes.stats_latest_1min], "last1min");
+    p = appendStatsJson(p, end, &Modes.stats_1min[Modes.stats_newest_1min], "last1min");
     p = safe_snprintf(p, end, ",\n");
 
     p = appendStatsJson(p, end, &Modes.stats_5min, "last5min");
@@ -1838,13 +1893,18 @@ char *generateStatsJson(const char *url_path, int *len) {
     p = appendStatsJson(p, end, &Modes.stats_15min, "last15min");
     p = safe_snprintf(p, end, ",\n");
 
-    add_stats(&Modes.stats_alltime, &Modes.stats_current, &add);
-    p = appendStatsJson(p, end, &add, "total");
+    p = appendStatsJson(p, end, &Modes.stats_alltime, "total");
     p = safe_snprintf(p, end, "\n}\n");
 
-    assert(p < end);
+    int used = p - buf;
+    if (p >= end) {
+        // overran the buffer
+        buflen = used + 50;
+        free(buf);
+        goto retry;
+    }
 
-    *len = p-buf;
+    *len = used;
     return buf;
 }
 
@@ -2443,6 +2503,7 @@ static void writeFATSV()
             (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
 
         uint64_t minAge;
+        double adjustedMinAge;
         if (immediate) {
             // a change we want to emit right away
             minAge = 0;
@@ -2462,8 +2523,12 @@ static void writeFATSV()
             minAge = (changed ? 10000 : 30000);
         }
 
-        if ((now - a->fatsv_last_emitted) < minAge)
+        // Adjust rate for multiplier
+        adjustedMinAge = minAge / Modes.faup_rate_multiplier;
+
+        if ((now - a->fatsv_last_emitted) < adjustedMinAge) {
             continue;
+        }
 
         char *p = prepareWrite(&Modes.fatsv_out, TSV_MAX_PACKET_SIZE);
         if (!p)

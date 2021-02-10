@@ -94,6 +94,8 @@ struct stats {
 
     // total messages:
     uint32_t messages_total;
+    // .. divided by DF
+    uint32_t messages_by_df[32];
 
     // CPR decoding:
     unsigned int cpr_surface;

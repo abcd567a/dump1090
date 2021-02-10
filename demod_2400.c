@@ -170,10 +170,10 @@ void demodulate2400(struct mag_buf *mag)
 
         // try all phases
         Modes.stats_current.demod_preambles++;
-        bestmsg = NULL; bestscore = -2; bestphase = -1;
+        bestmsg = NULL; bestscore = SR_NOT_SET; bestphase = -1;
         for (try_phase = 4; try_phase <= 8; ++try_phase) {
             uint16_t *pPtr;
-            int phase, i, score, bytelen;
+            int phase, i, score;
 
             // Decode all the next 112 bits, regardless of the actual message
             // size. We'll check the actual message type later
@@ -181,8 +181,7 @@ void demodulate2400(struct mag_buf *mag)
             pPtr = &m[j+19] + (try_phase/5);
             phase = try_phase % 5;
 
-            bytelen = MODES_LONG_MSG_BYTES;
-            for (i = 0; i < bytelen; ++i) {
+            for (i = 0; i < MODES_LONG_MSG_BYTES; ++i) {
                 uint8_t theByte = 0;
 
                 switch (phase) {
@@ -264,23 +263,10 @@ void demodulate2400(struct mag_buf *mag)
                 }
 
                 msg[i] = theByte;
-                if (i == 0) {
-                    switch (msg[0] >> 3) {
-                    case 0: case 4: case 5: case 11:
-                        bytelen = MODES_SHORT_MSG_BYTES; break;
-
-                    case 16: case 17: case 18: case 20: case 21: case 24:
-                        break;
-
-                    default:
-                        bytelen = 1; // unknown DF, give up immediately
-                        break;
-                    }
-                }
             }
 
             // Score the mode S message and see if it's any good.
-            score = scoreModesMessage(msg, i*8);
+            score = scoreModesMessage(msg);
             if (score > bestscore) {
                 // new high score!
                 bestmsg = msg;
@@ -295,8 +281,8 @@ void demodulate2400(struct mag_buf *mag)
         }
 
         // Do we have a candidate?
-        if (bestscore < 0) {
-            if (bestscore == -1)
+        if (bestscore < SR_ACCEPT_THRESHOLD) {
+            if (bestscore >= SR_UNKNOWN_THRESHOLD)
                 Modes.stats_current.demod_rejected_unknown_icao++;
             else
                 Modes.stats_current.demod_rejected_bad++;
@@ -319,17 +305,11 @@ void demodulate2400(struct mag_buf *mag)
         mm.score = bestscore;
 
         // Decode the received message
-        {
-            int result = decodeModesMessage(&mm, bestmsg);
-            if (result < 0) {
-                if (result == -1)
-                    Modes.stats_current.demod_rejected_unknown_icao++;
-                else
-                    Modes.stats_current.demod_rejected_bad++;
-                continue;
-            } else {
-                Modes.stats_current.demod_accepted[mm.correctedbits]++;
-            }
+        if (decodeModesMessage(&mm, bestmsg) < 0) {
+            Modes.stats_current.demod_rejected_bad++;
+            continue;
+        } else {
+            Modes.stats_current.demod_accepted[mm.correctedbits]++;
         }
 
         // measure signal power
