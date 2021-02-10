@@ -195,7 +195,7 @@ function fetchData() {
                 return;
         }
 
-        FetchPending = $.ajax({ url: 'data/dump1090-fa/aircraft.json',
+        FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
@@ -214,7 +214,7 @@ function fetchData() {
                         return;
                 }
 
-                FetchPending_UAT = $.ajax({ url: 'data/skyaware978/aircraft.json',
+                FetchPending_UAT = $.ajax({ url: 'data-978/aircraft.json',
                         timeout: 5000,
                         cache: false,
                         dataType: 'json' });
@@ -472,7 +472,7 @@ function initialize() {
 
 
         // Get 978 receiver metadata if present
-        $.ajax({ url: 'data/skyaware978/receiver.json',
+        $.ajax({ url: 'data-978/receiver.json',
                 timeout: 5000,
                 cache: false,
                 dataType: 'json' })
@@ -490,7 +490,7 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/dump1090-fa/receiver.json',
+        $.ajax({ url: 'data-1090/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -629,18 +629,19 @@ var TotalPositionHistorySize = 0;
 function start_load_history() {
         let url = new URL(window.location.href);
         let params = new URLSearchParams(url.search);
+
         TotalPositionHistorySize = PositionHistorySize + UatPositionHistorySize;
         if (TotalPositionHistorySize > 0 && params.get('nohistory') !== 'true') {
                 $("#loader_progress").attr('max', TotalPositionHistorySize);
                 console.log("Starting to load history (" + TotalPositionHistorySize + " items)");
                 // Load dump1090-fa history items
                 for (var i = 0; i < PositionHistorySize; i++) {
-                        load_history_item(i, 'dump1090-fa');
+                        load_history_item(i, 'data-1090');
                         CurrentHistoryFetch++;
                 }
                 // Load skyaware978 history items
                 for (var i = 0; i < UatPositionHistorySize; i++) {
-                        load_history_item(i, 'skyaware978');
+                        load_history_item(i, 'data-978');
                         CurrentHistoryFetch++;
                 }
         } else {
@@ -655,7 +656,7 @@ function load_history_item(i, source) {
 
         $("#loader_progress").attr('value', CurrentHistoryFetch);
 
-        $.ajax({ url: 'data/' + source + '/' + historyfile,
+        $.ajax({ url: source + '/' + historyfile,
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
