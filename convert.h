@@ -21,7 +21,7 @@
 #define DUMP1090_CONVERT_H
 
 struct converter_state;
-typedef enum { INPUT_UC8=0, INPUT_SC16, INPUT_SC16Q11 } input_format_t;
+typedef enum { INPUT_UC8=0, INPUT_SC16, INPUT_SC16Q11, INPUT_S16, INPUT_U16O12 } input_format_t;
 
 typedef void (*iq_convert_fn)(void *iq_data,
                               uint16_t *mag_data,
