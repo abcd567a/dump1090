@@ -203,7 +203,7 @@ function initialize() {
 	// Set page basics
 	document.title = PageName;
 
-	flightFeederCheck();
+	uiTypeCheck();
 
 	PlaneRowTemplate = document.getElementById("plane_row_template");
 
@@ -2132,30 +2132,27 @@ function toggleLayer(element, layer) {
 	});
 }
 
-// check status.json if it has a serial number for a flightfeeder
-function flightFeederCheck() {
+// Update UI to fit the current environment
+function uiTypeCheck() {
     $.ajax('/status.json', {
-	success: function(data) {
-	    if (data.type === "flightfeeder") {
-		isFlightFeeder = true;
-		updatePiAwareOrFlightFeeder();
-	    }
-	}
-    })
-}
+		success: function(data) {
+			var type = data.type || 'piaware';
 
-// updates the page to replace piaware with flightfeeder references
-function updatePiAwareOrFlightFeeder() {
-    if (isFlightFeeder) {
-	$('.piAwareLogo').hide();
-	$('.flightfeederLogo').show();
-	PageName = 'FlightFeeder SkyAware';
-    } else {
-	$('.flightfeederLogo').hide();
-	$('.piAwareLogo').show();
-	PageName = 'PiAware SkyAware';
-    }
-    refreshPageTitle();
+			switch (type) {
+				case 'piaware':
+					$('.piAwareLogo').show();
+					PageName = 'PiAware SkyAware';
+					break;
+				
+				case 'flightfeeder':
+					$('.flightfeederLogo').show();
+					PageName = 'FlightFeeder SkyAware';
+					break;
+			}
+
+			refreshPageTitle();
+		}
+	});
 }
 
 // Function to hide banner (ex. for a kiosk to show maximum data possible)
