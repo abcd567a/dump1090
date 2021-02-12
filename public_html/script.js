@@ -2148,6 +2148,10 @@ function uiTypeCheck() {
 					$('.flightfeederLogo').show();
 					PageName = 'FlightFeeder SkyAware';
 					break;
+				case 'anywhere':
+					$('.anywhereLogo').show();
+					PageName = 'SkyAware Anywhere';
+					break;
 			}
 
 			refreshPageTitle();

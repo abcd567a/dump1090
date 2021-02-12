@@ -493,6 +493,11 @@ select.error, textarea.error, input.error {
     height: 24px;
 }
 
+.anywhereLogo {
+    width: 231px;
+    height: 24px;
+}
+
 .logoContainer {
     flex: 1;
 }
