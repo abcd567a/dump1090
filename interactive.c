@@ -173,6 +173,9 @@ void interactiveShowData(void) {
     int rowMaxRSSI = 0;
     int rowMinRSSI = 0;
 
+    // Ensure trackDataValid uses the current time
+    _messageNow = now;
+
     while (a) {
 
         if (a->reliable && (now - a->seen) < Modes.interactive_display_ttl
