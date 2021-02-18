@@ -1039,6 +1039,11 @@ static void decodeESAirbornePosition(struct modesMessage *mm, int check_imf)
         altitude_unit_t unit;
         int alt = decodeAC12Field(AC12Field, &unit);
         if (alt != INVALID_ALTITUDE) {
+            // If we haven't set airground yet (e.g. DF18)
+            // then we can at least set it to UNCERTAIN here
+            if (mm->airground == AG_INVALID)
+                mm->airground = AG_UNCERTAIN;
+
             if (mm->metype == 20 || mm->metype == 21 || mm->metype == 22) {
                 mm->altitude_geom = alt;
                 mm->altitude_geom_unit = unit;
