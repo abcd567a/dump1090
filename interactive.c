@@ -217,10 +217,33 @@ void interactiveShowData(void) {
             double signalAverage = (pSig[0] + pSig[1] + pSig[2] + pSig[3] +
                                     pSig[4] + pSig[5] + pSig[6] + pSig[7]) / 8.0;
 
-            strMode[0] = 'S';
-            if (a->adsb_version >= 0) {
-                strMode[1] = '0' + a->adsb_version;
+            switch (a->addrtype) {
+            case ADDR_ADSB_ICAO:
+                if (a->adsb_version >= 0) {
+                    strMode[0] = 'A';
+                    strMode[1] = '0' + a->adsb_version;
+                } else {
+                    strMode[0] = 'S';
+                }
+                break;
+            case ADDR_ADSB_ICAO_NT:
+                strMode[0] = 'N';
+                strMode[1] = 'T';
+                break;
+            case ADDR_ADSR_ICAO:
+            case ADDR_ADSR_OTHER:
+                strMode[0] = 'R';
+                break;
+            case ADDR_TISB_ICAO:
+            case ADDR_TISB_TRACKFILE:
+            case ADDR_TISB_OTHER:
+                strMode[0] = 'T';
+                break;
+            default:
+                strMode[0] = '?';
+                break;
             }
+
             if (a->modeA_hit) {
                 strMode[2] = 'a';
             }
