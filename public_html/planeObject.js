@@ -453,6 +453,7 @@ PlaneObject.prototype.updateIcon = function() {
         var svgKey = col + '!' + outline + '!' + baseMarker.svg + '!' + add_stroke + "!" + scaleFactor;
         var styleKey = opacity + '!' + rotation + '!' + AircraftLabels;
 
+        // New icon or marker change
         if (this.markerStyle === null || this.markerIcon === null || this.markerSvgKey != svgKey) {
                 //console.log(this.icao + " new icon and style " + this.markerSvgKey + " -> " + svgKey);
 
@@ -501,6 +502,7 @@ PlaneObject.prototype.updateIcon = function() {
                 }
         }
 
+        // Rotation or aircraft label display change
         if (this.markerStyleKey != styleKey) {
                 //console.log(this.icao + " new rotation");
                 this.markerIcon.setRotation(rotation * Math.PI / 180.0);
@@ -527,7 +529,9 @@ PlaneObject.prototype.updateIcon = function() {
                                 image: this.markerIcon
                         });
                 };
-                this.marker.setStyle(this.markerStyle);
+                if (this.marker !== null) {
+                        this.marker.setStyle(this.markerStyle);
+                }
                 this.markerStyleKey = styleKey;
         }
 
