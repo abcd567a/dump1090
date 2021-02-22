@@ -75,6 +75,7 @@ function PlaneObject(icao) {
         this.markerStaticIcon = null;
         this.markerStyleKey = null;
         this.markerSvgKey = null;
+        this.markerLabel = null;
         this.filter = {};
 
         // start from a computed registration, let the DB override it
@@ -468,8 +469,21 @@ PlaneObject.prototype.updateIcon = function() {
                 });
 
                 this.markerIcon = icon;
+
+                var labelFill = new ol.style.Fill({color: 'white' });
+                var labelStrokeNarrow = new ol.style.Stroke({color: 'black', width: 5});
+
                 this.markerStyle = new ol.style.Style({
-                        image: this.markerIcon
+                        image: this.markerIcon,
+                        text: new ol.style.Text({
+                                text: this.flight,
+                                fill: labelFill,
+                                stroke: labelStrokeNarrow,
+                                textAlign: 'left',
+                                textBaseline: "top",
+                                offsetX: 20,
+                                font: '12px sans-serif'
+                            })
                 });
                 this.markerStaticIcon = null;
                 this.markerStaticStyle = new ol.style.Style({});

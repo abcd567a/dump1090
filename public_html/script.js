@@ -344,8 +344,12 @@ function initialize() {
         });
 
         $('#grouptype_checkbox').on('click', function() {
-		toggleGroupByDataType(true);
-	});
+                toggleGroupByDataType(true);
+        });
+
+        $('#aircraft_label_checkbox').on('click', function() {
+                toggleAircraftLabels(true);
+        });
 
         $('#altitude_checkbox').on('click', function() {
         	toggleAltitudeChart(true);
@@ -416,6 +420,7 @@ function initialize() {
         toggleAltitudeChart(false);
         toggleAllPlanes(false);
         toggleGroupByDataType(false);
+        toggleAircraftLabels(false);
         toggleAllColumns(false);
         toggleADSBAircraft(false);
         toggleMLATAircraft(false);
@@ -1804,6 +1809,28 @@ function toggleGroupByDataType(switchToggle) {
 	}
 
 	localStorage.setItem('groupByDataType', groupByDataType);
+}
+
+function toggleAircraftLabels(switchToggle) {
+	if (typeof localStorage['showAircraftLabels'] === 'undefined') {
+		localStorage.setItem('showAircraftLabels', 'deselected');
+	}
+
+	var showAircraftLabels = localStorage.getItem('showAircraftLabels');
+	if (switchToggle === true) {
+		showAircraftLabels = (showAircraftLabels === 'deselected') ? 'selected' : 'deselected';
+	}
+
+	if (showAircraftLabels === 'deselected') {
+                // hide aircraft labels
+		$('#aircraft_label_checkbox').removeClass('settingsCheckboxChecked');
+	} else {
+                // show aicraft labels
+		//sortByDataSource();
+		$('#aircraft_label_checkbox').addClass('settingsCheckboxChecked');
+	}
+
+	localStorage.setItem('showAircraftLabels', showAircraftLabels);
 }
 
 function toggleAllPlanes(switchToggle) {
