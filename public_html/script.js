@@ -57,6 +57,8 @@ var ActiveFilterCount = 0;
 var altitude_slider = null;
 var speed_slider = null;
 
+var AircraftLabels = false;
+
 // piaware vs flightfeeder
 var isFlightFeeder = false;
 
@@ -1822,15 +1824,16 @@ function toggleAircraftLabels(switchToggle) {
 	}
 
 	if (showAircraftLabels === 'deselected') {
-                // hide aircraft labels
+		// hide aircraft labels
+		AircraftLabels = false;
 		$('#aircraft_label_checkbox').removeClass('settingsCheckboxChecked');
 	} else {
-                // show aicraft labels
-		//sortByDataSource();
+		// show aicraft labels
+		AircraftLabels = true;
 		$('#aircraft_label_checkbox').addClass('settingsCheckboxChecked');
 	}
 
-	localStorage.setItem('showAircraftLabels', showAircraftLabels);
+        localStorage.setItem('showAircraftLabels', showAircraftLabels);
 }
 
 function toggleAllPlanes(switchToggle) {
