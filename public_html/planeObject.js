@@ -476,7 +476,7 @@ PlaneObject.prototype.updateIcon = function() {
                                 text: new ol.style.Text({
                                         text: this.flight,
                                         fill: new ol.style.Fill({color: 'white' }),
-                                        stroke: new ol.style.Stroke({color: 'black', width: 5}),
+                                        stroke: new ol.style.Stroke({color: 'black', width: 3}),
                                         textAlign: 'left',
                                         textBaseline: "top",
                                         offsetX: 20,
@@ -516,7 +516,7 @@ PlaneObject.prototype.updateIcon = function() {
                                 text: new ol.style.Text({
                                         text: this.flight,
                                         fill: new ol.style.Fill({color: 'white' }),
-                                        stroke: new ol.style.Stroke({color: 'black', width: 5}),
+                                        stroke: new ol.style.Stroke({color: 'black', width: 3}),
                                         textAlign: 'left',
                                         textBaseline: "top",
                                         offsetX: 20,
