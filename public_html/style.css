@@ -630,22 +630,6 @@ select.error, textarea.error, input.error {
     -webkit-border-radius: 4px;
 }
 
-#adsbLegendBox {
-    background-color: #E5F6FC;
-}
-
-#mlatLegendBox {
-    background-color: #FDF2E5;
-}
-
-#otherLegendBox {
-    background-color: #E6E6E6;
-}
-
-#tisbLegendBox {
-    background-color: #CCD5DF;
-}
-
 .legendTitle {
     line-height: 19px;
     display: inline-block;
