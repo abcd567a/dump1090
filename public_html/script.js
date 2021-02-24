@@ -1278,11 +1278,11 @@ function refreshSelected() {
                 MessageRate = null;
         }
 
-	refreshPageTitle();
-       
+        refreshPageTitle();
+
         var selected = false;
-	if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
-    	        selected = Planes[SelectedPlane];
+        if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
+                selected = Planes[SelectedPlane];
         }
         
         $('#dump1090_infoblock').css('display','block');
@@ -1433,58 +1433,59 @@ function refreshSelected() {
                 $('#selected_nav_modes').text("n/a");
         } else {
                 $('#selected_nav_modes').text(selected.nav_modes.join());
-		}
-		if (selected.nic_baro == null) {
-			$('#selected_nic_baro').text("n/a");
-		} else {
-			if (selected.nic_baro == 1) {
-				$('#selected_nic_baro').text("cross-checked");
-			} else {
-				$('#selected_nic_baro').text("not cross-checked");
-			}
-		}
+        }
+        if (selected.nic_baro == null) {
+                $('#selected_nic_baro').text("n/a");
+        } else {
+                if (selected.nic_baro == 1) {
+                        $('#selected_nic_baro').text("cross-checked");
+                } else {
+                        $('#selected_nic_baro').text("not cross-checked");
+                }
+        }
 
-		$('#selected_nac_p').text(format_nac_p(selected.nac_p));
-		$('#selected_nac_v').text(format_nac_v(selected.nac_v));
-		if (selected.rc == null) {
-			$('#selected_rc').text("n/a");
-		} else if (selected.rc == 0) {
-			$('#selected_rc').text("unknown");
-		} else {
-			$('#selected_rc').text(format_distance_short(selected.rc, DisplayUnits));
-		}
+        $('#selected_nac_p').text(format_nac_p(selected.nac_p));
+        $('#selected_nac_v').text(format_nac_v(selected.nac_v));
+        if (selected.rc == null) {
+                $('#selected_rc').text("n/a");
+        } else if (selected.rc == 0) {
+                $('#selected_rc').text("unknown");
+        } else {
+                $('#selected_rc').text(format_distance_short(selected.rc, DisplayUnits));
+        }
 
-		if (selected.sil == null || selected.sil_type == null) {
-			$('#selected_sil').text("n/a");
-		} else {
-			var sampleRate = "";
-			var silDesc = "";
-			if (selected.sil_type == "perhour") {
-				sampleRate = " per flight hour";
-			} else if (selected.sil_type == "persample") {
-				sampleRate = " per sample";
-			}
-			
-			switch (selected.sil) {
-				case 0:
-					silDesc = "&gt; 1×10<sup>-3</sup>";
-					break;
-				case 1:
-					silDesc = "≤ 1×10<sup>-3</sup>";
-					break;
-				case 2:
-					silDesc = "≤ 1×10<sup>-5</sup>";
-					break;
-				case 3:
-					silDesc = "≤ 1×10<sup>-7</sup>";
-					break;
-				default:
-					silDesc = "n/a";
-					sampleRate = "";
-					break;
-			}
-			$('#selected_sil').html(silDesc + sampleRate);
-		}
+        if (selected.sil == null || selected.sil_type == null) {
+                $('#selected_sil').text("n/a");
+        } else {
+                var sampleRate = "";
+                var silDesc = "";
+                if (selected.sil_type == "perhour") {
+                        sampleRate = " per flight hour";
+                } else if (selected.sil_type == "persample") {
+                        sampleRate = " per sample";
+                }
+
+                switch (selected.sil) {
+                        case 0:
+                                silDesc = "&gt; 1×10<sup>-3</sup>";
+                                break;
+                        case 1:
+                                silDesc = "≤ 1×10<sup>-3</sup>";
+                                break;
+                        case 2:
+                                silDesc = "≤ 1×10<sup>-5</sup>";
+                                break;
+                        case 3:
+                                silDesc = "≤ 1×10<sup>-7</sup>";
+                                break;
+                        default:
+                                silDesc = "n/a";
+                                sampleRate = "";
+                                break;
+                }
+
+                $('#selected_sil').html(silDesc + sampleRate);
+        }
 
         if (selected.version == null) {
                 $('#selected_version').text('N/A');
@@ -1510,7 +1511,7 @@ function refreshSelected() {
                 $('#selected_uat_version').text('v' + selected.uat_version);
         }
 
-        }
+}
 
 function refreshHighlighted() {
 	// this is following nearly identical logic, etc, as the refreshSelected function, but doing less junk for the highlighted pane
