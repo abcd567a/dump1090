@@ -470,17 +470,17 @@ PlaneObject.prototype.updateIcon = function() {
 
                 this.markerIcon = icon;
 
-                if (AircraftLabels) {
+                if (AircraftLabels && this.flight != null) {
                         this.markerStyle = new ol.style.Style({
                                 image: this.markerIcon,
                                 text: new ol.style.Text({
-                                        text: this.flight,
-                                        fill: new ol.style.Fill({color: 'white' }),
-                                        stroke: new ol.style.Stroke({color: 'black', width: 3}),
-                                        textAlign: 'left',
-                                        textBaseline: "top",
-                                        offsetX: 20,
-                                        font: '12px sans-serif'
+                                        text: this.flight.trim(),
+                                        fill: new ol.style.Fill({color: 'white'}),
+                                        backgroundFill: new ol.style.Stroke({color: 'rgba(0, 47, 93, 0.8'}),
+                                        textAlign: 'center',
+                                        offsetY: -20,
+                                        font: '10px Helvetica',
+                                        padding: [1,0,0,2]
                                 })
                         });
                 } else {
@@ -510,17 +510,17 @@ PlaneObject.prototype.updateIcon = function() {
                         this.staticIcon.setOpacity(opacity);
                 }
 
-                if (AircraftLabels) {
+                if (AircraftLabels && this.flight != null) {
                         this.markerStyle = new ol.style.Style({
                                 image: this.markerIcon,
                                 text: new ol.style.Text({
-                                        text: this.flight,
-                                        fill: new ol.style.Fill({color: 'white' }),
-                                        stroke: new ol.style.Stroke({color: 'black', width: 3}),
-                                        textAlign: 'left',
-                                        textBaseline: "top",
-                                        offsetX: 20,
-                                        font: '12px sans-serif'
+                                        text: this.flight.trim(),
+                                        fill: new ol.style.Fill({color: 'white'}),
+                                        backgroundFill: new ol.style.Stroke({color: 'rgba(0, 47, 93, 0.8)'}),
+                                        textAlign: 'center',
+                                        offsetY: -20,
+                                        font: '10px Helvetica',
+                                        padding: [1,0,0,2]
                                 })
                         });
                 } else {
