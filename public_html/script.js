@@ -615,38 +615,53 @@ function reset_filter_sliders() {
         updatePlaneFilter();
 }
 
-var CurrentHistoryFetch = null;
+var CurrentHistoryFetch = 0;
 var PositionHistoryBuffer = [];
 var HistoryItemsReturned = 0;
+var TotalPositionHistorySize = 0;
 function start_load_history() {
-	let url = new URL(window.location.href);
-	let params = new URLSearchParams(url.search);
-	if (PositionHistorySize > 0 && params.get('nohistory') !== 'true') {
-		$("#loader_progress").attr('max',PositionHistorySize);
-		console.log("Starting to load history (" + PositionHistorySize + " items)");
-		//Load history items in parallel
-		for (var i = 0; i < PositionHistorySize; i++) {
-			load_history_item(i);
-		}
-	} else {
-		// Nothing to load
-		end_load_history();
-	}
+        let url = new URL(window.location.href);
+        let params = new URLSearchParams(url.search);
+
+        // Get total number of history.json files to load
+        TotalPositionHistorySize = PositionHistorySize + UatPositionHistorySize;
+        if (TotalPositionHistorySize > 0 && params.get('nohistory') !== 'true') {
+                $("#loader_progress").attr('max', TotalPositionHistorySize);
+                console.log("Starting to load history (" + TotalPositionHistorySize + " items)");
+                // Load dump1090 history.json files
+                for (var i = 0; i < PositionHistorySize; i++) {
+                        load_history_item(i, 'data-1090');
+                        CurrentHistoryFetch++;
+                }
+                // Load skyaware978 history.json files
+                for (var i = 0; i < UatPositionHistorySize; i++) {
+                        load_history_item(i, 'data-978');
+                        CurrentHistoryFetch++;
+                }
+        } else {
+                // Nothing to load
+                end_load_history();
+        }
 }
 
-function load_history_item(i) {
-        console.log("Loading history #" + i);
-        $("#loader_progress").attr('value',i);
+// Loads a history json file
+function load_history_item(i, source) {
+        var historyfile = 'history_' + i + '.json';
+        console.log('Loading ' + source + ' ' + historyfile);
+        $("#loader_progress").attr('value', CurrentHistoryFetch);
 
-        $.ajax({ url: 'data-1090/history_' + i + '.json',
+        $.ajax({ url: source + '/' + historyfile,
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
 
                 .done(function(data) {
+                        // Tag history.json files with the source we fetched from (data-1090 / data-978)
+                        data["source"] = source;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
-                        if (HistoryItemsReturned == PositionHistorySize) {
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
+                                // End load history when all files have been loaded
                                 end_load_history();
                         }
                 })
@@ -654,9 +669,10 @@ function load_history_item(i) {
                 .fail(function(jqxhr, status, error) {
                         //Doesn't matter if it failed, we'll just be missing a data point
                         HistoryItemsReturned++;
-                                        if (HistoryItemsReturned == PositionHistorySize) {
-                                                end_load_history();
-                                        }
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
+                                // End load history when all files have been loaded
+                                end_load_history();
+                        }
                 });
 }
 
@@ -678,7 +694,7 @@ function end_load_history() {
                         console.log("Applying history " + (h + 1) + "/" + PositionHistoryBuffer.length + " at: " + now);
                         processReceiverUpdate(PositionHistoryBuffer[h]);
 
-                        // update track
+                        // Update track
                         console.log("Updating tracks at: " + now);
                         for (var i = 0; i < PlanesOrdered.length; ++i) {
                                 var plane = PlanesOrdered[i];
@@ -1471,7 +1487,7 @@ function refreshSelected() {
 		}
 
         if (selected.version == null) {
-                $('#selected_version').text('none');
+                $('#selected_version').text('N/A');
         } else if (selected.version == 0) {
                 $('#selected_version').text('v0 (DO-260)');
         } else if (selected.version == 1) {
@@ -1480,6 +1496,18 @@ function refreshSelected() {
                 $('#selected_version').text('v2 (DO-260B)');
         } else {
                 $('#selected_version').text('v' + selected.version);
+        }
+
+        if (selected.uat_version == null) {
+                $('#selected_uat_version').text('N/A');
+        } else if (selected.uat_version == 0) {
+                $('#selected_uat_version').text('v0 (DO-282)');
+        } else if (selected.uat_version == 1) {
+                $('#selected_uat_version').text('v1 (DO-282A)');
+        } else if (selected.uat_version == 2) {
+                $('#selected_uat_version').text('v2 (DO-282B)');
+        } else {
+                $('#selected_uat_version').text('v' + selected.uat_version);
         }
 
         }
