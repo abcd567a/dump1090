@@ -370,6 +370,11 @@ function initialize() {
                 refreshDataSourceFilters();
         })
 
+        $('#uat_datasource_checkbox').on('click', function() {
+                toggleUATAircraft(true);
+                refreshDataSourceFilters();
+        })
+
         $('#mlat_datasource_checkbox').on('click', function() {
                 toggleMLATAircraft(true);
                 refreshDataSourceFilters();
@@ -425,6 +430,7 @@ function initialize() {
         toggleAircraftLabels(false);
         toggleAllColumns(false);
         toggleADSBAircraft(false);
+        toggleUATAircraft(false);
         toggleMLATAircraft(false);
         toggleOtherAircraft(false);
         toggleTISBAircraft(false);
@@ -2606,6 +2612,23 @@ function toggleADSBAircraft(switchFilter) {
 		$('#adsb_datasource_checkbox').addClass('sourceCheckboxChecked');
 	}
 	localStorage.setItem('sourceADSBFilter', sourceADSBFilter);
+}
+
+function toggleUATAircraft(switchFilter) {
+	if (typeof localStorage['sourceUATFilter'] === 'undefined') {
+		localStorage.setItem('sourceUATFilter','selected');
+	}
+
+	var sourceUATFilter = localStorage.getItem('sourceUATFilter');
+	if (switchFilter === true) {
+		sourceUATFilter = (sourceUATFilter === 'deselected') ? 'selected' : 'deselected';
+	}
+	if (sourceUATFilter === 'deselected') {
+		$('#uat_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#uat_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceUATFilter', sourceUATFilter);
 }
 
 function toggleMLATAircraft(switchFilter) {

@@ -259,6 +259,7 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
 }
 
 .vPosition  { background-color: #E5F6FC; }
+.uat        { background-color: #CDF7D0; }
 .mlat       { background-color: #FDF2E5; }
 .other      { background-color: #CCD5F8; }
 .tisb       { background-color: #FFF3B8; }
