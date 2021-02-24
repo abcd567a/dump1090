@@ -227,6 +227,29 @@ function fetchData() {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
                 $("#update_error").css('display','block');
         });
+
+        // Fetch UAT if enabled
+        if (UAT_Enabled) {
+                if (FetchPending_UAT !== null && FetchPending_UAT.state() == 'pending') {
+                        // don't double up on fetches, let the last one resolve
+                        return;
+                }
+
+                FetchPending_UAT = $.ajax({ url: 'data-978/aircraft.json',
+                        timeout: 5000,
+                        cache: false,
+                        dataType: 'json' });
+
+                FetchPending_UAT.done(function(data) {
+                        // Process UAT aircraft.json here
+                        console.log('Fetching UAT aircraft.json...')
+                });
+
+                FetchPending_UAT.fail(function(jqxhr, status, error) {
+                        $("#uat_update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
+                        $("#uat_update_error").css('display','block');
+                });
+        }
 }
 
 var PositionHistorySize = 0;
