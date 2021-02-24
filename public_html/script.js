@@ -179,7 +179,7 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
+	FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
@@ -438,7 +438,7 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        $.ajax({ url: 'data-1090/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -585,7 +585,7 @@ function load_history_item(i) {
         console.log("Loading history #" + i);
         $("#loader_progress").attr('value',i);
 
-        $.ajax({ url: 'data/history_' + i + '.json',
+        $.ajax({ url: 'data-1090/history_' + i + '.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
