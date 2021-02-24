@@ -18,6 +18,9 @@ var infoBoxOriginalPosition = {};
 var customAltitudeColors = true;
 var myAdsbStatsSiteUrl = null;
 
+var ADSB_Enabled = true;
+var UAT_Enabled = false;
+
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
         '7600' : { cssClass: 'squawk7600', markerColor: 'rgb(0, 255, 255)', text: 'Radio Failure' },
@@ -43,8 +46,10 @@ var ReceiverClock = null;
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
 var FetchPending = null;
+var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
+
 var MessageRate = 0;
 
 var NBSP='\u00a0';
@@ -225,6 +230,7 @@ function fetchData() {
 }
 
 var PositionHistorySize = 0;
+var UatPositionHistorySize = 0;
 function initialize() {
         // Set page basics
         document.title = PageName;
@@ -436,6 +442,23 @@ function initialize() {
         toggleTISBAircraft(false);
         refreshDataSourceFilters();
 
+        // Get 978 receiver metadata if present
+        $.ajax({ url: 'data-978/receiver.json',
+                timeout: 5000,
+                cache: false,
+                dataType: 'json' })
+
+                .done(function(data) {
+                        console.log('SkyAware978 enabled')
+                        UAT_Enabled = true;
+                        UatPositionHistorySize = data.history;
+                })
+
+                .fail(function(data) {
+                        console.warn('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
+                        UAT_Enabled = false;
+                });
+
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
         $.ajax({ url: 'data-1090/receiver.json',
@@ -444,6 +467,8 @@ function initialize() {
                  dataType: 'json' })
 
                 .done(function(data) {
+                        console.log('dump1090-fa enabled');
+                        ADSB_Enabled = true;
                         if (typeof data.lat !== "undefined") {
                                 SiteShow = true;
                                 SiteLat = data.lat;
@@ -455,6 +480,11 @@ function initialize() {
                         SkyAwareVersion = data.version;
                         RefreshInterval = data.refresh;
                         PositionHistorySize = data.history;
+                })
+
+                .fail(function(data) {
+                        console.warn('Error reading dump1090-fa receiver.json. dump1090-fa may be disabled');
+                        ADSB_Enabled = false;
                 })
 
                 .always(function() {
