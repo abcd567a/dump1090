@@ -239,6 +239,7 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
     background-color: #002F5D;
     color: #FFFFFF;
     cursor: pointer;
+    white-space: nowrap;
 }
 .aircraft_table_header td {
     font-size: smaller;
@@ -271,6 +272,9 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
     cursor: pointer;
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+.ident_normal { font-weight: normal; font-style: normal; }
+.ident_fallback { font-weight: bold; font-style: italic; }
 .hidden { display: none; }
 
 .infoblock_heading    { font-size: larger; }

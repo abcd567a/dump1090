@@ -1307,8 +1307,13 @@ function refreshSelected() {
                 $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
         }
 
-        if (UatMessageRate !== null) {
-                $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
+        if (UAT_Enabled) {
+                $('#uat_message_rate_row').show();
+                if (UatMessageRate !== null) {
+                        $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
+                }
+        } else {
+                $('#uat_message_rate_row').hide();
         }
 
         setSelectedInfoBlockVisibility();
@@ -1692,10 +1697,16 @@ function refreshTableInfo() {
                         // ICAO doesn't change
                         if (tableplane.flight) {
                                 tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+				tableplane.tr.cells[2].className = "ident_normal";
+                        } else if (tableplane.registration !== null) {
+                                // Show registration with special styling if ident is not present
+				tableplane.tr.cells[2].innerHTML = getFlightAwareIdentLink(tableplane.registration, tableplane.registration);
+				tableplane.tr.cells[2].className = "ident_fallback";
                         } else {
-                                // Show _registration if ident is not present
-                                tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
-                        }
+				tableplane.tr.cells[2].innerHTML = "";
+				tableplane.tr.cells[2].className = "";
+			}
+
                         tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
                         tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
                         tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
@@ -2424,7 +2435,7 @@ function getFlightAwareIdentLink(ident, linkText) {
         if (!linkText) {
             linkText = ident;
         }
-        return "<a target=\"_blank\" href=\"https://flightaware.com/live/flight/" + ident.trim() + "\">" + linkText + "</a>";
+        return "<a target=\"_blank\" href=\"https://flightaware.com/live/flight/" + ident.trim() + "\"><span title=\"Bold ident indicates this is an aircraft registration number\"> " + linkText + "</span></a>";
     }
 
     return "";
