@@ -1611,7 +1611,7 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-        if (highlighted.dataSources.has("uat")) {
+        if (highlighted.getDataSource() === "uat") {
 		$('#highlighted_source').text("UAT");
         } else if (highlighted.getDataSource() === "adsb_icao") {
 		$('#highlighted_source').text("ADS-B");
