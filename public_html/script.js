@@ -1308,11 +1308,13 @@ function refreshSelected() {
         }
 
         if (UAT_Enabled) {
+		$('#uat_datasource_checkbox, #uat_datasource_label').show();
                 $('#uat_message_rate_row').show();
                 if (UatMessageRate !== null) {
                         $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
                 }
         } else {
+		$('#uat_datasource_checkbox, #uat_datasource_label').hide();
                 $('#uat_message_rate_row').hide();
         }
 
