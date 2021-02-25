@@ -129,7 +129,9 @@ PlaneObject.prototype.isFiltered = function() {
     }
 
     var dataSource = this.getDataSource();
-    if (dataSource === 'adsb_icao') {
+    if (dataSource === 'uat') {
+        if (!this.filter.UAT) return true;
+    } else if (dataSource === 'adsb_icao') {
         if (!this.filter.ADSB) return true;
     } else if (dataSource === 'mlat') {
         if (!this.filter.MLAT) return true;

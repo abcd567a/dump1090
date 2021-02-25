@@ -2420,6 +2420,7 @@ function refreshDataSourceFilters () {
         PlaneFilter.MLAT = (localStorage.getItem('sourceMLATFilter') === 'selected') ? true : false;
         PlaneFilter.Other = (localStorage.getItem('sourceOtherFilter') === 'selected') ? true : false;
         PlaneFilter.TISB = (localStorage.getItem('sourceTISBFilter') === 'selected') ? true : false;
+        PlaneFilter.UAT = (localStorage.getItem('sourceUATFilter') === 'selected') ? true : false;
 }
 
 function getFlightAwareIdentLink(ident, linkText) {
