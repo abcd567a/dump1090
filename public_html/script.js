@@ -49,8 +49,10 @@ var FetchPending = null;
 var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
+var MessageCountHistory_UAT = [];
 
 var MessageRate = 0;
+var UatMessageRate = 0;
 
 var NBSP='\u00a0';
 
@@ -104,17 +106,31 @@ function processReceiverUpdate(data, receiver_source) {
         var now = data.now;
         var acs = data.aircraft;
 
-        // Detect stats reset
-        if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
-                MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
-                                        'messages' : 0}];
-        }
+        if (receiver_source === "skyaware978") {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
+                        MessageCountHistory_UAT = [{'time' : MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time,
+                                                'messages' : 0}];
+                }
 
-        // Note the message count in the history
-        MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
-        // .. and clean up any old values
-        if ((now - MessageCountHistory[0].time) > 30)
-                MessageCountHistory.shift();
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory_UAT.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory_UAT[0].time) > 30)
+                        MessageCountHistory_UAT.shift();
+        } else {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
+                        MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
+                                                'messages' : 0}];
+                }
+
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory[0].time) > 30)
+                        MessageCountHistory.shift();
+        }
 
         for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
@@ -658,6 +674,8 @@ function load_history_item(i, source) {
         console.log('Loading ' + source + ' ' + historyfile);
         $("#loader_progress").attr('value', CurrentHistoryFetch);
 
+        var receiver_source = (source == "data-978" ? "skyaware978" : "dump1090-fa");
+
         $.ajax({ url: source + '/' + historyfile,
                  timeout: 5000,
                  cache: false,
@@ -665,7 +683,7 @@ function load_history_item(i, source) {
 
                 .done(function(data) {
                         // Tag history.json files with the source we fetched from (data-1090 / data-978)
-                        data["source"] = source;
+                        data["source"] = receiver_source;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
                         if (HistoryItemsReturned == TotalPositionHistorySize) {
@@ -1277,15 +1295,7 @@ function refreshPageTitle() {
 
 // Refresh the detail window about the plane
 function refreshSelected() {
-        if (MessageCountHistory.length > 1) {
-                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
-                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
-                if (message_time_delta > 0)
-                        MessageRate = message_count_delta / message_time_delta;
-        } else {
-                MessageRate = null;
-        }
-
+        updateMessageRates();
         refreshPageTitle();
 
         var selected = false;
@@ -1301,9 +1311,11 @@ function refreshSelected() {
         $('#active_filter_count').text(ActiveFilterCount);
 
         if (MessageRate !== null) {
-                $('#dump1090_message_rate').text(MessageRate.toFixed(1));
-        } else {
-                $('#dump1090_message_rate').text("n/a");
+                $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
+        }
+
+        if (UatMessageRate !== null) {
+                $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
         }
 
         setSelectedInfoBlockVisibility();
@@ -1521,6 +1533,28 @@ function refreshSelected() {
                 $('#selected_uat_version').text('v' + selected.uat_version);
         }
 
+}
+
+// Calculate 1090 and 978 Message rate using the rolling history of Message Counts recorded from processing aircraft.json
+function updateMessageRates () {
+        if (MessageCountHistory.length > 1) {
+                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
+                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
+                if (message_time_delta > 0)
+                        MessageRate = message_count_delta / message_time_delta;
+        } else {
+                MessageRate = null;
+        }
+
+
+        if (MessageCountHistory_UAT.length > 1) {
+                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
+                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
+                if (message_time_delta > 0)
+                        UatMessageRate = message_count_delta / message_time_delta;
+        } else {
+                UatMessageRate = null;
+        }
 }
 
 function refreshHighlighted() {
