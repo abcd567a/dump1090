@@ -41,8 +41,6 @@ var TrackedHistorySize = 0;
 
 var SitePosition = null;
 
-var ReceiverClock = null;
-
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
 var FetchPending = null;
@@ -256,11 +254,6 @@ function process_aircraft_json(data, receiver_source) {
         refreshTableInfo();
         refreshSelected();
         refreshHighlighted();
-
-        if (ReceiverClock) {
-                var rcv = new Date(now * 1000);
-                ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-        }
 
         // Check for stale receiver data
         if (LastReceiverTimestamp === now) {
