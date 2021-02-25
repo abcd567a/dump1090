@@ -200,7 +200,7 @@ function fetchData() {
                 return;
         }
 
-        FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
+        FetchPending = $.ajax({ url: 'data/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
@@ -501,7 +501,7 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data-1090/receiver.json',
+        $.ajax({ url: 'data/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
@@ -647,7 +647,7 @@ function start_load_history() {
                 console.log("Starting to load history (" + TotalPositionHistorySize + " items)");
                 // Load dump1090 history.json files
                 for (var i = 0; i < PositionHistorySize; i++) {
-                        load_history_item(i, 'data-1090');
+                        load_history_item(i, 'data');
                         CurrentHistoryFetch++;
                 }
                 // Load skyaware978 history.json files
@@ -675,7 +675,7 @@ function load_history_item(i, source) {
                  dataType: 'json' })
 
                 .done(function(data) {
-                        // Tag history.json files with the source we fetched from (data-1090 / data-978)
+                        // Tag history.json files with the source we fetched from (/data or /data-978)
                         data["source"] = receiver_source;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
