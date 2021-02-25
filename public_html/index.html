@@ -213,12 +213,15 @@
 										</tr>
 										<tr class="infoblock_body">
 											<td><span class="infoBlockTitleText">Total Aircraft:</span> <span id="dump1090_total_ac">n/a</span></td>
-											<td><span class="infoBlockTitleText">Messages:</span> <span id="dump1090_message_rate">n/a</span>/sec</td>
+											<td><span class="infoBlockTitleText">ADS-B Message Rate:</span> <span id="dump1090_message_rate">n/a</span></td>
 										</tr>
 			
 										<tr class="infoblock_body">
 											<td><span class="infoBlockTitleText">With Positions:</span> <span id="dump1090_total_ac_positions">n/a</span></td>
-											<td><span class="infoBlockTitleText">History:</span> <span id="dump1090_total_history">n/a</span> positions</td>
+											<td><span class="infoBlockTitleText">UAT Message Rate:</span> <span id="uat_message_rate">n/a</span></td>
+										</tr>
+										<tr class="infoblock_body">
+											<td><span class="infoBlockTitleText">Position History:</span> <span id="dump1090_total_history">n/a</span></td>
 										</tr>
 									</table>
 								</div> <!-- dump1090_infoblock -->
@@ -418,6 +421,8 @@
 										<div class="legend">
 											<div class="sourceCheckbox" id="adsb_datasource_checkbox"></div>
 											<div class="legendTitle vPosition">ADS-B</div>
+											<div class="sourceCheckbox" id="uat_datasource_checkbox"></div>
+											<div class="legendTitle uat">UAT</div>
 											<div class="sourceCheckbox" id="mlat_datasource_checkbox"></div>
 											<div class="legendTitle mlat">MLAT</div>
 											<div class="sourceCheckbox" id="other_datasource_checkbox"></div>
@@ -705,6 +710,14 @@
 									</div>
 									<div class="infoRowLine">
 										<div class="infoHeading infoRowFluid fourColumnSection1">
+											<span title="For UAT-equipped aircraft, the version of UAT ADS-B to which the aircraft conforms, as reported by the aircraft.">UAT Version</span>:
+										</div>
+										<div class="infoData infoRowFluid fourColumnSection2">
+											<span id="selected_uat_version">n/a</span>
+										</div>
+									</div>
+									<div class="infoRowLine">
+										<div class="infoHeading infoRowFluid fourColumnSection1">
 											<span title="Indicated signal strength of the signal received by your ADS-B site from the aircraft.">RSSI</span>:
 										</div>
 										<div class="infoData infoRowFluid fourColumnSection2">
@@ -825,6 +838,11 @@
 		<div id="update_error" class="hidden">
 			<b>Problem fetching data from dump1090.</b><br>
 			<span id="update_error_detail"></span><br>
+			The displayed map data will be out of date.
+		</div>
+		<div id="uat_update_error" class="hidden">
+			<b>Problem fetching data from SkyAware978.</b><br>
+			<span id="uat_update_error_detail"></span><br>
 			The displayed map data will be out of date.
 		</div>
 

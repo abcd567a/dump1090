@@ -18,6 +18,9 @@ var infoBoxOriginalPosition = {};
 var customAltitudeColors = true;
 var myAdsbStatsSiteUrl = null;
 
+var ADSB_Enabled = true;
+var UAT_Enabled = false;
+
 var SpecialSquawks = {
         '7500' : { cssClass: 'squawk7500', markerColor: 'rgb(255, 85, 85)', text: 'Aircraft Hijacking' },
         '7600' : { cssClass: 'squawk7600', markerColor: 'rgb(0, 255, 255)', text: 'Radio Failure' },
@@ -38,14 +41,16 @@ var TrackedHistorySize = 0;
 
 var SitePosition = null;
 
-var ReceiverClock = null;
-
 var LastReceiverTimestamp = 0;
 var StaleReceiverCount = 0;
 var FetchPending = null;
+var FetchPending_UAT = null;
 
 var MessageCountHistory = [];
+var MessageCountHistory_UAT = [];
+
 var MessageRate = 0;
+var UatMessageRate = 0;
 
 var NBSP='\u00a0';
 
@@ -92,22 +97,38 @@ var DefaultMinMaxFilters = {
         'imperial' : {min: 0, maxSpeed: 600, maxAltitude: 65000}        // mph, ft
 };
 
-function processReceiverUpdate(data) {
-	// Loop through all the planes in the data packet
+// Update Planes with data in aircraft json
+// receiver_source will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function processReceiverUpdate(data, receiver_source) {
+        // Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
 
-        // Detect stats reset
-        if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
-                MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
-                                        'messages' : 0}];
-        }
+        if (receiver_source === "skyaware978") {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory_UAT.length > 0 && MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages > data.messages) {
+                        MessageCountHistory_UAT = [{'time' : MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time,
+                                                'messages' : 0}];
+                }
 
-        // Note the message count in the history
-        MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
-        // .. and clean up any old values
-        if ((now - MessageCountHistory[0].time) > 30)
-                MessageCountHistory.shift();
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory_UAT.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory_UAT[0].time) > 30)
+                        MessageCountHistory_UAT.shift();
+        } else {
+                // Detect stats reset (i.e. if MessageCountHistory array is > 0 and the latest value > the "messages" field in the data packet)
+                if (MessageCountHistory.length > 0 && MessageCountHistory[MessageCountHistory.length-1].messages > data.messages) {
+                        MessageCountHistory = [{'time' : MessageCountHistory[MessageCountHistory.length-1].time,
+                                                'messages' : 0}];
+                }
+
+                // Maintain a 30 second rollinng history of message counts
+                MessageCountHistory.push({ 'time' : now, 'messages' : data.messages});
+                // .. and clean up any old values
+                if ((now - MessageCountHistory[0].time) > 30)
+                        MessageCountHistory.shift();
+        }
 
         for (var j=0; j < acs.length; j++) {
                 var ac = acs[j];
@@ -169,7 +190,7 @@ function processReceiverUpdate(data) {
                 }
 
                 // Call the function update
-                plane.updateData(now, ac);
+                plane.updateData(now, ac, receiver_source);
         }
 }
 
@@ -179,52 +200,77 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data/aircraft.json',
+        FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
         FetchPending.done(function(data) {
-                var now = data.now;
-
-                processReceiverUpdate(data);
-
-                // update timestamps, visibility, history track for all planes - not only those updated
-                for (var i = 0; i < PlanesOrdered.length; ++i) {
-                        var plane = PlanesOrdered[i];
-                        plane.updateTick(now, LastReceiverTimestamp);
-                }
-
-                selectNewPlanes();
-                refreshTableInfo();
-                refreshSelected();
-                refreshHighlighted();
-                
-                if (ReceiverClock) {
-                        var rcv = new Date(now * 1000);
-                        ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-                }
-
-                // Check for stale receiver data
-                if (LastReceiverTimestamp === now) {
-                        StaleReceiverCount++;
-                        if (StaleReceiverCount > 5) {
-                                $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-                                $("#update_error").css('display','block');
-                        }
-                } else { 
-                        StaleReceiverCount = 0;
-                        LastReceiverTimestamp = now;
-                        $("#update_error").css('display','none');
-                }
+                process_aircraft_json(data, 'dump1090-fa');
         });
 
         FetchPending.fail(function(jqxhr, status, error) {
                 $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
                 $("#update_error").css('display','block');
         });
+
+        // Fetch UAT if enabled
+        if (UAT_Enabled) {
+                if (FetchPending_UAT !== null && FetchPending_UAT.state() == 'pending') {
+                        // don't double up on fetches, let the last one resolve
+                        return;
+                }
+
+                FetchPending_UAT = $.ajax({ url: 'data-978/aircraft.json',
+                        timeout: 5000,
+                        cache: false,
+                        dataType: 'json' });
+
+                FetchPending_UAT.done(function(data) {
+                        // Process UAT aircraft.json here
+                        process_aircraft_json(data, 'skyaware978');
+                });
+
+                FetchPending_UAT.fail(function(jqxhr, status, error) {
+                        $("#uat_update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
+                        $("#uat_update_error").css('display','block');
+                });
+        }
+}
+
+// Process an aircraft.json and update Planes.
+// receiver_source will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function process_aircraft_json(data, receiver_source) {
+        var now = data.now;
+
+        processReceiverUpdate(data, receiver_source);
+
+        // update timestamps, visibility, history track for all planes - not only those updated
+        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                var plane = PlanesOrdered[i];
+                plane.updateTick(now, LastReceiverTimestamp);
+        }
+
+        selectNewPlanes();
+        refreshTableInfo();
+        refreshSelected();
+        refreshHighlighted();
+
+        // Check for stale receiver data
+        if (LastReceiverTimestamp === now) {
+                StaleReceiverCount++;
+                if (StaleReceiverCount > 5) {
+                        $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                }
+        } else {
+                StaleReceiverCount = 0;
+                LastReceiverTimestamp = now;
+                $("#update_error").css('display','none');
+        }
 }
 
 var PositionHistorySize = 0;
+var UatPositionHistorySize = 0;
 function initialize() {
         // Set page basics
         document.title = PageName;
@@ -370,6 +416,11 @@ function initialize() {
                 refreshDataSourceFilters();
         })
 
+        $('#uat_datasource_checkbox').on('click', function() {
+                toggleUATAircraft(true);
+                refreshDataSourceFilters();
+        })
+
         $('#mlat_datasource_checkbox').on('click', function() {
                 toggleMLATAircraft(true);
                 refreshDataSourceFilters();
@@ -425,19 +476,39 @@ function initialize() {
         toggleAircraftLabels(false);
         toggleAllColumns(false);
         toggleADSBAircraft(false);
+        toggleUATAircraft(false);
         toggleMLATAircraft(false);
         toggleOtherAircraft(false);
         toggleTISBAircraft(false);
         refreshDataSourceFilters();
 
+        // Get 978 receiver metadata if present
+        $.ajax({ url: 'data-978/receiver.json',
+                timeout: 5000,
+                cache: false,
+                dataType: 'json' })
+
+                .done(function(data) {
+                        console.log('SkyAware978 enabled')
+                        UAT_Enabled = true;
+                        UatPositionHistorySize = data.history;
+                })
+
+                .fail(function(data) {
+                        console.warn('Error reading SkyAware978 receiver.json. SkyAware978 may be disabled')
+                        UAT_Enabled = false;
+                });
+
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        $.ajax({ url: 'data-1090/receiver.json',
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
 
                 .done(function(data) {
+                        console.log('dump1090-fa enabled');
+                        ADSB_Enabled = true;
                         if (typeof data.lat !== "undefined") {
                                 SiteShow = true;
                                 SiteLat = data.lat;
@@ -449,6 +520,11 @@ function initialize() {
                         SkyAwareVersion = data.version;
                         RefreshInterval = data.refresh;
                         PositionHistorySize = data.history;
+                })
+
+                .fail(function(data) {
+                        console.warn('Error reading dump1090-fa receiver.json. dump1090-fa may be disabled');
+                        ADSB_Enabled = false;
                 })
 
                 .always(function() {
@@ -556,38 +632,55 @@ function reset_filter_sliders() {
         updatePlaneFilter();
 }
 
-var CurrentHistoryFetch = null;
+var CurrentHistoryFetch = 0;
 var PositionHistoryBuffer = [];
 var HistoryItemsReturned = 0;
+var TotalPositionHistorySize = 0;
 function start_load_history() {
-	let url = new URL(window.location.href);
-	let params = new URLSearchParams(url.search);
-	if (PositionHistorySize > 0 && params.get('nohistory') !== 'true') {
-		$("#loader_progress").attr('max',PositionHistorySize);
-		console.log("Starting to load history (" + PositionHistorySize + " items)");
-		//Load history items in parallel
-		for (var i = 0; i < PositionHistorySize; i++) {
-			load_history_item(i);
-		}
-	} else {
-		// Nothing to load
-		end_load_history();
-	}
+        let url = new URL(window.location.href);
+        let params = new URLSearchParams(url.search);
+
+        // Get total number of history.json files to load
+        TotalPositionHistorySize = PositionHistorySize + UatPositionHistorySize;
+        if (TotalPositionHistorySize > 0 && params.get('nohistory') !== 'true') {
+                $("#loader_progress").attr('max', TotalPositionHistorySize);
+                console.log("Starting to load history (" + TotalPositionHistorySize + " items)");
+                // Load dump1090 history.json files
+                for (var i = 0; i < PositionHistorySize; i++) {
+                        load_history_item(i, 'data-1090');
+                        CurrentHistoryFetch++;
+                }
+                // Load skyaware978 history.json files
+                for (var i = 0; i < UatPositionHistorySize; i++) {
+                        load_history_item(i, 'data-978');
+                        CurrentHistoryFetch++;
+                }
+        } else {
+                // Nothing to load
+                end_load_history();
+        }
 }
 
-function load_history_item(i) {
-        console.log("Loading history #" + i);
-        $("#loader_progress").attr('value',i);
+// Loads a history json file
+function load_history_item(i, source) {
+        var historyfile = 'history_' + i + '.json';
+        console.log('Loading ' + source + ' ' + historyfile);
+        $("#loader_progress").attr('value', CurrentHistoryFetch);
 
-        $.ajax({ url: 'data/history_' + i + '.json',
+        var receiver_source = (source == "data-978" ? "skyaware978" : "dump1090-fa");
+
+        $.ajax({ url: source + '/' + historyfile,
                  timeout: 5000,
                  cache: false,
                  dataType: 'json' })
 
                 .done(function(data) {
+                        // Tag history.json files with the source we fetched from (data-1090 / data-978)
+                        data["source"] = receiver_source;
                         PositionHistoryBuffer.push(data);
                         HistoryItemsReturned++;
-                        if (HistoryItemsReturned == PositionHistorySize) {
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
+                                // End load history when all files have been loaded
                                 end_load_history();
                         }
                 })
@@ -595,9 +688,10 @@ function load_history_item(i) {
                 .fail(function(jqxhr, status, error) {
                         //Doesn't matter if it failed, we'll just be missing a data point
                         HistoryItemsReturned++;
-                                        if (HistoryItemsReturned == PositionHistorySize) {
-                                                end_load_history();
-                                        }
+                        if (HistoryItemsReturned == TotalPositionHistorySize) {
+                                // End load history when all files have been loaded
+                                end_load_history();
+                        }
                 });
 }
 
@@ -617,9 +711,9 @@ function end_load_history() {
                 for (var h = 0; h < PositionHistoryBuffer.length; ++h) {
                         now = PositionHistoryBuffer[h].now;
                         console.log("Applying history " + (h + 1) + "/" + PositionHistoryBuffer.length + " at: " + now);
-                        processReceiverUpdate(PositionHistoryBuffer[h]);
+                        processReceiverUpdate(PositionHistoryBuffer[h], PositionHistoryBuffer[h].source);
 
-                        // update track
+                        // Update track
                         console.log("Updating tracks at: " + now);
                         for (var i = 0; i < PlanesOrdered.length; ++i) {
                                 var plane = PlanesOrdered[i];
@@ -1194,20 +1288,12 @@ function refreshPageTitle() {
 
 // Refresh the detail window about the plane
 function refreshSelected() {
-        if (MessageCountHistory.length > 1) {
-                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
-                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
-                if (message_time_delta > 0)
-                        MessageRate = message_count_delta / message_time_delta;
-        } else {
-                MessageRate = null;
-        }
+        updateMessageRates();
+        refreshPageTitle();
 
-	refreshPageTitle();
-       
         var selected = false;
-	if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
-    	        selected = Planes[SelectedPlane];
+        if (typeof SelectedPlane !== 'undefined' && SelectedPlane != "ICAO" && SelectedPlane != null) {
+                selected = Planes[SelectedPlane];
         }
         
         $('#dump1090_infoblock').css('display','block');
@@ -1218,9 +1304,11 @@ function refreshSelected() {
         $('#active_filter_count').text(ActiveFilterCount);
 
         if (MessageRate !== null) {
-                $('#dump1090_message_rate').text(MessageRate.toFixed(1));
-        } else {
-                $('#dump1090_message_rate').text("n/a");
+                $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
+        }
+
+        if (UatMessageRate !== null) {
+                $('#uat_message_rate').text(UatMessageRate.toFixed(1) + '/sec');
         }
 
         setSelectedInfoBlockVisibility();
@@ -1311,11 +1399,14 @@ function refreshSelected() {
                 }
         }
 
-        if (selected.getDataSource() === "adsb_icao") {
+        var datasource = selected.getDataSource();
+        if (datasource === "uat") {
+                $('#selected_source').text("UAT");
+        } else if (datasource === "adsb_icao") {
                 $('#selected_source').text("ADS-B");
-        } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
+        } else if (datasource === "tisb_trackfile" || datasource === "tisb_icao" || datasource === "tisb_other") {
                 $('#selected_source').text("TIS-B");
-        } else if (selected.getDataSource() === "mlat") {
+        } else if (datasource === "mlat") {
                 $('#selected_source').text("MLAT");
         } else {
                 $('#selected_source').text("Other");
@@ -1358,61 +1449,62 @@ function refreshSelected() {
                 $('#selected_nav_modes').text("n/a");
         } else {
                 $('#selected_nav_modes').text(selected.nav_modes.join());
-		}
-		if (selected.nic_baro == null) {
-			$('#selected_nic_baro').text("n/a");
-		} else {
-			if (selected.nic_baro == 1) {
-				$('#selected_nic_baro').text("cross-checked");
-			} else {
-				$('#selected_nic_baro').text("not cross-checked");
-			}
-		}
+        }
+        if (selected.nic_baro == null) {
+                $('#selected_nic_baro').text("n/a");
+        } else {
+                if (selected.nic_baro == 1) {
+                        $('#selected_nic_baro').text("cross-checked");
+                } else {
+                        $('#selected_nic_baro').text("not cross-checked");
+                }
+        }
 
-		$('#selected_nac_p').text(format_nac_p(selected.nac_p));
-		$('#selected_nac_v').text(format_nac_v(selected.nac_v));
-		if (selected.rc == null) {
-			$('#selected_rc').text("n/a");
-		} else if (selected.rc == 0) {
-			$('#selected_rc').text("unknown");
-		} else {
-			$('#selected_rc').text(format_distance_short(selected.rc, DisplayUnits));
-		}
+        $('#selected_nac_p').text(format_nac_p(selected.nac_p));
+        $('#selected_nac_v').text(format_nac_v(selected.nac_v));
+        if (selected.rc == null) {
+                $('#selected_rc').text("n/a");
+        } else if (selected.rc == 0) {
+                $('#selected_rc').text("unknown");
+        } else {
+                $('#selected_rc').text(format_distance_short(selected.rc, DisplayUnits));
+        }
 
-		if (selected.sil == null || selected.sil_type == null) {
-			$('#selected_sil').text("n/a");
-		} else {
-			var sampleRate = "";
-			var silDesc = "";
-			if (selected.sil_type == "perhour") {
-				sampleRate = " per flight hour";
-			} else if (selected.sil_type == "persample") {
-				sampleRate = " per sample";
-			}
-			
-			switch (selected.sil) {
-				case 0:
-					silDesc = "&gt; 1×10<sup>-3</sup>";
-					break;
-				case 1:
-					silDesc = "≤ 1×10<sup>-3</sup>";
-					break;
-				case 2:
-					silDesc = "≤ 1×10<sup>-5</sup>";
-					break;
-				case 3:
-					silDesc = "≤ 1×10<sup>-7</sup>";
-					break;
-				default:
-					silDesc = "n/a";
-					sampleRate = "";
-					break;
-			}
-			$('#selected_sil').html(silDesc + sampleRate);
-		}
+        if (selected.sil == null || selected.sil_type == null) {
+                $('#selected_sil').text("n/a");
+        } else {
+                var sampleRate = "";
+                var silDesc = "";
+                if (selected.sil_type == "perhour") {
+                        sampleRate = " per flight hour";
+                } else if (selected.sil_type == "persample") {
+                        sampleRate = " per sample";
+                }
+
+                switch (selected.sil) {
+                        case 0:
+                                silDesc = "&gt; 1×10<sup>-3</sup>";
+                                break;
+                        case 1:
+                                silDesc = "≤ 1×10<sup>-3</sup>";
+                                break;
+                        case 2:
+                                silDesc = "≤ 1×10<sup>-5</sup>";
+                                break;
+                        case 3:
+                                silDesc = "≤ 1×10<sup>-7</sup>";
+                                break;
+                        default:
+                                silDesc = "n/a";
+                                sampleRate = "";
+                                break;
+                }
+
+                $('#selected_sil').html(silDesc + sampleRate);
+        }
 
         if (selected.version == null) {
-                $('#selected_version').text('none');
+                $('#selected_version').text('N/A');
         } else if (selected.version == 0) {
                 $('#selected_version').text('v0 (DO-260)');
         } else if (selected.version == 1) {
@@ -1423,7 +1515,41 @@ function refreshSelected() {
                 $('#selected_version').text('v' + selected.version);
         }
 
+        if (selected.uat_version == null) {
+                $('#selected_uat_version').text('N/A');
+        } else if (selected.uat_version == 0) {
+                $('#selected_uat_version').text('v0 (DO-282)');
+        } else if (selected.uat_version == 1) {
+                $('#selected_uat_version').text('v1 (DO-282A)');
+        } else if (selected.uat_version == 2) {
+                $('#selected_uat_version').text('v2 (DO-282B)');
+        } else {
+                $('#selected_uat_version').text('v' + selected.uat_version);
         }
+
+}
+
+// Calculate 1090 and 978 Message rate using the rolling history of Message Counts recorded from processing aircraft.json
+function updateMessageRates () {
+        if (MessageCountHistory.length > 1) {
+                var message_time_delta = MessageCountHistory[MessageCountHistory.length-1].time - MessageCountHistory[0].time;
+                var message_count_delta = MessageCountHistory[MessageCountHistory.length-1].messages - MessageCountHistory[0].messages;
+                if (message_time_delta > 0)
+                        MessageRate = message_count_delta / message_time_delta;
+        } else {
+                MessageRate = null;
+        }
+
+
+        if (MessageCountHistory_UAT.length > 1) {
+                var message_time_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].time - MessageCountHistory_UAT[0].time;
+                var message_count_delta = MessageCountHistory_UAT[MessageCountHistory_UAT.length-1].messages - MessageCountHistory_UAT[0].messages;
+                if (message_time_delta > 0)
+                        UatMessageRate = message_count_delta / message_time_delta;
+        } else {
+                UatMessageRate = null;
+        }
+}
 
 function refreshHighlighted() {
 	// this is following nearly identical logic, etc, as the refreshSelected function, but doing less junk for the highlighted pane
@@ -1479,11 +1605,14 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-	if (highlighted.getDataSource() === "adsb_icao") {
+	var datasource = highlighted.getDataSource();
+	if (datasource === "uat") {
+		$('#highlighted_source').text("UAT");
+	} else if (datasource === "adsb_icao") {
 		$('#highlighted_source').text("ADS-B");
-	} else if (highlighted.getDataSource() === "tisb_trackfile" || highlighted.getDataSource() === "tisb_icao" || highlighted.getDataSource() === "tisb_other") {
+	} else if (datasource === "tisb_trackfile" || datasource === "tisb_icao" || datasource === "tisb_other") {
 		$('#highlighted_source').text("TIS-B");
-	} else if (highlighted.getDataSource() === "mlat") {
+	} else if (datasource === "mlat") {
 		$('#highlighted_source').text("MLAT");
 	} else {
 		$('#highlighted_source').text("Other");
@@ -1515,83 +1644,86 @@ function removeHighlight() {
 
 // Refreshes the larger table of all the planes
 function refreshTableInfo() {
-    var show_squawk_warning = false;
+        var show_squawk_warning = false;
 
-    TrackedAircraft = 0
-    TrackedAircraftPositions = 0
-    TrackedHistorySize = 0
+        TrackedAircraft = 0
+        TrackedAircraftPositions = 0
+        TrackedHistorySize = 0
 
-    $(".altitudeUnit").text(get_unit_label("altitude", DisplayUnits));
-    $(".speedUnit").text(get_unit_label("speed", DisplayUnits));
-    $(".distanceUnit").text(get_unit_label("distance", DisplayUnits));
-    $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
+        $(".altitudeUnit").text(get_unit_label("altitude", DisplayUnits));
+        $(".speedUnit").text(get_unit_label("speed", DisplayUnits));
+        $(".distanceUnit").text(get_unit_label("distance", DisplayUnits));
+        $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
 
-    for (var i = 0; i < PlanesOrdered.length; ++i) {
-	var tableplane = PlanesOrdered[i];
-    TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
-        tableplane.tr.className = "plane_table_row hidden";
-    } else {
-        TrackedAircraft++;
-        var classes = "plane_table_row";
+        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                var tableplane = PlanesOrdered[i];
+                TrackedHistorySize += tableplane.history_size;
+                if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+                        tableplane.tr.className = "plane_table_row hidden";
+                } else {
+                        TrackedAircraft++;
+                        var classes = "plane_table_row";
 
-        if (tableplane.position !== null && tableplane.seen_pos < 60) {
-            ++TrackedAircraftPositions;
-		}
+                        if (tableplane.position !== null && tableplane.seen_pos < 60) {
+                                ++TrackedAircraftPositions;
+                        }
 
-		if (tableplane.getDataSource() === "adsb_icao") {
-        	classes += " vPosition";
-        } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
-        	classes += " tisb";
-        } else if (tableplane.getDataSource() === "mlat") {
-        	classes += " mlat";
-        } else {
-        	classes += " other";
+                        var datasource = tableplane.getDataSource();
+                        if (datasource === "uat") {
+                                classes += " uat";
+                        } else if (datasource === "adsb_icao") {
+                                classes += " vPosition";
+                        } else if (datasource === "tisb_trackfile" || datasource === "tisb_icao" || datasource === "tisb_other") {
+                                classes += " tisb";
+                        } else if (datasource === "mlat") {
+                                classes += " mlat";
+                        } else {
+                                classes += " other";
+                        }
+
+                        if (tableplane.icao == SelectedPlane)
+                                classes += " selected";
+
+                        if (tableplane.squawk in SpecialSquawks) {
+                                classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
+                                show_squawk_warning = true;
+                        }
+
+                        // ICAO doesn't change
+                        if (tableplane.flight) {
+                                tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+                        } else {
+                                // Show _registration if ident is not present
+                                tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                        }
+                        tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
+                        tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
+                        tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
+                        tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
+                        tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
+                        tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
+                        tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
+                        tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
+                        tableplane.tr.cells[11].textContent = tableplane.messages;
+                        tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
+                        tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
+                        tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
+                        tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
+                        tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
+                        tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
+                        tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
+                        tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
+                        tableplane.tr.className = classes;
+                }
         }
 
-		if (tableplane.icao == SelectedPlane)
-            classes += " selected";
-                    
-        if (tableplane.squawk in SpecialSquawks) {
-            classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
-            show_squawk_warning = true;
-		}			                
-
-        // ICAO doesn't change
-        if (tableplane.flight) {
-                tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+        if (show_squawk_warning) {
+                $("#SpecialSquawkWarning").css('display','block');
         } else {
-		// Show _registration if ident is not present
-		tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+                $("#SpecialSquawkWarning").css('display','none');
         }
-        tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
-        tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
-        tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
-        tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
-        tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
-        tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
-        tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
-        tableplane.tr.cells[11].textContent = tableplane.messages;
-        tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
-        tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
-        tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
-        tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-        tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
-        tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
-        tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
-        tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
-        tableplane.tr.className = classes;
-	}
-}
 
-if (show_squawk_warning) {
-            $("#SpecialSquawkWarning").css('display','block');
-    } else {
-            $("#SpecialSquawkWarning").css('display','none');
-    }
-
-    resortTable();
+        resortTable();
 }
 
 //
@@ -2284,6 +2416,7 @@ function refreshDataSourceFilters () {
         PlaneFilter.MLAT = (localStorage.getItem('sourceMLATFilter') === 'selected') ? true : false;
         PlaneFilter.Other = (localStorage.getItem('sourceOtherFilter') === 'selected') ? true : false;
         PlaneFilter.TISB = (localStorage.getItem('sourceTISBFilter') === 'selected') ? true : false;
+        PlaneFilter.UAT = (localStorage.getItem('sourceUATFilter') === 'selected') ? true : false;
 }
 
 function getFlightAwareIdentLink(ident, linkText) {
@@ -2606,6 +2739,23 @@ function toggleADSBAircraft(switchFilter) {
 		$('#adsb_datasource_checkbox').addClass('sourceCheckboxChecked');
 	}
 	localStorage.setItem('sourceADSBFilter', sourceADSBFilter);
+}
+
+function toggleUATAircraft(switchFilter) {
+	if (typeof localStorage['sourceUATFilter'] === 'undefined') {
+		localStorage.setItem('sourceUATFilter','selected');
+	}
+
+	var sourceUATFilter = localStorage.getItem('sourceUATFilter');
+	if (switchFilter === true) {
+		sourceUATFilter = (sourceUATFilter === 'deselected') ? 'selected' : 'deselected';
+	}
+	if (sourceUATFilter === 'deselected') {
+		$('#uat_datasource_checkbox').removeClass('sourceCheckboxChecked');
+	} else {
+		$('#uat_datasource_checkbox').addClass('sourceCheckboxChecked');
+	}
+	localStorage.setItem('sourceUATFilter', sourceUATFilter);
 }
 
 function toggleMLATAircraft(switchFilter) {

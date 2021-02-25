@@ -42,6 +42,7 @@ function PlaneObject(icao) {
         this.vert_rate      = null;
 
         this.version        = null;
+        this.uat_version    = null;
 
         this.prev_position = null;
         this.prev_position_time = null;
@@ -84,6 +85,10 @@ function PlaneObject(icao) {
         this.typeDescription = null;
         this.wtc = null;
 
+        this.heard_on_1090 = false;
+        this.heard_on_978 = false;
+        this.heard_on_tisb = false;
+
         // request metadata
         getAircraftData(this.icao).done(function(data) {
                 if ("r" in data) {
@@ -124,7 +129,9 @@ PlaneObject.prototype.isFiltered = function() {
     }
 
     var dataSource = this.getDataSource();
-    if (dataSource === 'adsb_icao') {
+    if (dataSource === 'uat') {
+        if (!this.filter.UAT) return true;
+    } else if (dataSource === 'adsb_icao') {
         if (!this.filter.ADSB) return true;
     } else if (dataSource === 'mlat') {
         if (!this.filter.MLAT) return true;
@@ -317,6 +324,11 @@ PlaneObject.prototype.getDataSource = function() {
     // MLAT
     if (this.position_from_mlat) {
         return 'mlat';
+    }
+
+    // Classify as UAT if we heard it on 978 Mhz until we hear it from another source
+    if (this.heard_on_978 && !this.heard_on_1090 && !this.heard_on_tisb) {
+        return 'uat';
     }
 
     // Not MLAT, but position reported - ADSB or variants
@@ -538,11 +550,17 @@ PlaneObject.prototype.updateIcon = function() {
 };
 
 // Update our data
-PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
+PlaneObject.prototype.updateData = function(receiver_timestamp, data, receiver_source) {
         // Update all of our data
         this.messages = data.messages;
         this.rssi = data.rssi;
         this.last_message_time = receiver_timestamp - data.seen;
+
+        if (receiver_source == "dump1090-fa") {
+                this.heard_on_1090 = true;
+        } else if (receiver_source == "skyaware978") {
+                this.heard_on_978 = true;
+        }
 
         // simple fields
         var fields = ["alt_baro", "alt_geom", "gs", "ias", "tas", "track",
@@ -550,7 +568,7 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                       "roll", "nav_heading", "nav_modes",
                       "nac_p", "nac_v", "nic_baro", "sil_type", "sil",
                       "nav_qnh", "baro_rate", "geom_rate", "rc",
-                      "squawk", "category", "version"];
+                      "squawk", "category", "version", "uat_version"];
 
         for (var i = 0; i < fields.length; ++i) {
                 if (fields[i] in data) {
@@ -561,11 +579,15 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         }
 
         // fields with more complex behaviour
-        
+
         if ('type' in data)
                 this.addrtype	= data.type;
         else
                 this.addrtype   = 'adsb_icao';
+
+        if (this.addrtype == "tisb_trackfile" || this.addrtype == "tisb_icao" || this.addrtype == "tisb_other") {
+                this.heard_on_tisb = true;
+        }
 
         // don't expire callsigns
         if ('flight' in data)
