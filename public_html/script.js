@@ -97,8 +97,10 @@ var DefaultMinMaxFilters = {
         'imperial' : {min: 0, maxSpeed: 600, maxAltitude: 65000}        // mph, ft
 };
 
-function processReceiverUpdate(data) {
-	// Loop through all the planes in the data packet
+// Update Planes with data in aircraft json
+// receiver_source will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function processReceiverUpdate(data, receiver_source) {
+        // Loop through all the planes in the data packet
         var now = data.now;
         var acs = data.aircraft;
 
@@ -174,7 +176,7 @@ function processReceiverUpdate(data) {
                 }
 
                 // Call the function update
-                plane.updateData(now, ac);
+                plane.updateData(now, ac, receiver_source);
         }
 }
 
@@ -184,43 +186,12 @@ function fetchData() {
                 return;
         }
 
-	FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
+        FetchPending = $.ajax({ url: 'data-1090/aircraft.json',
                                 timeout: 5000,
                                 cache: false,
                                 dataType: 'json' });
         FetchPending.done(function(data) {
-                var now = data.now;
-
-                processReceiverUpdate(data);
-
-                // update timestamps, visibility, history track for all planes - not only those updated
-                for (var i = 0; i < PlanesOrdered.length; ++i) {
-                        var plane = PlanesOrdered[i];
-                        plane.updateTick(now, LastReceiverTimestamp);
-                }
-
-                selectNewPlanes();
-                refreshTableInfo();
-                refreshSelected();
-                refreshHighlighted();
-                
-                if (ReceiverClock) {
-                        var rcv = new Date(now * 1000);
-                        ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
-                }
-
-                // Check for stale receiver data
-                if (LastReceiverTimestamp === now) {
-                        StaleReceiverCount++;
-                        if (StaleReceiverCount > 5) {
-                                $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
-                                $("#update_error").css('display','block');
-                        }
-                } else { 
-                        StaleReceiverCount = 0;
-                        LastReceiverTimestamp = now;
-                        $("#update_error").css('display','none');
-                }
+                process_aircraft_json(data, 'dump1090-fa');
         });
 
         FetchPending.fail(function(jqxhr, status, error) {
@@ -242,13 +213,50 @@ function fetchData() {
 
                 FetchPending_UAT.done(function(data) {
                         // Process UAT aircraft.json here
-                        console.log('Fetching UAT aircraft.json...')
+                        process_aircraft_json(data, 'skyaware978');
                 });
 
                 FetchPending_UAT.fail(function(jqxhr, status, error) {
                         $("#uat_update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe skyaware978 is no longer running?");
                         $("#uat_update_error").css('display','block');
                 });
+        }
+}
+
+// Process an aircraft.json and update Planes.
+// receiver_source will specify where the aircraft.json originated from (dump1090-fa or skyaware978)
+function process_aircraft_json(data, receiver_source) {
+        var now = data.now;
+
+        processReceiverUpdate(data, receiver_source);
+
+        // update timestamps, visibility, history track for all planes - not only those updated
+        for (var i = 0; i < PlanesOrdered.length; ++i) {
+                var plane = PlanesOrdered[i];
+                plane.updateTick(now, LastReceiverTimestamp);
+        }
+
+        selectNewPlanes();
+        refreshTableInfo();
+        refreshSelected();
+        refreshHighlighted();
+
+        if (ReceiverClock) {
+                var rcv = new Date(now * 1000);
+                ReceiverClock.render(rcv.getUTCHours(),rcv.getUTCMinutes(),rcv.getUTCSeconds());
+        }
+
+        // Check for stale receiver data
+        if (LastReceiverTimestamp === now) {
+                StaleReceiverCount++;
+                if (StaleReceiverCount > 5) {
+                        $("#update_error_detail").text("The data from dump1090 hasn't been updated in a while. Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                }
+        } else {
+                StaleReceiverCount = 0;
+                LastReceiverTimestamp = now;
+                $("#update_error").css('display','none');
         }
 }
 
@@ -692,7 +700,7 @@ function end_load_history() {
                 for (var h = 0; h < PositionHistoryBuffer.length; ++h) {
                         now = PositionHistoryBuffer[h].now;
                         console.log("Applying history " + (h + 1) + "/" + PositionHistoryBuffer.length + " at: " + now);
-                        processReceiverUpdate(PositionHistoryBuffer[h]);
+                        processReceiverUpdate(PositionHistoryBuffer[h], PositionHistoryBuffer[h].source);
 
                         // Update track
                         console.log("Updating tracks at: " + now);
@@ -1386,7 +1394,9 @@ function refreshSelected() {
                 }
         }
 
-        if (selected.getDataSource() === "adsb_icao") {
+        if (selected.getDataSource() === "uat") {
+                $('#selected_source').text("UAT");
+        } else if (selected.getDataSource() === "adsb_icao") {
                 $('#selected_source').text("ADS-B");
         } else if (selected.getDataSource() === "tisb_trackfile" || selected.getDataSource() === "tisb_icao" || selected.getDataSource() === "tisb_other") {
                 $('#selected_source').text("TIS-B");
@@ -1567,7 +1577,9 @@ function refreshHighlighted() {
 		$('#higlighted_icaotype').text("n/a");
 	}
 
-	if (highlighted.getDataSource() === "adsb_icao") {
+        if (highlighted.dataSources.has("uat")) {
+		$('#highlighted_source').text("UAT");
+        } else if (highlighted.getDataSource() === "adsb_icao") {
 		$('#highlighted_source').text("ADS-B");
 	} else if (highlighted.getDataSource() === "tisb_trackfile" || highlighted.getDataSource() === "tisb_icao" || highlighted.getDataSource() === "tisb_other") {
 		$('#highlighted_source').text("TIS-B");
@@ -1615,9 +1627,9 @@ function refreshTableInfo() {
     $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
-	var tableplane = PlanesOrdered[i];
+        var tableplane = PlanesOrdered[i];
     TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+    if (tableplane.seen >= 58 || tableplane.isFiltered()) {
         tableplane.tr.className = "plane_table_row hidden";
     } else {
         TrackedAircraft++;
@@ -1625,10 +1637,12 @@ function refreshTableInfo() {
 
         if (tableplane.position !== null && tableplane.seen_pos < 60) {
             ++TrackedAircraftPositions;
-		}
+        }
 
-		if (tableplane.getDataSource() === "adsb_icao") {
-        	classes += " vPosition";
+        if (tableplane.getDataSource() === "uat") {
+                classes += " uat";
+        } else if (tableplane.getDataSource() === "adsb_icao") {
+                classes += " vPosition";
         } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
         	classes += " tisb";
         } else if (tableplane.getDataSource() === "mlat") {
@@ -1637,13 +1651,13 @@ function refreshTableInfo() {
         	classes += " other";
         }
 
-		if (tableplane.icao == SelectedPlane)
+        if (tableplane.icao == SelectedPlane)
             classes += " selected";
-                    
+
         if (tableplane.squawk in SpecialSquawks) {
             classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
             show_squawk_warning = true;
-		}			                
+        }
 
         // ICAO doesn't change
         if (tableplane.flight) {

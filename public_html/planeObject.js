@@ -42,6 +42,7 @@ function PlaneObject(icao) {
         this.vert_rate      = null;
 
         this.version        = null;
+        this.uat_version    = null;
 
         this.prev_position = null;
         this.prev_position_time = null;
@@ -83,6 +84,10 @@ function PlaneObject(icao) {
         this.icaotype = null;
         this.typeDescription = null;
         this.wtc = null;
+
+        this.heard_on_1090 = false;
+        this.heard_on_978 = false;
+        this.heard_on_tisb = false;
 
         // request metadata
         getAircraftData(this.icao).done(function(data) {
@@ -319,6 +324,11 @@ PlaneObject.prototype.getDataSource = function() {
         return 'mlat';
     }
 
+    // Classify as UAT if we heard it on 978 Mhz until we hear it from another source
+    if (this.heard_on_978 && !this.heard_on_1090 && !this.heard_on_tisb) {
+        return 'uat';
+    }
+
     // Not MLAT, but position reported - ADSB or variants
     if (this.position !== null) {
         return this.addrtype;
@@ -538,11 +548,17 @@ PlaneObject.prototype.updateIcon = function() {
 };
 
 // Update our data
-PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
+PlaneObject.prototype.updateData = function(receiver_timestamp, data, receiver_source) {
         // Update all of our data
         this.messages = data.messages;
         this.rssi = data.rssi;
         this.last_message_time = receiver_timestamp - data.seen;
+
+        if (receiver_source == "dump1090-fa") {
+                this.heard_on_1090 = true;
+        } else if (receiver_source == "skyaware978") {
+                this.heard_on_978 = true;
+        }
 
         // simple fields
         var fields = ["alt_baro", "alt_geom", "gs", "ias", "tas", "track",
@@ -561,11 +577,15 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         }
 
         // fields with more complex behaviour
-        
+
         if ('type' in data)
                 this.addrtype	= data.type;
         else
                 this.addrtype   = 'adsb_icao';
+
+        if (this.addrtype == "tisb_trackfile" || this.addrtype == "tisb_icao" || this.addrtype == "tisb_other") {
+                this.heard_on_tisb = true;
+        }
 
         // don't expire callsigns
         if ('flight' in data)
