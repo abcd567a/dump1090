@@ -88,6 +88,7 @@ function PlaneObject(icao) {
         this.heard_on_1090 = false;
         this.heard_on_978 = false;
         this.heard_on_tisb = false;
+        this.heard_on_adsr = false;
 
         // request metadata
         getAircraftData(this.icao).done(function(data) {
@@ -327,7 +328,7 @@ PlaneObject.prototype.getDataSource = function() {
     }
 
     // Classify as UAT if we heard it on 978 Mhz until we hear it from another source
-    if (this.heard_on_978 && !this.heard_on_1090 && !this.heard_on_tisb) {
+    if (this.heard_on_978 && !this.heard_on_tisb) {
         return 'uat';
     }
 
@@ -551,16 +552,19 @@ PlaneObject.prototype.updateIcon = function() {
 
 // Update our data
 PlaneObject.prototype.updateData = function(receiver_timestamp, data, receiver_source) {
+        if (receiver_source == "dump1090-fa") {
+                this.heard_on_1090 = true;
+                // Ignore messages on 1090 for now if we heard it on 978. We will show multiple data sources in a later release
+                if (this.heard_on_978)
+                        return
+        } else if (receiver_source == "skyaware978") {
+                this.heard_on_978 = true;
+        }
         // Update all of our data
         this.messages = data.messages;
         this.rssi = data.rssi;
         this.last_message_time = receiver_timestamp - data.seen;
 
-        if (receiver_source == "dump1090-fa") {
-                this.heard_on_1090 = true;
-        } else if (receiver_source == "skyaware978") {
-                this.heard_on_978 = true;
-        }
 
         // simple fields
         var fields = ["alt_baro", "alt_geom", "gs", "ias", "tas", "track",
@@ -587,6 +591,10 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data, receiver_s
 
         if (this.addrtype == "tisb_trackfile" || this.addrtype == "tisb_icao" || this.addrtype == "tisb_other") {
                 this.heard_on_tisb = true;
+        }
+
+        if (this.addrtype == "adsr_icao") {
+                this.heard_on_adsr = true;
         }
 
         // don't expire callsigns
