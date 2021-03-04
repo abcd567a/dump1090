@@ -31,10 +31,9 @@ DefaultZoomLvl   = 7;
 // Center marker. If dump1090 provides a receiver location,
 // that location is used and these settings are ignored.
 
-SiteShow    = false;           // true to show a center marker
-SiteLat     = 45.0;            // position of the marker
-SiteLon     = 9.0;
-SiteName    = "My Radar Site"; // tooltip of the marker
+SiteShow        = false;           // true to show a center marker
+SitePositions    = [[9.0,45.0]]    // position of the marker (array of [lon,lat])
+SiteName        = "My Radar Site"; // tooltip of the marker
 
 // -- Marker settings -------------------------------------
 

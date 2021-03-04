@@ -495,8 +495,9 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.position   = [data.lon, data.lat];
                 this.last_position_time = receiver_timestamp - data.seen_pos;
 
-                if (SitePosition !== null) {
-                        this.sitedist = ol.sphere.getDistance(SitePosition, this.position);
+                // Only calculate site distance if we have one and only one site position
+                if (SitePositions !== null && SitePositions.length == 1) {
+                        this.sitedist = ol.sphere.getDistance(SitePositions[0], this.position);
                 }
 
                 this.position_from_mlat = false;

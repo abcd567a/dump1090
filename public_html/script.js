@@ -25,6 +25,9 @@ var SpecialSquawks = {
 // Get current map settings
 var CenterLat, CenterLon, ZoomLvl, MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
 
+// Raw receiver data stash
+var receiverData;
+
 var Dump1090Version = "unknown version";
 var RefreshInterval = 1000;
 
@@ -34,7 +37,7 @@ var TrackedAircraft = 0;
 var TrackedAircraftPositions = 0;
 var TrackedHistorySize = 0;
 
-var SitePosition = null;
+var SitePositions = null;
 
 var ReceiverClock = null;
 
@@ -383,15 +386,54 @@ function initialize() {
 	$.ajax({ url: 'data/receiver.json',
 		 timeout: 5000,
 		 cache: false,
+		 data: window.location.search.substring(1),
 		 dataType: 'json' })
 
 		.done(function(data) {
+			// Stash a copy for possible socket usage
+			receiverData = data;
+
 			if (typeof data.lat !== "undefined") {
+				// Local case
 				SiteShow = true;
-				SiteLat = data.lat;
-				SiteLon = data.lon;
+				SitePositions = [[data.lon, data.lat]]
 				DefaultCenterLat = data.lat;
 				DefaultCenterLon = data.lon;
+			} else if (typeof data.locations === 'object' && data.locations.length > 0) {
+				// Remote case
+				SiteShow = true;
+				// Figure out default center/zoom
+				if (data.locations.length == 1) {
+					// Only one location provided, go with legacy code path
+					DefaultCenterLat = data.locations[0].lat;
+					DefaultCenterLon = data.locations[0].lon;
+				} else {
+					// Multiple locations, derive correct default center/zoom
+					// Create an OL-sompatible coord array
+					var coords = data.locations.map(function(loc){
+						return ol.proj.fromLonLat([loc.lon, loc.lat]);
+					});
+					// Create an extent to use for our defaults
+					// we'll buffer (pad) the extent by 400nm to allow for range rings
+					var buffer = 400 * 1852;
+					var extent = ol.extent.buffer(ol.extent.boundingExtent(coords), buffer);
+					// This is sorta hacky, but to get the center and zoom, we
+					// just create a throwaway view and fit it to the extent
+					var view = new ol.View();
+					var $canvas = $('#map_canvas');
+					var size = [$canvas.width(), $canvas.height()];
+					view.fit(extent, {size: size});
+					var center = ol.proj.toLonLat(view.getCenter());
+					DefaultCenterLat = center[1];
+					DefaultCenterLon = center[0];
+					DefaultZoomLvl = view.getZoom();
+				}
+
+				// And now set all the receiver locations
+				SitePositions = data.locations.map(function(loc){
+					return [loc.lon, loc.lat];
+				});
+
 			}
 			
 			Dump1090Version = data.version;
@@ -655,14 +697,13 @@ function initialize_map() {
 	MapType = localStorage['MapType'];
 	var groupByDataTypeBox = localStorage.getItem('groupByDataType');
 
-	// Set SitePosition, initialize sorting
-	if (SiteShow && (typeof SiteLat !==  'undefined') && (typeof SiteLon !==  'undefined')) {
-		SitePosition = [SiteLon, SiteLat];
+	// Initialize sorting
+	if (SiteShow && typeof SitePositions !== 'undefined') {
 		if (groupByDataTypeBox === 'deselected') {
 			sortByDistance();
 		}
 	} else {
-		SitePosition = null;
+		SitePositions = null;
 		PlaneRowTemplate.cells[9].style.display = 'none'; // hide distance column
 		document.getElementById("distance").style.display = 'none'; // hide distance header
 		if (groupByDataTypeBox === 'deselected') {
@@ -862,21 +903,23 @@ function initialize_map() {
 	});
 
 	// Add home marker if requested
-	if (SitePosition) {
-		var markerStyle = new ol.style.Style({
-			image: new ol.style.Circle({
-				radius: 7,
-				snapToPixel: false,
-				fill: new ol.style.Fill({color: 'black'}),
-				stroke: new ol.style.Stroke({
-					color: 'white', width: 2
+	if (SitePositions) {
+		SitePositions.forEach(function(coord){
+			var markerStyle = new ol.style.Style({
+				image: new ol.style.Circle({
+					radius: 7,
+					snapToPixel: false,
+					fill: new ol.style.Fill({color: 'black'}),
+					stroke: new ol.style.Stroke({
+						color: 'white', width: 2
+					})
 				})
-			})
+			});
+	
+			var feature = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(coord)));
+			feature.setStyle(markerStyle);
+			StaticFeatures.push(feature);
 		});
-
-		var feature = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(SitePosition)));
-		feature.setStyle(markerStyle);
-		StaticFeatures.push(feature);
 
 		$('#range_ring_column').show();
 
@@ -984,20 +1027,22 @@ function createSiteCircleFeatures() {
 
     var conversionFactor = 1000.0;
     if (DisplayUnits === "nautical") {
-	conversionFactor = 1852.0;
+		conversionFactor = 1852.0;
     } else if (DisplayUnits === "imperial") {
-	conversionFactor = 1609.0;
-    }
-
-    for (var i=0; i < SiteCirclesCount; ++i) {
-	    var distance = (SiteCirclesBaseDistance + (SiteCirclesInterval * i)) * conversionFactor;
-	    var circle = make_geodesic_circle(SitePosition, distance, 360);
-	    circle.transform('EPSG:4326', 'EPSG:3857');
-	    var feature = new ol.Feature(circle);
-	    feature.setStyle(circleStyle(distance));
-	    StaticFeatures.push(feature);
-	    SiteCircleFeatures.push(feature);
-    }
+		conversionFactor = 1609.0;
+	}
+	
+	SitePositions.forEach(function(coord){
+		for (var i=0; i < SiteCirclesCount; ++i) {
+			var distance = (SiteCirclesBaseDistance + (SiteCirclesInterval * i)) * conversionFactor;
+			var circle = make_geodesic_circle(coord, distance, 360);
+			circle.transform('EPSG:4326', 'EPSG:3857');
+			var feature = new ol.Feature(circle);
+			feature.setStyle(circleStyle(distance));
+			StaticFeatures.push(feature);
+			SiteCircleFeatures.push(feature);
+		}
+	});
 }
 
 // This looks for planes to reap out of the master Planes variable
@@ -1934,8 +1979,8 @@ function onDisplayUnitsChanged(e) {
     refreshHighlighted();
 
     // Redraw range rings
-    if (SitePosition !== null && SitePosition !== undefined && SiteCircles) {
-	createSiteCircleFeatures();
+    if (SitePositions !== null && SitePositions !== undefined && SiteCircles) {
+		createSiteCircleFeatures();
     }
 
     // Reset map scale line units
