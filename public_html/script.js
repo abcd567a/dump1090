@@ -37,7 +37,7 @@ var TrackedAircraft = 0;
 var TrackedAircraftPositions = 0;
 var TrackedHistorySize = 0;
 
-var SitePositions = null;
+var SitePositions = [];
 
 var ReceiverClock = null;
 
@@ -698,12 +698,12 @@ function initialize_map() {
 	var groupByDataTypeBox = localStorage.getItem('groupByDataType');
 
 	// Initialize sorting
-	if (SiteShow && typeof SitePositions !== 'undefined') {
+	// Only show distance column if we have exactly one site
+	if (SitePositions.length == 1) {
 		if (groupByDataTypeBox === 'deselected') {
 			sortByDistance();
 		}
 	} else {
-		SitePositions = null;
 		PlaneRowTemplate.cells[9].style.display = 'none'; // hide distance column
 		document.getElementById("distance").style.display = 'none'; // hide distance header
 		if (groupByDataTypeBox === 'deselected') {
@@ -903,7 +903,7 @@ function initialize_map() {
 	});
 
 	// Add home marker if requested
-	if (SitePositions) {
+	if (SiteShow) {
 		SitePositions.forEach(function(coord){
 			var markerStyle = new ol.style.Style({
 				image: new ol.style.Circle({
@@ -1979,7 +1979,7 @@ function onDisplayUnitsChanged(e) {
     refreshHighlighted();
 
     // Redraw range rings
-    if (SitePositions !== null && SitePositions !== undefined && SiteCircles) {
+    if (SiteShow && SiteCircles) {
 		createSiteCircleFeatures();
     }
 
