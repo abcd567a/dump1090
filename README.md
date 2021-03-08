@@ -115,3 +115,38 @@ Minimal testing on 12.1-RELEASE, YMMV.
 # pkg install hackrf
 $ gmake
 ```
+
+## Generating wisdom files
+
+dump1090-fa uses [starch](https://github.com/flightaware/starch) to build
+multiple versions of the DSP code and choose the fastest supported by the
+hardware at runtime. The implementations chosen can been seen by running
+`dump1090-fa --version`.
+
+The implementations used are controlled by "wisdom files", a list of
+implementations to use in order of priority. For each DSP function, the first
+implementation listed that's supported by the current hardware is used.
+By default dump1090-fa provides compiled-in wisdom for [x86](wisdom.x86),
+[ARM 32-bit](wisdom.arm), and [ARM 64-bit](wisdom.aarch64). If the defaults
+are not suitable for your hardware or if you're building on a different
+architecture, you may want to generate your own external wisdom file.
+
+Ideally, to get stable results, you want to do this on an idle system
+with CPU frequency scaling disabled. Running the benchmarks will take
+some time (10s of minutes).
+
+### Package installs
+
+Run `/usr/share/dump1090-fa/generate-wisdom`. Wait.
+
+Follow the instructions to copy the resulting wisdom file to `/etc/dump1090-fa/wisdom.local`.
+
+Restart dump1090.
+
+### Manual installs
+
+Run `make wisdom.local`. Wait.
+
+Copy the resulting `wisdom.local` file somewhere appropriate.
+
+Update the dump1090-fa command-line options to include `--wisdom /path/to/wisdom.local`
