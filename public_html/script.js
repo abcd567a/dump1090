@@ -195,24 +195,25 @@ function processReceiverUpdate(data, receiver_source) {
 }
 
 function fetchData() {
-        if (FetchPending !== null && FetchPending.state() == 'pending') {
-                // don't double up on fetches, let the last one resolve
-                return;
+        if (ADSB_Enabled) {
+                if (FetchPending !== null && FetchPending.state() == 'pending') {
+                        // don't double up on fetches, let the last one resolve
+                        return;
+                }
+
+                FetchPending = $.ajax({ url: 'data/aircraft.json',
+                                        timeout: 5000,
+                                        cache: false,
+                                        dataType: 'json' });
+                FetchPending.done(function(data) {
+                        process_aircraft_json(data, 'dump1090-fa');
+                });
+
+                FetchPending.fail(function(jqxhr, status, error) {
+                        $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
+                        $("#update_error").css('display','block');
+                });
         }
-
-        FetchPending = $.ajax({ url: 'data/aircraft.json',
-                                timeout: 5000,
-                                cache: false,
-                                dataType: 'json' });
-        FetchPending.done(function(data) {
-                process_aircraft_json(data, 'dump1090-fa');
-        });
-
-        FetchPending.fail(function(jqxhr, status, error) {
-                $("#update_error_detail").text("AJAX call failed (" + status + (error ? (": " + error) : "") + "). Maybe dump1090 is no longer running?");
-                $("#update_error").css('display','block');
-        });
-
         // Fetch UAT if enabled
         if (UAT_Enabled) {
                 if (FetchPending_UAT !== null && FetchPending_UAT.state() == 'pending') {
@@ -1303,8 +1304,15 @@ function refreshSelected() {
         $('#dump1090_total_history').text(TrackedHistorySize);
         $('#active_filter_count').text(ActiveFilterCount);
 
-        if (MessageRate !== null) {
-                $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
+        if (ADSB_Enabled) {
+                $('#adsb_datasource_checkbox, #adsb_datasource_label').show();
+                $('#adsb_message_rate_row').show();
+                if (MessageRate !== null) {
+                        $('#dump1090_message_rate').text(MessageRate.toFixed(1) + '/sec');
+                }
+        } else {
+                $('#adsb_datasource_checkbox, #adsb_datasource_label').hide();
+                $('#adsb_message_rate_row').hide();
         }
 
         if (UAT_Enabled) {
