@@ -623,7 +623,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--hae") || !strcmp(argv[j],"--gnss")) {
             Modes.use_gnss = 1;
         } else if (!strcmp(argv[j],"--aggressive")) {
-            fprintf(stderr, "warning: --aggressive not supported in this build, option ignored (consider '--fix --fix' instead)\n");
+            fprintf(stderr, "warning: --aggressive not supported in this build, option ignored (consider '--fix-2bit' instead)\n");
         } else if (!strcmp(argv[j],"--interactive")) {
             Modes.interactive = 1;
         } else if (!strcmp(argv[j],"--interactive-ttl") && more) {
