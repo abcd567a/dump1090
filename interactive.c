@@ -349,10 +349,9 @@ void interactiveShowData(void) {
     }
 
     if (rowMaxd > 3 && Modes.interactive_show_distance) {
-        mvprintw(rowMaxd, 52, "^");
+        mvprintw(rowMaxd, 52, "+");
     }
 
-    mvprintw(rowMaxd, 52, "+");
     mvprintw(rowMaxRSSI, 68, "+");
     mvprintw(rowMinRSSI, 68, "-");
 
