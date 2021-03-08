@@ -2,6 +2,39 @@ dump1090-fa (5.0~dev) UNRELEASED; urgency=medium
 
   * in development
 
+  * dump1090: limesdr: use --gain value if --limesdr-gain is not specified
+  * dump1090: Switch sample-conversion DSP code to use starch. Provide NEON implementations for ARM when the
+    hardware supports it. Update 8-bit unsigned zero offset to reflect actual rtlsdr behavior. This gives a
+    substantial speedup to sample processing for the 12/16-bit case, and a small speedup for the 8-bit case.
+    Default wisdom provided for arm, aarch64, and x86; see the README for details on generating hardware-
+    specific wisdom files.
+  * dump1090: Make console stats display fixed-width (courtesy @gtjoseph)
+  * dump1090: Add `--json-stats-every` option to control the update cycle of `stats.json`
+  * dump1090: Don't expire data when reading a capture at full speed via `--ifile`
+  * dump1090: Count received messages for each DF type, emit in console stats / `stats.json`
+  * dump1090: Write final stats.json on process exit (mostly useful for `--ifile`)
+  * dump1090: Attempt to correct DF11/17/18 messages where the DF field itself is damaged. This requires
+    a lot more CRC checks when receiving messages off-the-air, but slightly increases the decode rate for
+    DF11/17/18.
+  * dump1090: Add a `--no-df-fix` option to disable the extra DF field correction, for cases where the extra
+    messages are not worth the extra CPU
+  * dump1090: Track recently-seen DF18 addresses, but only count them as recently-seen for DF18 decoding,
+    not for Mode S / DF17
+
+  * dump1090: Support `--stats-every` intervals of less than 1 minute correctly
+  * dump1090: Don't erroneously consider ICAO 000000 as "recently seen" when decoding
+  * dump1090: Fix rare hang (1 in 1e9) in FIFO code due to an off-by-one error in normalize_timespec
+  * dump1090: Correctly expire stale emergency, nac_v data (courtesy @wiedehopf, issue #96)
+  * dump1090: Fix FIFO bounded memory leak / effective reduction in size of the FIFO, triggered if the
+    demodulator couldn't keep up with the input rate
+  * dump1090: Set at least airground = AG_UNCERTAIN for airborne position messages with valid altitudes (issue #113)
+
+  * view1090: Interactive mode enhancements to show min/max RSSI, distances (courtesy @gtjoseph, PR #81)
+  * view1090: Fix table alignment with `--interactive-ttl` > 99 (courtesy @MavEtJu, PR #99)
+  * view1090: Tweak Mode column to display more data-source info
+
+  * general:  Fix linking against NetBSD curses library (courtesy @jvanwouw, PR #111)
+
  -- Eric Tran <eric.tran@flightaware.com>  Sat, 06 Feb 2021 19:26:07 -6000
 
 dump1090-fa (4.0) stable; urgency=medium
