@@ -32,6 +32,7 @@ dump1090-fa (5.0~dev) UNRELEASED; urgency=medium
   * view1090: Interactive mode enhancements to show min/max RSSI, distances (courtesy @gtjoseph, PR #81)
   * view1090: Fix table alignment with `--interactive-ttl` > 99 (courtesy @MavEtJu, PR #99)
   * view1090: Tweak Mode column to display more data-source info
+  * view1090: Fix librtlsdr output interfering with interactive mode display (courtesy @VasiliyTurchenko, PR #116)
 
   * general:  Fix linking against NetBSD curses library (courtesy @jvanwouw, PR #111)
 
