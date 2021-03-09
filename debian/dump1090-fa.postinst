@@ -63,6 +63,13 @@ case "$1" in
             fi
         fi
 
+        if dpkg --compare-versions "$2" le "5.0"
+        then
+            echo "Enabling lighttpd skyaware module.." >&2
+            lighty-enable-mod skyaware || true
+
+        fi
+
         echo "Restarting lighttpd.." >&2
         invoke-rc.d lighttpd restart || true
     ;;

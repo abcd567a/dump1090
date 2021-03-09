@@ -113,6 +113,7 @@ static void modesInitConfig(void) {
     Modes.gain                    = MODES_MAX_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.check_crc               = 1;
+    Modes.fix_df                  = 1;
     Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
@@ -334,6 +335,7 @@ static void showHelp(void)
 "--fix                    Enable single-bit error correction using CRC\n"
 "--fix-2bit               Enable two-bit error correction using CRC (use with caution)\n"
 "--no-fix                 Disable error correction using CRC\n"
+"--no-fix-df              Disable error correction of the DF message field (reduces CPU requirements)\n"
 "--no-crc-check           Disable messages with broken CRC (discouraged)\n"
 "--mlat                   display raw messages in Beast ascii mode\n"
 "--stats                  With --ifile print stats at exit. No other output\n"
@@ -547,6 +549,8 @@ int main(int argc, char **argv) {
             Modes.nfix_crc = 2;
         } else if (!strcmp(argv[j],"--no-fix")) {
             Modes.nfix_crc = 0;
+        } else if (!strcmp(argv[j],"--no-fix-df")) {
+            Modes.fix_df = 0;
         } else if (!strcmp(argv[j],"--no-crc-check")) {
             Modes.check_crc = 0;
         } else if (!strcmp(argv[j],"--phase-enhance")) {
@@ -619,7 +623,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--hae") || !strcmp(argv[j],"--gnss")) {
             Modes.use_gnss = 1;
         } else if (!strcmp(argv[j],"--aggressive")) {
-            fprintf(stderr, "warning: --aggressive not supported in this build, option ignored (consider '--fix --fix' instead)\n");
+            fprintf(stderr, "warning: --aggressive not supported in this build, option ignored (consider '--fix-2bit' instead)\n");
         } else if (!strcmp(argv[j],"--interactive")) {
             Modes.interactive = 1;
         } else if (!strcmp(argv[j],"--interactive-ttl") && more) {

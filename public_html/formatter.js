@@ -234,8 +234,6 @@ function format_latlng(p) {
 
 function format_data_source(source) {
 	switch (source) {
-		case 'uat':
-			return "UAT";
 		case 'mlat':
 			return "MLAT";
 		case 'adsb_icao':

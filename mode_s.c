@@ -268,8 +268,13 @@ static int correctMessage(const unsigned char *in, unsigned char *out)
     const unsigned uncorrected_df = getbits(in, 1, 5);
     const uint32_t df_bit = 1 << uncorrected_df;
 
+    // Select the right bitset based on the maximum number of bit errors in the DF field that we could correct.
+    // nb: strictly speaking, --no-fix-df doesn't _entirely_ disable correction of the DF field when nfix_crc == 2
+    // (DF17 could be corrected to DF18 or vice versa), but it does disable the CPU hungry part of it.
+    const unsigned fix_df_bits = (Modes.fix_df ? Modes.nfix_crc : 0);
+
     struct errorinfo *long_ei = NULL;
-    if (df_correctable_long[Modes.nfix_crc] & df_bit) {
+    if (df_correctable_long[fix_df_bits] & df_bit) {
         uint32_t long_syndrome = modesChecksum(in, MODES_LONG_MSG_BITS);
         if (isLongPIMessage(in) && long_syndrome == 0) {
             // DF17/18 message with correct checksum
@@ -281,7 +286,7 @@ static int correctMessage(const unsigned char *in, unsigned char *out)
     }
 
     struct errorinfo *short_ei = NULL;
-    if (df_correctable_short[Modes.nfix_crc] & df_bit) {
+    if (df_correctable_short[fix_df_bits] & df_bit) {
         uint32_t short_syndrome = modesChecksum(in, MODES_SHORT_MSG_BITS);
         if (isShortPIMessage(in) && (short_syndrome & 0xFFFF80) == 0) {
             // DF11 message with correct checksum

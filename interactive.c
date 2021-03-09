@@ -137,6 +137,7 @@ void interactiveNoConnection(void) {
 void interactiveShowData(void) {
     struct aircraft *a = Modes.aircrafts;
     static uint64_t next_update;
+    static bool need_clear = true;
     uint64_t now = mstime();
     char progress;
     char spinner[4] = "|/-\\";
@@ -149,6 +150,10 @@ void interactiveShowData(void) {
     if (!Modes.interactive)
         return;
 
+    if (need_clear) {
+        clear();
+        need_clear = false;
+    }
     // Refresh screen every (MODES_INTERACTIVE_REFRESH_TIME) miliseconde
     if (now < next_update)
         return;
@@ -349,10 +354,9 @@ void interactiveShowData(void) {
     }
 
     if (rowMaxd > 3 && Modes.interactive_show_distance) {
-        mvprintw(rowMaxd, 52, "^");
+        mvprintw(rowMaxd, 52, "+");
     }
 
-    mvprintw(rowMaxd, 52, "+");
     mvprintw(rowMaxRSSI, 68, "+");
     mvprintw(rowMinRSSI, 68, "-");
 

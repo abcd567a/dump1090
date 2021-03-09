@@ -230,5 +230,5 @@ starchgen:
 
 .PHONY: wisdom.local
 wisdom.local: starch-benchmark
-	./starch-benchmark -i 15 -o wisdom.local mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
-	./starch-benchmark -i 15 -r wisdom.local -o wisdom.local
+	./starch-benchmark -i 5 -o wisdom.local mean_power_u16 mean_power_u16_aligned magnitude_uc8 magnitude_uc8_aligned
+	./starch-benchmark -i 5 -r wisdom.local -o wisdom.local
