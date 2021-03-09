@@ -2535,7 +2535,9 @@ function setStatsLink() {
                         myAdsbStatsSiteUrl = data.site_url;
                     }
                 }
-        })
+        }).fail(function() {
+                $('#stats_page_button').hide();
+        });
 }
 
 // updates the page to replace piaware with flightfeeder references
