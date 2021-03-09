@@ -287,6 +287,17 @@ div#loader { z-index: 99; position: absolute; left: 0; top: 0; bottom: 0; right:
     text-align: center;
 }
 
+#aircraft_table_footer {
+    background-color: #002F5D;
+    color: #FFFFFF;
+    display: none;
+}
+#aircraft_table_footer td {
+    font-size: smaller;
+    padding: 5px;
+    text-align: center;
+}
+
 .verticalRateTriangle {
     font-family: "Courier New",monospace;
 }

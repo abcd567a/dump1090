@@ -1563,9 +1563,31 @@ function resortTable() {
 	PlanesOrdered.sort(sortFunction);
 	
 	var tbody = document.getElementById('tableinfo').tBodies[0];
+	// Use a document fragment to store the newly-sorted rows
+	var fragment = document.createDocumentFragment();
+	var disclosure = document.getElementById('tableinfo').tFoot.children[0];
+	disclosure.style.display = 'none';
 	for (var i = 0; i < PlanesOrdered.length; ++i) {
-		tbody.appendChild(PlanesOrdered[i].tr);
+		if (i >= 200) {
+			// Show disclosure footer that we're limiting results
+			disclosure.style.display = 'table-row';
+
+			// Detach all remaining rows in the table; we do this instead of 
+			// clearing the table because we need to keep these elements around
+			var children = Array.prototype.slice.call(tbody.children);
+			children.forEach(function(node){
+				tbody.removeChild(node);
+			});
+
+			// And we're done looping now
+			break;
+		}
+
+		fragment.appendChild(PlanesOrdered[i].tr);
 	}
+
+	// Now replace the tbody contents with the new fragment
+	tbody.appendChild(fragment);
 }
 
 function sortBy(id,sc,se) {
