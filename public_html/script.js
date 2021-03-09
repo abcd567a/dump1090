@@ -1054,8 +1054,11 @@ function reaper() {
 	for (var i = 0; i < PlanesOrdered.length; ++i) {
 		var plane = PlanesOrdered[i];
 		if (plane.seen > 300) {
-			// Reap it.                                
-			plane.tr.parentNode.removeChild(plane.tr);
+			// Reap it.
+			if (plane.tr.parentNode !== null) {
+				plane.tr.parentNode.removeChild(plane.tr);
+			}
+
 			plane.tr = null;
 			delete Planes[plane.icao];
 			plane.destroy();
@@ -1568,7 +1571,7 @@ function resortTable() {
 	var disclosure = document.getElementById('tableinfo').tFoot.children[0];
 	disclosure.style.display = 'none';
 	for (var i = 0; i < PlanesOrdered.length; ++i) {
-		if (i >= 200) {
+		if (i >= 20) {
 			// Show disclosure footer that we're limiting results
 			disclosure.style.display = 'table-row';
 
