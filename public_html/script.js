@@ -1571,7 +1571,7 @@ function resortTable() {
 	var disclosure = document.getElementById('tableinfo').tFoot.children[0];
 	disclosure.style.display = 'none';
 	for (var i = 0; i < PlanesOrdered.length; ++i) {
-		if (i >= 20) {
+		if (i >= 200) {
 			// Show disclosure footer that we're limiting results
 			disclosure.style.display = 'table-row';
 
