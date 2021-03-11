@@ -1,4 +1,4 @@
-dump1090-fa (5.0) UNRELEASED; urgency=medium
+dump1090-fa (5.0) stable; urgency=medium
 
   * SkyAware: New Altitude, Speed, Aircraft Ident, and Aircraft Type filters to fine tune the select aircraft you want see
   * SkyAware: Ability to toggle visibility of ADS-B, MLAT, UAT, TIS-B, and Other aircraft on SkyAware using the check boxes under the aircraft table
@@ -42,7 +42,7 @@ dump1090-fa (5.0) UNRELEASED; urgency=medium
 
   * general:  Fix linking against NetBSD curses library (courtesy @jvanwouw, PR #111)
 
- -- Eric Tran <eric.tran@flightaware.com>  Mon, 08 Feb 2021 19:26:07 -6000
+ -- Eric Tran <eric.tran@flightaware.com>  Thu, 11 Mar 2021 19:26:07 -6000
 
 dump1090-fa (4.0) stable; urgency=medium
 
