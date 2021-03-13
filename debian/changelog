@@ -1,3 +1,9 @@
+dump1090-fa (5.1~dev) UNRELEASED; urgency=medium
+
+  * in development
+
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Sat, 13 Mar 2021 12:41:06 +0800
+
 dump1090-fa (5.0) stable; urgency=medium
 
   * SkyAware: New Altitude, Speed, Aircraft Ident, and Aircraft Type filters to fine tune the select aircraft you want see
