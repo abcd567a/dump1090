@@ -21,7 +21,7 @@ ifeq ($(CPUFEATURES_ARCH),x86_64)
   CPUFEATURES_OBJS += cpu_features/src/cpuinfo_x86.o
 endif
 
-ifneq ($(filter-out $(CPUFEATURES_ARCH),i%86),)
+ifneq (,$(filter i%86,$(CPUFEATURES_ARCH)))
   CPUFEATURES_OBJS += cpu_features/src/cpuinfo_x86.o
 endif
 
