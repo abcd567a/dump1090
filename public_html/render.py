@@ -11,41 +11,44 @@ def main():
 
     # declare configs by environment
     configs = {
-        'remote-dev': {
-            'asset_path': lambda filename: '/include/LIVE-skyaware/{filename}'.format(filename=filename)
-        },
-        'remote-prod': {
-            'asset_path': lambda filename: '/include/abcdef123456-skyaware/{filename}'.format(filename=filename)
+        'remote': {
+            'outfile': 'index.rvt',
+            'filters': {
+                'asset_path': lambda filename: '<?= [skyaware_include_resource_filename {filename}] ?>'.format(filename=filename)
+            },
+            'params': {
+                'preface': '<? flightaware_startpage ?>'
+            }
         },
         'local': {
-            'asset_path': lambda filename: '{filename}?v=4.0'.format(filename=filename)
+            'outfile': 'index.html',
+            'filters': {
+                'asset_path': lambda filename: '{filename}?v=4.0'.format(filename=filename)
+            },
+            'params': {
+                'preface': ''
+            }
         }
     }
 
     # suss out our config
     config = configs[args.env]
 
-    asset_path = config['asset_path']
-
     env = Environment(
         loader=FileSystemLoader('.'),
         autoescape=select_autoescape(['html', 'xml'])
     )
 
-    env.filters['asset_path'] = asset_path
+    env.filters = config['filters']
+    params = config['params']
 
     # render the template
-    outfile = 'index.html'
-    infile = outfile + '.j2'
+    outfile = config['outfile']
+    infile = 'index.j2'
 
     template = env.get_template(infile)
 
-    params = {
-        'name': 'Bob'
-    }
-
     content = template.render(params)
-    # print(content)
 
     with open(outfile, 'w') as fh:
        fh.write(content)

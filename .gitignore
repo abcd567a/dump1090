@@ -14,3 +14,4 @@ package-wheezy
 oneoff/convert_benchmark
 oneoff/decode_comm_b
 public_html/index.html
+public_html/index.rvt
