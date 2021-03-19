@@ -325,6 +325,7 @@ struct _Modes {                             // Internal state
     int   nfix_crc;                  // Number of crc bit error(s) to correct
     int   check_crc;                 // Only display messages with good CRC
     int   fix_df;                    // Try to correct damage to the DF field, as well as the main message body
+    int   enable_df24;               // Enable decoding of DF24..DF31 (Comm-D ELM)
     int   raw;                       // Raw output format
     int   mode_ac;                   // Enable decoding of SSR Modes A & C
     int   mode_ac_auto;              // allow toggling of A/C by Beast commands

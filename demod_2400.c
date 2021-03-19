@@ -58,6 +58,40 @@ static inline int slice_phase4(uint16_t *m) {
     return m[0] + 5 * m[1] - 5 * m[2] - m[3];
 }
 
+static uint32_t valid_df_short_bitset;        // set of acceptable DF values for short messages
+static uint32_t valid_df_long_bitset;         // set of acceptable DF values for long messages
+
+static uint32_t generate_damage_set(uint8_t df, unsigned damage_bits)
+{
+    uint32_t result = (1 << df);
+    if (!damage_bits)
+        return result;
+
+    for (unsigned bit = 0; bit < 5; ++bit) {
+        unsigned damaged_df = df ^ (1 << bit);
+        result |= generate_damage_set(damaged_df, damage_bits - 1);
+    }
+
+    return result;
+}
+
+static void init_bitsets()
+{
+    // DFs that we directly understand without correction
+    valid_df_short_bitset = (1 << 0) | (1 << 4) | (1 << 5) | (1 << 11);
+    valid_df_long_bitset = (1 << 16) | (1 << 17) | (1 << 18) | (1 << 20) | (1 << 21);
+
+    if (Modes.enable_df24)
+        valid_df_long_bitset |= (1 << 24) | (1 << 25) | (1 << 26) | (1 << 27) | (1 << 28) | (1 << 29) | (1 << 30) | (1 << 31);
+
+    // if we can also repair DF damage, include those corrections
+    if (Modes.fix_df && Modes.nfix_crc) {
+        valid_df_short_bitset |= generate_damage_set(11, 1);
+        valid_df_long_bitset |= generate_damage_set(17, Modes.nfix_crc);
+        valid_df_long_bitset |= generate_damage_set(18, Modes.nfix_crc);
+    }
+}
+
 //
 // Given 'mlen' magnitude samples in 'm', sampled at 2.4MHz,
 // try to demodulate some Mode S messages.
@@ -68,6 +102,10 @@ void demodulate2400(struct mag_buf *mag)
     struct modesMessage mm;
     unsigned char msg1[MODES_LONG_MSG_BYTES], msg2[MODES_LONG_MSG_BYTES], *msg;
     uint32_t j;
+
+    // initialize bitsets on first call
+    if (!valid_df_short_bitset)
+        init_bitsets();
 
     unsigned char *bestmsg;
     int bestscore, bestphase;
@@ -173,7 +211,7 @@ void demodulate2400(struct mag_buf *mag)
         bestmsg = NULL; bestscore = SR_NOT_SET; bestphase = -1;
         for (try_phase = 4; try_phase <= 8; ++try_phase) {
             uint16_t *pPtr;
-            int phase, i, score;
+            int phase, score;
 
             // Decode all the next 112 bits, regardless of the actual message
             // size. We'll check the actual message type later
@@ -181,7 +219,8 @@ void demodulate2400(struct mag_buf *mag)
             pPtr = &m[j+19] + (try_phase/5);
             phase = try_phase % 5;
 
-            for (i = 0; i < MODES_LONG_MSG_BYTES; ++i) {
+            unsigned bytelen = 1;
+            for (unsigned i = 0; i < bytelen; ++i) {
                 uint8_t theByte = 0;
 
                 switch (phase) {
@@ -263,6 +302,22 @@ void demodulate2400(struct mag_buf *mag)
                 }
 
                 msg[i] = theByte;
+
+                if (i == 0) {
+                    // inspect DF field early, only continue processing
+                    // messages where the DF appears valid
+                    unsigned df = theByte >> 3;
+                    if (valid_df_long_bitset & (1 << df))
+                        bytelen = MODES_LONG_MSG_BYTES;
+                    else if (valid_df_short_bitset & (1 << df))
+                        bytelen = MODES_SHORT_MSG_BYTES;
+                }
+            }
+
+            if (bytelen == 1) {
+                // rejected early by the DF filter
+                Modes.stats_current.demod_rejected_bad++;
+                continue;
             }
 
             // Score the mode S message and see if it's any good.

@@ -337,6 +337,7 @@ static void showHelp(void)
 "--no-fix                 Disable error correction using CRC\n"
 "--no-fix-df              Disable error correction of the DF message field (reduces CPU requirements)\n"
 "--no-crc-check           Disable messages with broken CRC (discouraged)\n"
+"--enable-df24            Enable decoding of DF24 Comm-D ELM messages\n"
 "--mlat                   display raw messages in Beast ascii mode\n"
 "--stats                  With --ifile print stats at exit. No other output\n"
 "--stats-range            Collect/show range histogram\n"
@@ -547,6 +548,8 @@ int main(int argc, char **argv) {
                 Modes.nfix_crc = 1;
         } else if (!strcmp(argv[j],"--fix-2bit")) {
             Modes.nfix_crc = 2;
+        } else if (!strcmp(argv[j],"--enable-df24")) {
+            Modes.enable_df24 = 1;
         } else if (!strcmp(argv[j],"--no-fix")) {
             Modes.nfix_crc = 0;
         } else if (!strcmp(argv[j],"--no-fix-df")) {
