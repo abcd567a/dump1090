@@ -42,6 +42,7 @@ typedef struct {
     bool (*handleOption)(int, char**, int*);
     bool (*open)();
     void (*run)();
+    void (*stop)();
     void (*close)();
 } sdr_handler;
 
@@ -72,6 +73,10 @@ static void noRun()
 {
 }
 
+static void noStop()
+{
+}
+
 static void noClose()
 {
 }
@@ -84,24 +89,24 @@ static bool unsupportedOpen()
 
 static sdr_handler sdr_handlers[] = {
 #ifdef ENABLE_RTLSDR
-    { "rtlsdr", SDR_RTLSDR, rtlsdrInitConfig, rtlsdrShowHelp, rtlsdrHandleOption, rtlsdrOpen, rtlsdrRun, rtlsdrClose },
+    { "rtlsdr", SDR_RTLSDR, rtlsdrInitConfig, rtlsdrShowHelp, rtlsdrHandleOption, rtlsdrOpen, rtlsdrRun, rtlsdrStop, rtlsdrClose },
 #endif
 
 #ifdef ENABLE_BLADERF
-    { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, bladeRFClose },
+    { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, noStop, bladeRFClose },
 #endif
 
 #ifdef ENABLE_HACKRF
-    { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, hackRFClose },
+    { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, noStop, hackRFClose },
 #endif
 #ifdef ENABLE_LIMESDR
-    { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, limesdrClose },
+    { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, noStop, limesdrClose },
 #endif
 
-    { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noClose },
-    { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, ifileClose },
+    { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noStop, noClose },
+    { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, noStop, ifileClose },
 
-    { NULL, SDR_NONE, NULL, NULL, NULL, NULL, NULL, NULL } /* must come last */
+    { NULL, SDR_NONE, NULL, NULL, NULL, NULL, NULL, NULL, NULL } /* must come last */
 };
 
 void sdrInitConfig()
@@ -158,7 +163,7 @@ bool sdrHandleOption(int argc, char **argv, int *jptr)
 
 static sdr_handler *current_handler()
 {
-    static sdr_handler unsupported_handler = { "unsupported", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, unsupportedOpen, noRun, noClose };
+    static sdr_handler unsupported_handler = { "unsupported", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, unsupportedOpen, noRun, noStop, noClose };
 
     for (int i = 0; sdr_handlers[i].name; ++i) {
         if (Modes.sdr_type == sdr_handlers[i].sdr_type) {
@@ -190,6 +195,11 @@ void sdrRun()
     pthread_mutex_lock(&Modes.reader_cpu_mutex);
     end_cpu_timing(&Modes.reader_cpu_start, &Modes.reader_cpu_accumulator);
     pthread_mutex_unlock(&Modes.reader_cpu_mutex);
+}
+
+void sdrStop()
+{
+    current_handler()->stop();
 }
 
 void sdrClose()

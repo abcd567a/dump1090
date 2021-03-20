@@ -132,3 +132,15 @@ void set_thread_name(const char *name)
     MODES_NOTUSED(name);
 #endif
 }
+
+int join_thread(pthread_t thread, void **retval, uint32_t timeout_ms)
+{
+#if (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
+    struct timespec abstime;
+    get_deadline(timeout_ms, &abstime);
+    return pthread_timedjoin_np(thread, retval, &abstime);
+#else
+    MODES_NOTUSED(timeout_ms);
+    return pthread_join(thread, retval);
+#endif
+}

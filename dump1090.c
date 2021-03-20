@@ -761,7 +761,7 @@ int main(int argc, char **argv) {
             nanosleep(&slp, NULL);
         }
     } else {
-        int watchdogCounter = 10; // about 1 second
+        int watchdogCounter = 300; // about 30 seconds
 
         // Create the thread that will read the data from the device.
         pthread_create(&Modes.reader_thread, NULL, readerThreadEntryPoint, NULL);
@@ -789,12 +789,12 @@ int main(int argc, char **argv) {
                 fifo_release(buf);
 
                 // We got something so reset the watchdog
-                watchdogCounter = 10;
+                watchdogCounter = 300;
             } else {
                 // Nothing to process this time around.
                 if (--watchdogCounter <= 0) {
-                    log_with_timestamp("No data received from the SDR for a long time, it may have wedged");
-                    watchdogCounter = 600;
+                    log_with_timestamp("No samples received from the SDR for a long time. Maybe the hardware is wedged? Giving up.");
+                    Modes.exit = 2; // abnormal exit
                 }
             }
 
@@ -804,8 +804,14 @@ int main(int argc, char **argv) {
         }
 
         log_with_timestamp("Waiting for receive thread termination");
+        sdrStop();   // tell reader thread to wake up and exit
         fifo_halt(); // Reader thread should do this anyway, but just in case..
-        pthread_join(Modes.reader_thread,NULL);     // Wait on reader thread exit
+
+        // Wait on reader thread exit
+        if (join_thread(Modes.reader_thread, NULL, 30000) == ETIMEDOUT) {
+            log_with_timestamp("Receive thread did not shut down cleanly in 30 seconds, aborting.");
+            abort(); // Can't complete cleanup while the receive thread is active; bail out.
+        }
     }
 
     interactiveCleanup();

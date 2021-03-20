@@ -358,6 +358,15 @@ void rtlsdrRun()
     }
 }
 
+void rtlsdrStop()
+{
+    if (!RTLSDR.dev) {
+        return;
+    }
+
+    rtlsdr_cancel_async(RTLSDR.dev);
+}
+
 void rtlsdrClose()
 {
     if (RTLSDR.dev) {

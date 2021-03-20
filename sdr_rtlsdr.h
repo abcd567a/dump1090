@@ -25,6 +25,7 @@ void rtlsdrInitConfig();
 void rtlsdrShowHelp();
 bool rtlsdrOpen();
 void rtlsdrRun();
+void rtlsdrStop();
 void rtlsdrClose();
 bool rtlsdrHandleOption(int argc, char **argv, int *jptr);
 
