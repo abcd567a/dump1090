@@ -40,6 +40,8 @@ Nothing special, just build it (`dpkg-buildpackage -b`)
 
 ## Building with limited dependencies
 
+(Supported for buster builds only)
+
 The package supports some build profiles to allow building without all
 required SDR libraries being present. This will produce a package with
 limited SDR support only.
