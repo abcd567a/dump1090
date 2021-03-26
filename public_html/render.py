@@ -17,7 +17,7 @@ def main():
                 'asset_path': lambda filename: '<?= [skyaware_include_resource_filename {filename}] ?>'.format(filename=filename)
             },
             'params': {
-                'preface': '<? flightaware_startpage ?>'
+                'preface': '<? skyaware_init ?>'
             }
         },
         'local': {
