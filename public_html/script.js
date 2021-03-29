@@ -949,6 +949,11 @@ function initialize_map() {
 		if (SiteCircles) {
 		    createSiteCircleFeatures();
 		}
+
+		// Default range rings to off if not set in local storage
+		if (typeof localStorage['layer_site_pos'] === 'undefined') {
+			setRangeRingVisibility('hide');
+		}
 	}
 
 	// Add terrain-limit rings. To enable this:
