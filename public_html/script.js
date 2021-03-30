@@ -132,48 +132,40 @@ function processReceiverUpdate(data) {
                                 plane.tr.cells[0].textContent = hex;
                         }
 
-			if (hex[0] === '~') {
-				// Non-ICAO address
-				plane.tr.cells[0].textContent = hex.substring(1);
-				$(plane.tr).css('font-style', 'italic');
-			} else {
-				plane.tr.cells[0].textContent = hex;
-			}
+						// set flag image if available
+						if (ShowFlags && plane.icaorange.flag_image !== null) {
+							$('img', plane.tr.cells[1]).attr('src', FlagPath + plane.icaorange.flag_image);
+							$('img', plane.tr.cells[1]).attr('title', plane.icaorange.country);
+						} else {
+							$('img', plane.tr.cells[1]).css('display', 'none');
+						}
 
-			// set flag image if available
-			if (ShowFlags && plane.icaorange.flag_image !== null) {
-				$('img', plane.tr.cells[1]).attr('src', FlagPath + plane.icaorange.flag_image);
-				$('img', plane.tr.cells[1]).attr('title', plane.icaorange.country);
-			} else {
-				$('img', plane.tr.cells[1]).css('display', 'none');
-			}
+						plane.tr.addEventListener('click', function(h, evt) {
+							if (evt.srcElement instanceof HTMLAnchorElement) {
+								evt.stopPropagation();
+								return;
+							}
 
-			plane.tr.addEventListener('click', function(h, evt) {
-				if (evt.srcElement instanceof HTMLAnchorElement) {
-					evt.stopPropagation();
-					return;
-				}
+							if (!$("#map_container").is(":visible")) {
+								showMap();
+							}
+							selectPlaneByHex(h, false);
+							adjustSelectedInfoBlockPosition();
+							evt.preventDefault();
+						}.bind(undefined, hex));
 
-				if (!$("#map_container").is(":visible")) {
-					showMap();
-				}
-				selectPlaneByHex(h, false);
-				adjustSelectedInfoBlockPosition();
-				evt.preventDefault();
-			}.bind(undefined, hex));
+						plane.tr.addEventListener('dblclick', function(h, evt) {
+							if (!$("#map_container").is(":visible")) {
+								showMap();
+							}
+							selectPlaneByHex(h, true);
+							adjustSelectedInfoBlockPosition();
+							evt.preventDefault();
+						}.bind(undefined, hex));
 
-			plane.tr.addEventListener('dblclick', function(h, evt) {
-				if (!$("#map_container").is(":visible")) {
-					showMap();
-				}
-				selectPlaneByHex(h, true);
-				adjustSelectedInfoBlockPosition();
-				evt.preventDefault();
-			}.bind(undefined, hex));
-
-			Planes[hex] = plane;
-			PlanesOrdered.push(plane);
-		}
+						Planes[hex] = plane;
+						PlanesOrdered.push(plane);
+					}
 
                 // Call the function update
                 plane.updateData(now, ac);
@@ -320,14 +312,6 @@ function initialize() {
         $('#settingsCog').on('click', function() {
         	$('#settings_infoblock').toggle();
         });
-
-	$('#column_select').on('click', function() {
-		$('#column_select_window').toggle();
-	});
-
-	$('#column_select_close_box').on('click', function() {
-		$('#column_select_window').hide();
-	});
 
 	$('#settings_close').on('click', function() {
 	    $('#settings_infoblock').hide();
