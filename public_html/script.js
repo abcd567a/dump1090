@@ -2274,6 +2274,9 @@ function updatePlaneFilter() {
     var aircraftIdentFilterSet = (PlaneFilter.aircraftIdent == undefined) ? 0 : 1;
 
     ActiveFilterCount = altitudeFilterSet + speedFilterSet + aircraftTypeFilterSet + aircraftIdentFilterSet;
+
+    var filter = document.getElementById('filter_button');
+    filter.style.backgroundColor = (ActiveFilterCount > 0) ? "Lime" : "#FEBC11";	
 }
 
 function refreshDataSourceFilters () {
