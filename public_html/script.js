@@ -327,7 +327,6 @@ function initialize() {
         	$('#settings_infoblock').toggle();
         });
 
-<<<<<<< HEAD
 	$('#column_select').on('click', function() {
 		$('#column_select_window').toggle();
 	});
@@ -339,11 +338,6 @@ function initialize() {
 	$('#settings_close').on('click', function() {
 	    $('#settings_infoblock').hide();
 	});
-=======
-        $('#settings_close').on('click', function() {
-            $('#settings_infoblock').hide();
-        });
->>>>>>> 829fe1b... Filter and Column buttons to expand panels and styling cleanup
 
 	$('#groundvehicle_filter').on('click', function() {
 		filterGroundVehicles(true);
