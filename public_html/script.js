@@ -213,7 +213,7 @@ function onNewData(data) {
                         LastReceiverTimestamp = now;
                         $("#update_error").css('display','none');
                 }
-        });
+        }
 
 function onDataError(errMsg) {
 	$("#update_error_detail").text(errMsg);
@@ -304,48 +304,10 @@ function initialize() {
         // Initialize other controls
         initializeUnitsSelector();
 
-<<<<<<< HEAD
-        altitude_slider = document.getElementById('altitude_slider');
-
-        noUiSlider.create(altitude_slider, {
-                start: [0, 65000],
-                connect: true,
-                range: {
-                    'min': DefaultMinAltitudeFilter,
-                    'max': DefaultMaxAltitudeFilter
-                },
-                step: 25,
-                format: {
-                        to: (v) => parseFloat(v).toFixed(0),
-                        from: (v) => parseFloat(v).toFixed(0)
-                    }
-            });
-
-        var minAltitudeInput = document.getElementById('minAltitudeText'),
-            maxAltitudeInput = document.getElementById('maxAltitudeText');
-
-        altitude_slider.noUiSlider.on('update', function (values, handle) {
-                if (handle) {
-                        maxAltitudeInput.innerHTML = values[handle];
-                } else {
-                        minAltitudeInput.innerHTML = values[handle];
-                }
-        });
-
-        altitude_slider.noUiSlider.on('set', function (values, handle) {
-                onFilterByAltitude();
-        });
-
-	// check if the altitude color values are default to enable the altitude filter
-	if (ColorByAlt.air.h.length === 3 && ColorByAlt.air.h[0].alt === 2000 && ColorByAlt.air.h[0].val === 20 && ColorByAlt.air.h[1].alt === 10000 && ColorByAlt.air.h[1].val === 140 && ColorByAlt.air.h[2].alt === 40000 && ColorByAlt.air.h[2].val === 300) {
-	    customAltitudeColors = false;
-	}
-=======
         // check if the altitude color values are default to enable the altitude filter
         if (ColorByAlt.air.h.length === 3 && ColorByAlt.air.h[0].alt === 2000 && ColorByAlt.air.h[0].val === 20 && ColorByAlt.air.h[1].alt === 10000 && ColorByAlt.air.h[1].val === 140 && ColorByAlt.air.h[2].alt === 40000 && ColorByAlt.air.h[2].val === 300) {
             customAltitudeColors = false;
         }
->>>>>>> 4eab124... Update filter slider default values accordingly when changing the DisplayUnits
 
         create_filter_sliders();
 
@@ -2312,9 +2274,6 @@ function updatePlaneFilter() {
     var aircraftIdentFilterSet = (PlaneFilter.aircraftIdent == undefined) ? 0 : 1;
 
     ActiveFilterCount = altitudeFilterSet + speedFilterSet + aircraftTypeFilterSet + aircraftIdentFilterSet;
-
-    var filter = document.getElementById('filter_button');
-    filter.style.backgroundColor = (ActiveFilterCount > 0) ? "Lime" : "#FEBC11";
 }
 
 function refreshDataSourceFilters () {
