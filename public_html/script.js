@@ -408,27 +408,66 @@ function initialize() {
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
         $.ajax({ url: 'data/receiver.json',
-                 timeout: 5000,
-                 cache: false,
-                 dataType: 'json' })
+                timeout: 5000,
+                cache: false,
+                dataType: 'json' })
 
-                .done(function(data) {
-                        if (typeof data.lat !== "undefined") {
-                                SiteShow = true;
-                                SiteLat = data.lat;
-                                SiteLon = data.lon;
-                                DefaultCenterLat = data.lat;
-                                DefaultCenterLon = data.lon;
+                 .done(function(data) {
+                    // Stash a copy for possible socket usage
+                    receiverData = data;
+
+                    if (typeof data.lat !== "undefined") {
+                        // Local case
+                        SiteShow = true;
+                        SitePositions = [[data.lon, data.lat]]
+                        DefaultCenterLat = data.lat;
+                        DefaultCenterLon = data.lon;
+                    } else if (typeof data.locations === 'object' && data.locations.length > 0) {
+                        // Remote case
+                        SiteShow = true;
+                        // Figure out default center/zoom
+                        if (data.locations.length == 1) {
+                            // Only one location provided, go with legacy code path
+                            DefaultCenterLat = data.locations[0].lat;
+                            DefaultCenterLon = data.locations[0].lon;
+                        } else {
+                            // Multiple locations, derive correct default center/zoom
+                            // Create an OL-sompatible coord array
+                            var coords = data.locations.map(function(loc){
+                                return ol.proj.fromLonLat([loc.lon, loc.lat]);
+                            });
+                            // Create an extent to use for our defaults
+                            // we'll buffer (pad) the extent by 400nm to allow for range rings
+                            var buffer = 400 * 1852;
+                            var extent = ol.extent.buffer(ol.extent.boundingExtent(coords), buffer);
+                            // This is sorta hacky, but to get the center and zoom, we
+                            // just create a throwaway view and fit it to the extent
+                            var view = new ol.View();
+                            var $canvas = $('#map_canvas');
+                            var size = [$canvas.width(), $canvas.height()];
+                            view.fit(extent, {size: size});
+                            var center = ol.proj.toLonLat(view.getCenter());
+                            DefaultCenterLat = center[1];
+                            DefaultCenterLon = center[0];
+                            DefaultZoomLvl = view.getZoom();
                         }
-                        
-                        Dump1090Version = data.version;
-                        RefreshInterval = data.refresh;
-                        PositionHistorySize = data.history;
+
+                        // And now set all the receiver locations
+                        SitePositions = data.locations.map(function(loc){
+                            return [loc.lon, loc.lat];
+                        });
+
+                    }
+
+                    Dump1090Version = data.version;
+                    RefreshInterval = data.refresh;
+                    PositionHistorySize = data.history;
                 })
 
                 .always(function() {
-                        initialize_map();
-                        start_load_history();
+                    initialize_map();
+                    start_load_history();
+                    start_data_fetching();
                 });
 }
 
