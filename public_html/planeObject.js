@@ -51,7 +51,6 @@ function PlaneObject(icao) {
 
 	// Data packet numbers
 	this.messages  = null;
-        this.rssi      = null;
 
         // Track history as a series of line segments
         this.elastic_feature = null;
@@ -500,7 +499,6 @@ PlaneObject.prototype.updateIcon = function() {
 PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
         // Update all of our data
         this.messages = data.messages;
-        this.rssi = data.rssi;
         this.last_message_time = receiver_timestamp - data.seen;
 
         // simple fields

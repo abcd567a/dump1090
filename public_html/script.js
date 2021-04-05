@@ -75,7 +75,6 @@ var checkbox_div_map = new Map ([
 	['#heading_col_checkbox', '#track'],
 	['#messages_col_checkbox', '#msgs'],
 	['#msg_age_col_checkbox', '#seen'],
-	['#rssi_col_checkbox', '#rssi'],
 	['#lat_col_checkbox', '#lat'],
 	['#lon_col_checkbox', '#lon'],
 	['#datasource_col_checkbox', '#data_source'],
@@ -1351,7 +1350,6 @@ function refreshSelected() {
 
         $('#selected_category').text(selected.category ? selected.category : "n/a");
         $('#selected_sitedist').text(format_distance_long(selected.sitedist, DisplayUnits));
-        $('#selected_rssi').text(selected.rssi.toFixed(1) + ' dBFS');
         $('#selected_message_count').text(selected.messages);
         $('#selected_photo_link').html(getFlightAwarePhotoLink(selected.registration));
         $('#selected_altitude_geom').text(format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
@@ -1602,13 +1600,12 @@ function refreshTableInfo() {
 	tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
 	tableplane.tr.cells[11].textContent = tableplane.messages;
 	tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
-	tableplane.tr.cells[13].textContent = (tableplane.rssi !== null ? tableplane.rssi : "");
-	tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
-	tableplane.tr.cells[15].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-	tableplane.tr.cells[16].textContent = format_data_source(tableplane.getDataSource());
-	tableplane.tr.cells[17].innerHTML = getAirframesModeSLink(tableplane.icao);
-	tableplane.tr.cells[18].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
-	tableplane.tr.cells[19].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
+	tableplane.tr.cells[13].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
+	tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
+	tableplane.tr.cells[15].textContent = format_data_source(tableplane.getDataSource());
+	tableplane.tr.cells[16].innerHTML = getAirframesModeSLink(tableplane.icao);
+	tableplane.tr.cells[17].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
+	tableplane.tr.cells[18].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
 	tableplane.tr.className = classes;
 	}
 }
@@ -1654,7 +1651,6 @@ function sortByTrack()    { sortBy('track',   compareNumeric, function(x) { retu
 function sortByMsgs()     { sortBy('msgs',    compareNumeric, function(x) { return x.messages; }); }
 function sortBySeen()     { sortBy('seen',    compareNumeric, function(x) { return x.seen; }); }
 function sortByCountry()  { sortBy('country', compareAlpha,   function(x) { return x.icaorange.country; }); }
-function sortByRssi()     { sortBy('rssi',    compareNumeric, function(x) { return x.rssi }); }
 function sortByLatitude()   { sortBy('lat',   compareNumeric, function(x) { return (x.position !== null ? x.position[1] : null) }); }
 function sortByLongitude()  { sortBy('lon',   compareNumeric, function(x) { return (x.position !== null ? x.position[0] : null) }); }
 function sortByDataSource() { sortBy('data_source',     compareAlpha, function(x) { return x.getDataSource() } ); }
