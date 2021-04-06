@@ -1553,67 +1553,68 @@ function refreshTableInfo() {
     $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
-	var tableplane = PlanesOrdered[i];
-    TrackedHistorySize += tableplane.history_size;
-	if (tableplane.seen >= 58 || tableplane.isFiltered()) {
-	tableplane.tr.className = "plane_table_row hidden";
-    } else {
-	TrackedAircraft++;
-	var classes = "plane_table_row";
+        var tableplane = PlanesOrdered[i];
+        TrackedHistorySize += tableplane.history_size;
+        if (tableplane.seen >= 58 || tableplane.isFiltered()) {
+            tableplane.tr.className = "plane_table_row hidden";
+        } else {
+            TrackedAircraft++;
+            var classes = "plane_table_row";
 
-	if (tableplane.position !== null && tableplane.seen_pos < 60) {
-	    ++TrackedAircraftPositions;
+            if (tableplane.position !== null && tableplane.seen_pos < 60) {
+                ++TrackedAircraftPositions;
+            }
+
+            if (tableplane.getDataSource() === "adsb_icao") {
+                classes += " vPosition";
+            } else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
+                classes += " tisb";
+            } else if (tableplane.getDataSource() === "mlat") {
+                classes += " mlat";
+            } else {
+                classes += " other";
+            }
+
+            if (tableplane.icao == SelectedPlane)
+                classes += " selected";
+
+            if (tableplane.squawk in SpecialSquawks) {
+                classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
+                show_squawk_warning = true;
+            }
+
+            // ICAO doesn't change
+            if (tableplane.flight) {
+                tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
+            } else {
+                // Show _registration if ident is not present
+                tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
+            }
+
+            tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
+            tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
+            tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
+            tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
+            tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
+            tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
+            tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
+            tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
+            tableplane.tr.cells[11].textContent = tableplane.messages;
+            tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
+            tableplane.tr.cells[13].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
+            tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
+            tableplane.tr.cells[15].textContent = format_data_source(tableplane.getDataSource());
+            tableplane.tr.cells[16].innerHTML = getAirframesModeSLink(tableplane.icao);
+            tableplane.tr.cells[17].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
+            tableplane.tr.cells[18].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
+            tableplane.tr.className = classes;
 		}
-
-		if (tableplane.getDataSource() === "adsb_icao") {
-		classes += " vPosition";
-	} else if (tableplane.getDataSource() === "tisb_trackfile" || tableplane.getDataSource() === "tisb_icao" || tableplane.getDataSource() === "tisb_other") {
-		classes += " tisb";
-	} else if (tableplane.getDataSource() === "mlat") {
-		classes += " mlat";
-	} else {
-		classes += " other";
 	}
 
-		if (tableplane.icao == SelectedPlane)
-	    classes += " selected";
-		    
-	if (tableplane.squawk in SpecialSquawks) {
-	    classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
-	    show_squawk_warning = true;
-		}			                
-
-	// ICAO doesn't change
-	if (tableplane.flight) {
-		tableplane.tr.cells[2].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight, tableplane.flight);
-	} else {
-		// Show _registration if ident is not present
-		tableplane.tr.cells[2].innerHTML = (tableplane.registration !== null ? getFlightAwareIdentLink(tableplane.registration, '_' + tableplane.registration) : "");
-	}
-	tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
-	tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
-	tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
-	tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
-	tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
-	tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
-	tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
-	tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
-	tableplane.tr.cells[11].textContent = tableplane.messages;
-	tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
-	tableplane.tr.cells[13].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
-	tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-	tableplane.tr.cells[15].textContent = format_data_source(tableplane.getDataSource());
-	tableplane.tr.cells[16].innerHTML = getAirframesModeSLink(tableplane.icao);
-	tableplane.tr.cells[17].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
-	tableplane.tr.cells[18].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
-	tableplane.tr.className = classes;
-	}
-}
-
-if (show_squawk_warning) {
-	    $("#SpecialSquawkWarning").css('display','block');
+    if (show_squawk_warning) {
+        $("#SpecialSquawkWarning").css('display','block');
     } else {
-	    $("#SpecialSquawkWarning").css('display','none');
+        $("#SpecialSquawkWarning").css('display','none');
     }
 
     resortTable();
