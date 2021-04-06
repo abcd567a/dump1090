@@ -409,6 +409,7 @@ function initialize() {
         $.ajax({ url: 'data/receiver.json',
                 timeout: 5000,
                 cache: false,
+                data: window.location.search.substring(1),
                 dataType: 'json' })
 
                  .done(function(data) {
@@ -1964,15 +1965,32 @@ function showMap() {
 }
 
 function showColumn(table, columnId, visible) {
-    var index = $(columnId).index();
-    if (index >= 0) {
-	var cells = $(table).find("td:nth-child(" + (index + 1).toString() + ")");
-	if (visible) {
-	    cells.show();
-	} else {
-	    cells.hide();
+	var index = $(columnId).index();
+	// Sanity check
+	if (index < 0) {
+		return;
 	}
-    }
+
+	// Assemble a group of elements to show/hide
+	var $cells = $();
+
+	// Find the relevant column heading
+	$cells = $cells.add(table.children('thead').find("td:nth-child(" + (index + 1).toString() + ")"));
+
+	// Also get the relevant cell from the hidden template row
+	$cells = $cells.add($(PlaneRowTemplate).find("td:nth-child(" + (index + 1).toString() + ")"));
+
+	// Finally, find the relevant cell for each Plane object
+	Object.keys(Planes).forEach(function(icao){
+		$cells = $cells.add($(Planes[icao].tr.children[index]));
+	});
+
+	// And now we can show/hide all these cells
+	if (visible) {
+		$cells.show();
+	} else {
+		$cells.hide();
+	}
 }
 
 function setColumnVisibility() {
