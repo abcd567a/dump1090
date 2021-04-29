@@ -1,8 +1,9 @@
 // Part of dump1090, a Mode S message decoder for RTLSDR devices.
 //
-// stats.c: statistics structures and prototypes.
+// stats.h: statistics structures and prototypes.
 //
 // Copyright (c) 2015 Oliver Jowett <oliver@mutability.co.uk>
+// Copyright (c) 2021 FlightAware LLC
 //
 // This file is free software: you may copy, redistribute and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -128,6 +129,10 @@ struct stats {
     // range histogram
 #define RANGE_BUCKET_COUNT 76
     uint32_t range_histogram[RANGE_BUCKET_COUNT];
+
+    // autogain measurements
+    double autogain_bursts_per_second;
+    double autogain_noise_dbfs;
 };
 
 void add_stats(const struct stats *st1, const struct stats *st2, struct stats *target);

@@ -103,9 +103,16 @@ void demodulate2400(struct mag_buf *mag)
     unsigned char msg1[MODES_LONG_MSG_BYTES], msg2[MODES_LONG_MSG_BYTES], *msg;
     uint32_t j;
 
+    static unsigned last_message_end = 0;
+
     // initialize bitsets on first call
     if (!valid_df_short_bitset)
         init_bitsets();
+
+    if (mag->flags & MAGBUF_DISCONTINUOUS) {
+        // gap, start from the very beginning
+        last_message_end = 0;
+    }
 
     unsigned char *bestmsg;
     int bestscore, bestphase;
@@ -120,7 +127,11 @@ void demodulate2400(struct mag_buf *mag)
 
     msg = msg1;
 
-    for (j = 0; j < mlen; j++) {
+    // sanity check
+    if (last_message_end > mlen)
+        last_message_end = mlen;
+
+    for (j = last_message_end; j < mlen; j++) {
         uint16_t *preamble = &m[j];
         int high;
         uint32_t base_signal, base_noise;
@@ -391,13 +402,21 @@ void demodulate2400(struct mag_buf *mag)
                 Modes.stats_current.strong_signal_count++; // signal power above -3dBFS
         }
 
+        // Feed "empty" sample to autogain estimator
+        if (j > last_message_end)
+            autogain_update(&m[last_message_end], j - last_message_end, NULL);
+
+        // Feed message samples to autogain estimator, update end pointer
+        last_message_end = j + (msglen + 8) * 12/5;
+        autogain_update(&m[j], last_message_end - j, &mm);
+
         // Skip over the message:
         // (we actually skip to 8 bits before the end of the message,
         //  because we can often decode two messages that *almost* collide,
         //  where the preamble of the second message clobbered the last
         //  few bits of the first message, but the message bits didn't
         //  overlap)
-        j += msglen*12/5;
+        j = last_message_end - 8*12/5;
 
         // Pass data to the next layer
         useModesMessage(&mm);
@@ -409,8 +428,20 @@ void demodulate2400(struct mag_buf *mag)
         Modes.stats_current.noise_power_sum += (mag->mean_power * mlen - sum_signal_power);
         Modes.stats_current.noise_power_count += mlen;
     }
-}
 
+    // feed trailing empty samples to autogain estimator
+    if (last_message_end < mlen) {
+        // trailing data from end of last message to start of overlap;
+        // on the next pass, start from the start of the overlap
+        autogain_update(&m[last_message_end], mlen - last_message_end, NULL);
+        last_message_end = 0;
+    } else {
+        // last decoded message runs into the overlap region;
+        // on the next pass, start at the right place in the overlap;
+        // no trailing data to pass to the autogain estimator this time
+        last_message_end -= mlen;
+    }
+}
 
 #ifdef MODEAC_DEBUG
 

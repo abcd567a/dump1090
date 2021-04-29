@@ -3,6 +3,7 @@
 // stats.c: statistics helpers.
 //
 // Copyright (c) 2015 Oliver Jowett <oliver@mutability.co.uk>
+// Copyright (c) 2021 FlightAware LLC
 //
 // This file is free software: you may copy, redistribute and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -185,6 +186,12 @@ void display_stats(struct stats *st) {
     if (Modes.stats_range_histo)
         display_range_histogram(st);
 
+    printf("Autogain:\n"
+           "  %5.1f loud bursts/second\n"
+           "  %5.1f dBFS noise floor estimate\n",
+           st->autogain_bursts_per_second,
+           st->autogain_noise_dbfs);
+
     fflush(stdout);
 }
 
@@ -272,7 +279,14 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
     else
         target->start = st2->start;
 
-    target->end = st1->end > st2->end ? st1->end : st2->end;
+    const struct stats *newer;
+    if (st1->end > st2->end) {
+        newer = st1;
+    } else {
+        newer = st2;
+    }
+
+    target->end = newer->end;
 
     target->demod_preambles = st1->demod_preambles + st2->demod_preambles;
     target->demod_rejected_bad = st1->demod_rejected_bad + st2->demod_rejected_bad;
@@ -344,4 +358,8 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
     // range histogram
     for (i = 0; i < RANGE_BUCKET_COUNT; ++i)
         target->range_histogram[i] = st1->range_histogram[i] + st2->range_histogram[i];
+
+    // autogain measurements
+    target->autogain_bursts_per_second = newer->autogain_bursts_per_second;
+    target->autogain_noise_dbfs = newer->autogain_noise_dbfs;
 }

@@ -186,6 +186,8 @@ static void modesInit(void) {
 
     if (Modes.show_only)
         icaoFilterAdd(Modes.show_only);
+
+    autogain_init();
 }
 
 //

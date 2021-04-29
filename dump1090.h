@@ -272,6 +272,7 @@ typedef enum {
 #include "convert.h"
 #include "sdr.h"
 #include "fifo.h"
+#include "autogain.h"
 
 //======================== structure declarations =========================
 

@@ -1803,64 +1803,67 @@ static char * appendStatsJson(char *p,
         p = safe_snprintf(p, end, "]}");
     }
 
-    {
-        uint64_t demod_cpu_millis = (uint64_t)st->demod_cpu.tv_sec*1000UL + st->demod_cpu.tv_nsec/1000000UL;
-        uint64_t reader_cpu_millis = (uint64_t)st->reader_cpu.tv_sec*1000UL + st->reader_cpu.tv_nsec/1000000UL;
-        uint64_t background_cpu_millis = (uint64_t)st->background_cpu.tv_sec*1000UL + st->background_cpu.tv_nsec/1000000UL;
+    uint64_t demod_cpu_millis = (uint64_t)st->demod_cpu.tv_sec*1000UL + st->demod_cpu.tv_nsec/1000000UL;
+    uint64_t reader_cpu_millis = (uint64_t)st->reader_cpu.tv_sec*1000UL + st->reader_cpu.tv_nsec/1000000UL;
+    uint64_t background_cpu_millis = (uint64_t)st->background_cpu.tv_sec*1000UL + st->background_cpu.tv_nsec/1000000UL;
 
-        p = safe_snprintf(p, end,
-                           ",\"cpr\":{\"surface\":%u"
-                           ",\"airborne\":%u"
-                           ",\"global_ok\":%u"
-                           ",\"global_bad\":%u"
-                           ",\"global_range\":%u"
-                           ",\"global_speed\":%u"
-                           ",\"global_skipped\":%u"
-                           ",\"local_ok\":%u"
-                           ",\"local_aircraft_relative\":%u"
-                           ",\"local_receiver_relative\":%u"
-                           ",\"local_skipped\":%u"
-                           ",\"local_range\":%u"
-                           ",\"local_speed\":%u"
-                           ",\"filtered\":%u}"
-                           ",\"altitude_suppressed\":%u"
-                           ",\"cpu\":{\"demod\":%llu,\"reader\":%llu,\"background\":%llu}"
-                           ",\"tracks\":{\"all\":%u"
-                           ",\"single_message\":%u"
-                           ",\"unreliable\":%u}"
-                           ",\"messages\":%u",
-                           st->cpr_surface,
-                           st->cpr_airborne,
-                           st->cpr_global_ok,
-                           st->cpr_global_bad,
-                           st->cpr_global_range_checks,
-                           st->cpr_global_speed_checks,
-                           st->cpr_global_skipped,
-                           st->cpr_local_ok,
-                           st->cpr_local_aircraft_relative,
-                           st->cpr_local_receiver_relative,
-                           st->cpr_local_skipped,
-                           st->cpr_local_range_checks,
-                           st->cpr_local_speed_checks,
-                           st->cpr_filtered,
-                           st->suppressed_altitude_messages,
-                           (unsigned long long)demod_cpu_millis,
-                           (unsigned long long)reader_cpu_millis,
-                           (unsigned long long)background_cpu_millis,
-                           st->unique_aircraft,
-                           st->single_message_aircraft,
-                           st->unreliable_aircraft,
-                          st->messages_total);
+    p = safe_snprintf(p, end,
+                      ",\"cpr\":{\"surface\":%u"
+                      ",\"airborne\":%u"
+                      ",\"global_ok\":%u"
+                      ",\"global_bad\":%u"
+                      ",\"global_range\":%u"
+                      ",\"global_speed\":%u"
+                      ",\"global_skipped\":%u"
+                      ",\"local_ok\":%u"
+                      ",\"local_aircraft_relative\":%u"
+                      ",\"local_receiver_relative\":%u"
+                      ",\"local_skipped\":%u"
+                      ",\"local_range\":%u"
+                      ",\"local_speed\":%u"
+                      ",\"filtered\":%u}"
+                      ",\"altitude_suppressed\":%u"
+                      ",\"cpu\":{\"demod\":%llu,\"reader\":%llu,\"background\":%llu}"
+                      ",\"tracks\":{\"all\":%u"
+                      ",\"single_message\":%u"
+                      ",\"unreliable\":%u}"
+                      ",\"messages\":%u",
+                      st->cpr_surface,
+                      st->cpr_airborne,
+                      st->cpr_global_ok,
+                      st->cpr_global_bad,
+                      st->cpr_global_range_checks,
+                      st->cpr_global_speed_checks,
+                      st->cpr_global_skipped,
+                      st->cpr_local_ok,
+                      st->cpr_local_aircraft_relative,
+                      st->cpr_local_receiver_relative,
+                      st->cpr_local_skipped,
+                      st->cpr_local_range_checks,
+                      st->cpr_local_speed_checks,
+                      st->cpr_filtered,
+                      st->suppressed_altitude_messages,
+                      (unsigned long long)demod_cpu_millis,
+                      (unsigned long long)reader_cpu_millis,
+                      (unsigned long long)background_cpu_millis,
+                      st->unique_aircraft,
+                      st->single_message_aircraft,
+                      st->unreliable_aircraft,
+                      st->messages_total);
 
-        for (i = 0; i < 32; ++i) {
-            if (i == 0)
-                p = safe_snprintf(p, end, ",\"messages_by_df\":[%u", st->messages_by_df[i]);
-            else
-                p = safe_snprintf(p, end, ",%u", st->messages_by_df[i]);
-        }
-        p = safe_snprintf(p, end, "]}");
+    for (i = 0; i < 32; ++i) {
+        if (i == 0)
+            p = safe_snprintf(p, end, ",\"messages_by_df\":[%u", st->messages_by_df[i]);
+        else
+            p = safe_snprintf(p, end, ",%u", st->messages_by_df[i]);
     }
+    p = safe_snprintf(p, end, "]");
 
+    p = safe_snprintf(p, end, ",\"autogain\":{\"bursts_per_second\":%.1f,\"noise_dbfs\":%.1f}",
+                      st->autogain_bursts_per_second,
+                      st->autogain_noise_dbfs);
+
+    p = safe_snprintf(p, end, "}");
     return p;
 }
 
