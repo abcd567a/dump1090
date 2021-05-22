@@ -4,9 +4,9 @@
     --modal-bgcolor: #ffffff;
     --body-text: #222222;
     --head-text: #444444;
+    --title-text: #002F5D;
     --link-default: #0000C8;
     --link-hover: #d77925;
-    --infoblock-text: #002F5D;
     --error-text: red;
     --error-border: red;
     --error-background: #FFFFA3;
@@ -18,9 +18,9 @@
         --modal-bgcolor: #333333;
         --body-text: #eeeeee;
         --head-text: #cccccc;
-        --link-default: #d77925;
+        --title-text: #ffffff;
+        --link-default: rgba(0, 160, 226, 1);
         --link-hover: #de914b;
-        --infoblock-text: #ffffff;
         --error-text: red;
         --error-border: red;
         --error-background: #FFFFA3;
@@ -385,8 +385,7 @@ div#loader {
 }
 .infoblock_heading a {
     text-decoration: none;
-    color: blue;
-    font-size: x-small;
+   font-size: x-small;
 }
 
 .dim {
@@ -502,8 +501,7 @@ input.error {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     width: 100%;
     font-size: 12px;
-    color: #000000;
-    color: rgb(0, 0, 0);
+    color: #000000; /* keep this fixed; the legends are in little colored bubbles */
     display: inline-flex;
     justify-content: flex-end;
     padding-top: 10px;
@@ -513,8 +511,7 @@ input.error {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
-    color: #002f5d;
-    color: rgb(0, 47, 93);
+    color: var(--title-text);
 }
 
 .settingsText {
@@ -522,16 +519,24 @@ input.error {
     font-size: 14px;
     line-height: 20px;
     text-indent: 16px;
-    color: rgb(0, 0, 0);
+    color: var(--body-text);
+}
+
+a {
+    color: var(--link-default);
+    text-decoration: underline;
+}
+a:visited {
+    color: var(--link-default);
+}
+a:hover {
+    color: var(--link-hover);
 }
 
 .link {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 10px;
     line-height: 20px;
-    color: #0000c8;
-    color: rgb(0, 0, 200);
-    text-decoration: underline;
 }
 
 #header {
@@ -733,7 +738,7 @@ input.error {
 
 .infoBlockTitleText {
     font-weight: bold;
-    color: #002f5d;
+    color: var(--title-text);
 }
 
 .legendBox {
