@@ -1,7 +1,7 @@
 :root {
     color-scheme: light dark;
     --body-bgcolor: #ffffff;
-    --modal-bgcolor: #ffffff;
+    --modal-bgcolor: #dddddd;
     --body-text: #222222;
     --head-text: #444444;
     --title-text: #002F5D;
@@ -1060,9 +1060,9 @@ a:hover {
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     background-clip: padding-box;
-    border: 1px solid #e5e9f9;
+    border: 1px solid var(--modal-bgcolor);
     background-color: var(--body-bgcolor);
-    color: #060d46;
+    color: var(--body-color);
     width: auto;
 }
 
