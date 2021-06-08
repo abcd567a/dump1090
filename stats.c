@@ -186,11 +186,13 @@ void display_stats(struct stats *st) {
     if (Modes.stats_range_histo)
         display_range_histogram(st);
 
-    printf("Autogain:\n"
-           "  %5.1f loud bursts/second\n"
+    printf("Adaptive gain:\n"
+           "  %8u loud undecoded bursts\n"
+           "  %8u loud decoded messages\n"
            "  %5.1f dBFS noise floor estimate\n",
-           st->autogain_bursts_per_second,
-           st->autogain_noise_dbfs);
+           st->adaptive_burst_loud_undecoded,
+           st->adaptive_burst_loud_decoded,
+           st->adaptive_range_noise_dbfs);
 
     fflush(stdout);
 }
@@ -359,7 +361,8 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
     for (i = 0; i < RANGE_BUCKET_COUNT; ++i)
         target->range_histogram[i] = st1->range_histogram[i] + st2->range_histogram[i];
 
-    // autogain measurements
-    target->autogain_bursts_per_second = newer->autogain_bursts_per_second;
-    target->autogain_noise_dbfs = newer->autogain_noise_dbfs;
+    // adaptive gain measurements
+    target->adaptive_burst_loud_undecoded = st1->adaptive_burst_loud_undecoded + st2->adaptive_burst_loud_undecoded;
+    target->adaptive_burst_loud_decoded = st1->adaptive_burst_loud_decoded + st2->adaptive_burst_loud_decoded;
+    target->adaptive_range_noise_dbfs = newer->adaptive_range_noise_dbfs;
 }

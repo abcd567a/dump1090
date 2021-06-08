@@ -28,5 +28,9 @@ void rtlsdrRun();
 void rtlsdrStop();
 void rtlsdrClose();
 bool rtlsdrHandleOption(int argc, char **argv, int *jptr);
+int rtlsdrGetGain();
+int rtlsdrGetMaxGain();
+double rtlsdrGetGainDb(int step);
+int rtlsdrSetGain(int step);
 
 #endif

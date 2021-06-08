@@ -402,13 +402,13 @@ void demodulate2400(struct mag_buf *mag)
                 Modes.stats_current.strong_signal_count++; // signal power above -3dBFS
         }
 
-        // Feed "empty" sample to autogain estimator
+        // Feed "empty" sample to adaptive gain logic
         if (j > last_message_end)
-            autogain_update(&m[last_message_end], j - last_message_end, NULL);
+            adaptive_update(&m[last_message_end], j - last_message_end, NULL);
 
-        // Feed message samples to autogain estimator, update end pointer
+        // Feed message samples to adaptive gain logic, update end pointer
         last_message_end = j + (msglen + 8) * 12/5;
-        autogain_update(&m[j], last_message_end - j, &mm);
+        adaptive_update(&m[j], last_message_end - j, &mm);
 
         // Skip over the message:
         // (we actually skip to 8 bits before the end of the message,
@@ -429,16 +429,16 @@ void demodulate2400(struct mag_buf *mag)
         Modes.stats_current.noise_power_count += mlen;
     }
 
-    // feed trailing empty samples to autogain estimator
+    // feed trailing empty samples to adaptive gain logic
     if (last_message_end < mlen) {
         // trailing data from end of last message to start of overlap;
         // on the next pass, start from the start of the overlap
-        autogain_update(&m[last_message_end], mlen - last_message_end, NULL);
+        adaptive_update(&m[last_message_end], mlen - last_message_end, NULL);
         last_message_end = 0;
     } else {
         // last decoded message runs into the overlap region;
         // on the next pass, start at the right place in the overlap;
-        // no trailing data to pass to the autogain estimator this time
+        // no trailing data to pass this time
         last_message_end -= mlen;
     }
 }

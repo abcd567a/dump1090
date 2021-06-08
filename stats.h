@@ -130,9 +130,10 @@ struct stats {
 #define RANGE_BUCKET_COUNT 76
     uint32_t range_histogram[RANGE_BUCKET_COUNT];
 
-    // autogain measurements
-    double autogain_bursts_per_second;
-    double autogain_noise_dbfs;
+    // adaptive gain measurements
+    uint32_t adaptive_burst_loud_undecoded;
+    uint32_t adaptive_burst_loud_decoded;
+    double adaptive_range_noise_dbfs;
 };
 
 void add_stats(const struct stats *st1, const struct stats *st2, struct stats *target);

@@ -1859,9 +1859,10 @@ static char * appendStatsJson(char *p,
     }
     p = safe_snprintf(p, end, "]");
 
-    p = safe_snprintf(p, end, ",\"autogain\":{\"bursts_per_second\":%.1f,\"noise_dbfs\":%.1f}",
-                      st->autogain_bursts_per_second,
-                      st->autogain_noise_dbfs);
+    p = safe_snprintf(p, end, ",\"adaptive\":{\"loud_undecoded\":%u,\"loud_decoded\":%u,\"noise_dbfs\":%.1f}",
+                      st->adaptive_burst_loud_undecoded,
+                      st->adaptive_burst_loud_decoded,
+                      st->adaptive_range_noise_dbfs);
 
     p = safe_snprintf(p, end, "}");
     return p;

@@ -44,6 +44,10 @@ typedef struct {
     void (*run)();
     void (*stop)();
     void (*close)();
+    int (*getgain)();
+    int (*getmaxgain)();
+    double (*getgaindb)(int);
+    int (*setgain)(int);
 } sdr_handler;
 
 static void noInitConfig()
@@ -81,6 +85,28 @@ static void noClose()
 {
 }
 
+static int noGetGain()
+{
+    return -1;
+}
+
+static int noGetMaxGain()
+{
+    return -1;
+}
+
+static double noGetGainDb(int step)
+{
+    MODES_NOTUSED(step);
+    return 0.0;
+}
+
+static int noSetGain(int step)
+{
+    MODES_NOTUSED(step);
+    return 0;
+}
+
 static bool unsupportedOpen()
 {
     fprintf(stderr, "Support for this SDR type was not enabled in this build.\n");
@@ -89,24 +115,24 @@ static bool unsupportedOpen()
 
 static sdr_handler sdr_handlers[] = {
 #ifdef ENABLE_RTLSDR
-    { "rtlsdr", SDR_RTLSDR, rtlsdrInitConfig, rtlsdrShowHelp, rtlsdrHandleOption, rtlsdrOpen, rtlsdrRun, rtlsdrStop, rtlsdrClose },
+    { "rtlsdr", SDR_RTLSDR, rtlsdrInitConfig, rtlsdrShowHelp, rtlsdrHandleOption, rtlsdrOpen, rtlsdrRun, rtlsdrStop, rtlsdrClose, rtlsdrGetGain, rtlsdrGetMaxGain, rtlsdrGetGainDb, rtlsdrSetGain },
 #endif
 
 #ifdef ENABLE_BLADERF
-    { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, noStop, bladeRFClose },
+    { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, noStop, bladeRFClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 
 #ifdef ENABLE_HACKRF
-    { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, noStop, hackRFClose },
+    { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, noStop, hackRFClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 #ifdef ENABLE_LIMESDR
-    { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, noStop, limesdrClose },
+    { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, noStop, limesdrClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 
-    { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noStop, noClose },
-    { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, noStop, ifileClose },
+    { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noStop, noClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
+    { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, noStop, ifileClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 
-    { NULL, SDR_NONE, NULL, NULL, NULL, NULL, NULL, NULL, NULL } /* must come last */
+    { NULL, SDR_NONE, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL } /* must come last */
 };
 
 void sdrInitConfig()
@@ -163,7 +189,7 @@ bool sdrHandleOption(int argc, char **argv, int *jptr)
 
 static sdr_handler *current_handler()
 {
-    static sdr_handler unsupported_handler = { "unsupported", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, unsupportedOpen, noRun, noStop, noClose };
+    static sdr_handler unsupported_handler = { "unsupported", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, unsupportedOpen, noRun, noStop, noClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain };
 
     for (int i = 0; sdr_handlers[i].name; ++i) {
         if (Modes.sdr_type == sdr_handlers[i].sdr_type) {
@@ -223,3 +249,25 @@ void sdrUpdateCPUTime(struct timespec *addTo)
     Modes.reader_cpu_accumulator.tv_nsec = 0;
     pthread_mutex_unlock(&Modes.reader_cpu_mutex);
 }
+
+int sdrGetGain()
+{
+    return current_handler()->getgain();
+}
+
+int sdrGetMaxGain()
+{
+    return current_handler()->getmaxgain();
+}
+
+double sdrGetGainDb(int step)
+{
+    return current_handler()->getgaindb(step);
+}
+
+int sdrSetGain(int step)
+{
+    return current_handler()->setgain(step);
+}
+
+

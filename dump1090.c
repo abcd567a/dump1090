@@ -122,6 +122,24 @@ static void modesInitConfig(void) {
     Modes.maxRange                = 1852 * 300; // 300NM default max range
     Modes.mode_ac_auto            = 1;
 
+    // adaptive
+    Modes.adaptive_min_gain_db = 0;
+    Modes.adaptive_max_gain_db = 99999;
+
+    Modes.adaptive_burst_control = false;
+    Modes.adaptive_burst_alpha = 2.0 / (5 + 1);
+    Modes.adaptive_burst_change_delay = 15;
+    Modes.adaptive_burst_loud_runlength = 10;
+    Modes.adaptive_burst_loud_rate = 5.0;
+    Modes.adaptive_burst_quiet_runlength = 10;    
+    Modes.adaptive_burst_quiet_rate = 5.0;
+
+    Modes.adaptive_range_control = false;
+    Modes.adaptive_range_alpha = 2.0 / (5 + 1);
+    Modes.adaptive_range_percentile = 40;
+    Modes.adaptive_range_scan_delay = 15;
+    Modes.adaptive_range_rescan_delay = 300;
+
     sdrInitConfig();
 }
 //
@@ -186,8 +204,6 @@ static void modesInit(void) {
 
     if (Modes.show_only)
         icaoFilterAdd(Modes.show_only);
-
-    autogain_init();
 }
 
 //
@@ -365,7 +381,8 @@ static void showHelp(void)
 
 // Accumulate stats data from stats_current to stats_periodic, stats_alltime and stats_latest;
 // reset stats_current
-static void flush_stats(uint64_t now)
+void flush_stats(uint64_t now);
+void flush_stats(uint64_t now)
 {
     add_stats(&Modes.stats_current, &Modes.stats_periodic, &Modes.stats_periodic);
     add_stats(&Modes.stats_current, &Modes.stats_alltime, &Modes.stats_alltime);
@@ -536,7 +553,7 @@ int main(int argc, char **argv) {
         } else if ( (!strcmp(argv[j], "--device") || !strcmp(argv[j], "--device-index")) && more) {
             Modes.dev_name = strdup(argv[++j]);
         } else if (!strcmp(argv[j],"--gain") && more) {
-            Modes.gain = (int) (atof(argv[++j])*10); // Gain is in tens of DBs
+            Modes.gain = atof(argv[++j]);
         } else if (!strcmp(argv[j],"--dcfilter")) {
 #if 0
             Modes.dc_filter = 1;
@@ -695,7 +712,39 @@ int main(int argc, char **argv) {
                 fprintf(stderr,
                         "Failed to read wisdom file %s: %s\n", argv[j], strerror(errno));
                 exit(1);
-            }
+            }            
+        } else if (!strcmp(argv[j], "--adaptive-min-gain") && more) {
+            Modes.adaptive_min_gain_db = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-max-gain") && more) {
+            Modes.adaptive_max_gain_db = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst")) {
+            Modes.adaptive_burst_control = true;
+        } else if (!strcmp(argv[j], "--adaptive-burst")) {
+            Modes.adaptive_burst_control = true;
+        } else if (!strcmp(argv[j], "--adaptive-burst-alpha") && more) {
+            Modes.adaptive_burst_alpha = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst-delay") && more) {
+            Modes.adaptive_burst_change_delay = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst-loud-rate") && more) {
+            Modes.adaptive_burst_loud_rate = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst-loud-runlength") && more) {
+            Modes.adaptive_burst_loud_runlength = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst-quiet-rate") && more) {
+            Modes.adaptive_burst_quiet_rate = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-burst-quiet-runlength") && more) {
+            Modes.adaptive_burst_quiet_runlength = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-range")) {
+            Modes.adaptive_range_control = true;
+        } else if (!strcmp(argv[j], "--adaptive-range-alpha") && more) {
+            Modes.adaptive_range_alpha = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-range-percentile") && more) {
+            Modes.adaptive_range_percentile = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-range-target") && more) {
+            Modes.adaptive_range_target = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-range-scan-delay") && more) {
+            Modes.adaptive_range_scan_delay = atoi(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-range-rescan-delay") && more) {
+            Modes.adaptive_range_rescan_delay = atoi(argv[++j]);
         } else if (sdrHandleOption(argc, argv, &j)) {
             /* handled */
         } else {
@@ -726,7 +775,7 @@ int main(int argc, char **argv) {
     if (!sdrOpen()) {
         exit(1);
     }
-
+   
     if (Modes.net) {
         modesInitNet();
     }
@@ -741,6 +790,8 @@ int main(int argc, char **argv) {
 
     for (j = 0; j < 15; ++j)
         Modes.stats_1min[j].start = Modes.stats_1min[j].end = Modes.stats_current.start;
+
+    adaptive_init();
 
     // write initial json files so they're not missing
     writeJsonToFile("receiver.json", generateReceiverJson);
