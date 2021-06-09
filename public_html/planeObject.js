@@ -449,7 +449,7 @@ PlaneObject.prototype.updateIcon = function() {
         //var transparentBorderWidth = (32 / baseMarker.scale / scaleFactor).toFixed(1);
 
         var svgKey = col + '!' + outline + '!' + baseMarker.svg + '!' + add_stroke + "!" + scaleFactor;
-        var styleKey = opacity + '!' + rotation;
+        var styleKey = opacity + '!' + rotation + '!' + AircraftLabels;
 
         if (this.markerStyle === null || this.markerIcon === null || this.markerSvgKey != svgKey) {
                 //console.log(this.icao + " new icon and style " + this.markerSvgKey + " -> " + svgKey);
@@ -467,10 +467,27 @@ PlaneObject.prototype.updateIcon = function() {
                 });
 
                 this.markerIcon = icon;
-                this.markerStyle = new ol.style.Style({
-                        image: this.markerIcon
-                });
-                this.markerStaticIcon = null;
+
+		if (AircraftLabels && this.flight != null) {
+                        this.markerStyle = new ol.style.Style({
+                                image: this.markerIcon,
+                                text: new ol.style.Text({
+                                        text: this.flight.trim(),
+                                        fill: new ol.style.Fill({color: 'white'}),
+                                        backgroundFill: new ol.style.Stroke({color: 'rgba(0, 47, 93, 0.8'}),
+                                        textAlign: 'center',
+                                        offsetY: -20,
+                                        font: '10px Helvetica',
+                                        padding: [1,0,0,2]
+                                })
+                        });
+                } else {
+                        this.markerStyle = new ol.style.Style({
+                                image: this.markerIcon
+                        });
+                };
+
+		this.markerStaticIcon = null;
                 this.markerStaticStyle = new ol.style.Style({});
 
                 this.markerStyleKey = styleKey;
@@ -489,6 +506,28 @@ PlaneObject.prototype.updateIcon = function() {
                 if (this.staticIcon) {
                         this.staticIcon.setOpacity(opacity);
                 }
+                if (AircraftLabels && this.flight != null) {
+                        this.markerStyle = new ol.style.Style({
+                                image: this.markerIcon,
+                                text: new ol.style.Text({
+                                        text: this.flight.trim(),
+                                        fill: new ol.style.Fill({color: 'white'}),
+                                        backgroundFill: new ol.style.Stroke({color: 'rgba(0, 47, 93, 0.8)'}),
+                                        textAlign: 'center',
+                                        offsetY: -20,
+                                        font: '10px Helvetica',
+                                        padding: [1,0,0,2]
+                                })
+                        });
+                } else {
+                        this.markerStyle = new ol.style.Style({
+                                image: this.markerIcon
+                        });
+                };
+                if (this.marker !== null) {
+                        this.marker.setStyle(this.markerStyle);
+                }
+
                 this.markerStyleKey = styleKey;
         }
 
