@@ -1,3 +1,22 @@
+// Part of dump1090, a Mode S message decoder for RTLSDR devices.
+//
+// adaptive.c: adaptive gain control
+//
+// Copyright (c) 2021 FlightAware, LLC
+//
+// This file is free software: you may copy, redistribute and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation, either version 2 of the License, or (at your
+// option) any later version.
+//
+// This file is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 #include "dump1090.h"
 #include "adaptive.h"
 
@@ -135,6 +154,10 @@ void adaptive_init()
 
     fprintf(stderr, "adaptive: enabled adaptive gain control with gain limits %.1fdB (step %d) .. %.1fdB (step %d)\n",
             sdrGetGainDb(adaptive_gain_min), adaptive_gain_min, sdrGetGainDb(adaptive_gain_max), adaptive_gain_max);
+    if (Modes.adaptive_range_control)
+        fprintf(stderr, "adaptive: enabled dynamic range control, target dynamic range %.1fdB\n", Modes.adaptive_range_target);
+    if (Modes.adaptive_burst_control)
+        fprintf(stderr, "adaptive: enabled burst control\n");
     adaptive_set_gain(sdrGetGain(), "constraining gain to adaptive gain limits");
     adaptive_gain_changed();
 }
@@ -313,13 +336,13 @@ static void adaptive_range_end_of_block()
         n += adaptive_range_radix[i++];
     uint16_t percentile_n = i - 1;
 
-    // maintain an EWA of the Nth percentile
+    // maintain an EMA of the Nth percentile
     adaptive_range_smoothed = adaptive_range_smoothed * (1 - Modes.adaptive_range_alpha) + percentile_n * Modes.adaptive_range_alpha;
     // .. report to stats in dBFS
     if (adaptive_range_smoothed > 0) {
-        Modes.stats_current.adaptive_range_noise_dbfs = 20 * log10(adaptive_range_smoothed / 65536.0);
+        Modes.stats_current.adaptive_noise_dbfs = 20 * log10(adaptive_range_smoothed / 65536.0);
     } else {
-        Modes.stats_current.adaptive_range_noise_dbfs = 0;
+        Modes.stats_current.adaptive_noise_dbfs = 0;
     }
 
     // reset radix sort for the next block
@@ -333,13 +356,13 @@ static void adaptive_burst_end_of_block()
     if (!Modes.adaptive_burst_control)
         return;
 
-    // maintain an EWA of the number of bursts seen per block
-    Modes.stats_current.adaptive_burst_loud_undecoded += adaptive_burst_block_counter;
+    // maintain an EMA of the number of bursts seen per block
+    Modes.stats_current.adaptive_loud_undecoded += adaptive_burst_block_counter;
     adaptive_burst_smoothed = adaptive_burst_smoothed * (1 - Modes.adaptive_burst_alpha) + adaptive_burst_block_counter * Modes.adaptive_burst_alpha;
     adaptive_burst_block_counter = 0;
 
-    // maintain an EWA of the number of decoded, but loud, messages seen per block
-    Modes.stats_current.adaptive_burst_loud_decoded += adaptive_burst_block_loud_decodes;
+    // maintain an EMA of the number of decoded, but loud, messages seen per block
+    Modes.stats_current.adaptive_loud_decoded += adaptive_burst_block_loud_decodes;
     adaptive_burst_loud_decodes_smoothed = adaptive_burst_loud_decodes_smoothed * (1 - Modes.adaptive_burst_alpha) + adaptive_burst_block_loud_decodes * Modes.adaptive_burst_alpha;
     adaptive_burst_block_loud_decodes = 0;
 }
@@ -376,28 +399,10 @@ static void adaptive_end_of_block()
     adaptive_burst_control_update();
     adaptive_range_control_update();
 
-    static unsigned statscounter = 0;
-    static uint32_t last_messages_total = 0;
-    static uint64_t last_stats_end = 0;
-
-    flush_stats(mstime());
-    double rate = 0.0;
-    if (last_stats_end != 0) {
-        double elapsed = (Modes.stats_alltime.end - last_stats_end) / 1000.0;
-        double messages = Modes.stats_alltime.messages_total - last_messages_total;
-        rate = messages / elapsed;
-    }
-    last_stats_end = Modes.stats_alltime.end;
-    last_messages_total = Modes.stats_alltime.messages_total;
-    
-    fprintf(stderr, "adaptivestats: %u %.2f %.2f %u %u %s %d %u %.1f %.1f %.2f\n",
-            ++statscounter,
-            adaptive_burst_smoothed, adaptive_burst_loud_decodes_smoothed,
-            adaptive_burst_loud_blocks, adaptive_burst_quiet_blocks,
-            adaptive_burst_suppressing ? "yes" : "no", adaptive_burst_orig_gain,
-            adaptive_burst_change_delay, sdrGetGainDb(sdrGetGain()),
-            20 * log10(adaptive_range_smoothed / 65536.0), rate);
-
+    unsigned current = Modes.stats_current.adaptive_gain = sdrGetGain();
+    ++Modes.stats_current.adaptive_gain_seconds[current < STATS_GAIN_COUNT ? current : STATS_GAIN_COUNT-1];
+    if (adaptive_burst_suppressing)
+        ++Modes.stats_current.adaptive_gain_reduced_seconds;
 }
 
 static void adaptive_burst_control_update()

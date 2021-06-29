@@ -299,7 +299,7 @@ bool rtlsdrOpen(void)
 #endif
 
     if (Modes.adaptive_range_target == 0)
-        Modes.adaptive_range_target = 35.0;
+        Modes.adaptive_range_target = 30.0;
     
     return true;
 }
