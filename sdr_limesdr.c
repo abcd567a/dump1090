@@ -285,7 +285,7 @@ bool limesdrOpen(void)
                 goto error;
             }
         } else {
-            if (LMS_SetGaindB(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.gain / 10)) {
+            if (LMS_SetGaindB(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, Modes.gain)) {
                 limesdrLogHandler(LMS_LOG_ERROR, "unable to set gain");
                 goto error;
             }

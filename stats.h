@@ -1,8 +1,9 @@
 // Part of dump1090, a Mode S message decoder for RTLSDR devices.
 //
-// stats.c: statistics structures and prototypes.
+// stats.h: statistics structures and prototypes.
 //
 // Copyright (c) 2015 Oliver Jowett <oliver@mutability.co.uk>
+// Copyright (c) 2021 FlightAware LLC
 //
 // This file is free software: you may copy, redistribute and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -128,6 +129,15 @@ struct stats {
     // range histogram
 #define RANGE_BUCKET_COUNT 76
     uint32_t range_histogram[RANGE_BUCKET_COUNT];
+
+    // adaptive gain measurements
+#define STATS_GAIN_COUNT 64
+    unsigned adaptive_gain;                             // Current gain step in use
+    uint32_t adaptive_gain_seconds[STATS_GAIN_COUNT];   // Seconds spent at each gain step
+    uint32_t adaptive_gain_reduced_seconds;             // Seconds spent at a reduced gain due to burst detection
+    uint32_t adaptive_loud_undecoded;                   // Total number of loud, undecoded bursts
+    uint32_t adaptive_loud_decoded;                     // Total number of loud, decoded messages
+    double adaptive_noise_dbfs;                         // Current adaptive-dynamic-range smoothed noise measurement, dBFS
 };
 
 void add_stats(const struct stats *st1, const struct stats *st2, struct stats *target);

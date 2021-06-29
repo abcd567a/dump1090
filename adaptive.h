@@ -1,9 +1,8 @@
 // Part of dump1090, a Mode S message decoder for RTLSDR devices.
 //
-// sdr_rtlsdr.h: rtlsdr dongle support (header)
+// adaptive.h: adaptive gain control prototypes
 //
-// Copyright (c) 2016-2017 Oliver Jowett <oliver@mutability.co.uk>
-// Copyright (c) 2017 FlightAware LLC
+// Copyright (c) 2021 FlightAware, LLC
 //
 // This file is free software: you may copy, redistribute and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -18,19 +17,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#ifndef SDR_RTLSDR_H
-#define SDR_RTLSDR_H
+#ifndef ADAPTIVE_H
+#define ADAPTIVE_H
 
-void rtlsdrInitConfig();
-void rtlsdrShowHelp();
-bool rtlsdrOpen();
-void rtlsdrRun();
-void rtlsdrStop();
-void rtlsdrClose();
-bool rtlsdrHandleOption(int argc, char **argv, int *jptr);
-int rtlsdrGetGain();
-int rtlsdrGetMaxGain();
-double rtlsdrGetGainDb(int step);
-int rtlsdrSetGain(int step);
+#include <inttypes.h>
+
+struct modesMessage;
+
+void adaptive_init();
+void adaptive_update(uint16_t *buf, unsigned length, struct modesMessage *decoded);
 
 #endif

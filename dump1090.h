@@ -92,7 +92,7 @@
 #define MODES_RTL_BUF_SIZE         (16*16384)                 // 256k
 #define MODES_MAG_BUF_SAMPLES      (MODES_RTL_BUF_SIZE / 2)   // Each sample is 2 bytes
 #define MODES_MAG_BUFFERS          12                         // Number of magnitude buffers (should be smaller than RTL_BUFFERS for flowcontrol to work)
-#define MODES_AUTO_GAIN            -100                       // Use automatic gain
+#define MODES_AUTO_GAIN            -10                        // Use automatic gain
 #define MODES_MAX_GAIN             999999                     // Use max available gain
 #define MODES_MSG_SQUELCH_DB       4.0                        // Minimum SNR, in dB
 #define MODES_MSG_ENCODER_ERRS     3                          // Maximum number of encoding errors
@@ -272,6 +272,7 @@ typedef enum {
 #include "convert.h"
 #include "sdr.h"
 #include "fifo.h"
+#include "adaptive.h"
 
 //======================== structure declarations =========================
 
@@ -296,9 +297,9 @@ struct _Modes {                             // Internal state
     // Sample conversion
     int            dc_filter;        // should we apply a DC filter?
 
-    // RTLSDR
+    // RTLSDR and some other SDRs
     char *        dev_name;
-    int           gain;
+    float         gain;              // value in dB, or MODES_AUTO_GAIN, or MODES_MAX_GAIN
     int           freq;
 
     // Networking
@@ -388,6 +389,25 @@ struct _Modes {                             // Internal state
     int stats_newest_1min;          // Index into stats_1min of the most recent 1-minute window
     struct stats stats_5min;        // Accumulated stats from the last 5 complete 1-minute windows
     struct stats stats_15min;       // Accumulated stats from the last 15 complete 1-minute windows
+
+    // Adaptive gain config
+    float adaptive_min_gain_db;
+    float adaptive_max_gain_db;
+
+    bool adaptive_burst_control;
+    float adaptive_burst_alpha;
+    unsigned adaptive_burst_change_delay;
+    float adaptive_burst_loud_rate;
+    unsigned adaptive_burst_loud_runlength;
+    float adaptive_burst_quiet_rate;
+    unsigned adaptive_burst_quiet_runlength;
+
+    bool adaptive_range_control;
+    float adaptive_range_alpha;
+    unsigned adaptive_range_percentile;
+    float adaptive_range_target;
+    unsigned adaptive_range_scan_delay;
+    unsigned adaptive_range_rescan_delay;
 };
 
 extern struct _Modes Modes;
