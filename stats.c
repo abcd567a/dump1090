@@ -115,7 +115,7 @@ void display_stats(struct stats *st) {
                st->strong_signal_count);
     }
 
-    if (Modes.adaptive_burst_control || Modes.adaptive_range_control) {
+    if (st->adaptive_valid) {
         printf("Adaptive gain:\n"
                "  %5u loud undecoded bursts\n"
                "  %5u loud decoded messages\n"
@@ -315,7 +315,7 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
         target->start = st2->start;
 
     const struct stats *newer;
-    if (st1->end > st2->end) {
+    if (st1->end > st2->end || (st1->end == st2->end && st1->start > st2->start)) {
         newer = st1;
     } else {
         newer = st2;
@@ -395,11 +395,21 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
         target->range_histogram[i] = st1->range_histogram[i] + st2->range_histogram[i];
 
     // adaptive gain measurements
-    target->adaptive_gain = newer->adaptive_gain;
+
+    const struct stats *adaptive_best;
+    if (st1->adaptive_valid && st2->adaptive_valid)
+        adaptive_best = newer;
+    else if (st1->adaptive_valid)
+        adaptive_best = st1;
+    else
+        adaptive_best = st2;
+
+    target->adaptive_valid = adaptive_best->adaptive_valid;
+    target->adaptive_gain = adaptive_best->adaptive_gain;
     for (unsigned i = 0; i < STATS_GAIN_COUNT; ++i)
         target->adaptive_gain_seconds[i] = st1->adaptive_gain_seconds[i] + st2->adaptive_gain_seconds[i];
     target->adaptive_gain_reduced_seconds = st1->adaptive_gain_reduced_seconds + st2->adaptive_gain_reduced_seconds;
     target->adaptive_loud_undecoded = st1->adaptive_loud_undecoded + st2->adaptive_loud_undecoded;
     target->adaptive_loud_decoded = st1->adaptive_loud_decoded + st2->adaptive_loud_decoded;
-    target->adaptive_noise_dbfs = newer->adaptive_noise_dbfs;
+    target->adaptive_noise_dbfs = adaptive_best->adaptive_noise_dbfs;
 }

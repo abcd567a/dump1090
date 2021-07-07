@@ -399,6 +399,7 @@ static void adaptive_end_of_block()
     adaptive_burst_control_update();
     adaptive_range_control_update();
 
+    Modes.stats_current.adaptive_valid = true;
     unsigned current = Modes.stats_current.adaptive_gain = sdrGetGain();
     ++Modes.stats_current.adaptive_gain_seconds[current < STATS_GAIN_COUNT ? current : STATS_GAIN_COUNT-1];
     if (adaptive_burst_suppressing)
