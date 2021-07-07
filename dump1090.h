@@ -406,7 +406,7 @@ struct _Modes {                             // Internal state
     float adaptive_range_alpha;
     unsigned adaptive_range_percentile;
     float adaptive_range_target;
-    unsigned adaptive_range_scan_delay;
+    unsigned adaptive_range_change_delay;
     unsigned adaptive_range_rescan_delay;
 };
 

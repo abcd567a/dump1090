@@ -1863,13 +1863,15 @@ static char * appendStatsJson(char *p,
         p = safe_snprintf(p, end,
                           ",\"adaptive\":"
                           "{\"gain_db\":%.1f"
-                          ",\"gain_reduced_seconds\":%u"
+                          ",\"dynamic_range_limit_db\":%.1f"
+                          ",\"gain_changes\":%u"
                           ",\"loud_undecoded\":%u"
                           ",\"loud_decoded\":%u"
                           ",\"noise_dbfs\":%.1f"
                           ",\"gain_seconds\":[",
                           sdrGetGainDb(st->adaptive_gain),
-                          st->adaptive_gain_reduced_seconds,
+                          sdrGetGainDb(st->adaptive_range_gain_limit),
+                          st->adaptive_gain_changes,
                           st->adaptive_loud_undecoded,
                           st->adaptive_loud_decoded,
                           st->adaptive_noise_dbfs);

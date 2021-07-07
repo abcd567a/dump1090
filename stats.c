@@ -120,11 +120,15 @@ void display_stats(struct stats *st) {
                "  %5u loud undecoded bursts\n"
                "  %5u loud decoded messages\n"
                "  %5.1f dBFS current noise floor\n"
-               "  %5.1f dB current gain setting\n",
+               "  %5.1f dB current gain setting\n"
+               "  %5.1f dB current dynamic range gain upper limit\n"
+               "  %5u gain changes caused by adaptive gain control\n",
                st->adaptive_loud_undecoded,
                st->adaptive_loud_decoded,
                st->adaptive_noise_dbfs,
-               sdrGetGainDb(st->adaptive_gain));
+               sdrGetGainDb(st->adaptive_gain),
+               sdrGetGainDb(st->adaptive_range_gain_limit),
+               st->adaptive_gain_changes);
 
         uint32_t total_seconds = 0;
         for (unsigned i = 0; i < STATS_GAIN_COUNT; ++i)
@@ -139,9 +143,6 @@ void display_stats(struct stats *st) {
                     break;
                 }
             }
-
-            printf("  %5u seconds (%5.1f%%) at reduced gain due to loud messages\n",
-                   st->adaptive_gain_reduced_seconds, 100.0 * st->adaptive_gain_reduced_seconds / total_seconds);
 
             printf("  Gain histogram:\n");
             for (unsigned i = 0; i < STATS_GAIN_COUNT; ++i) {
@@ -408,8 +409,9 @@ void add_stats(const struct stats *st1, const struct stats *st2, struct stats *t
     target->adaptive_gain = adaptive_best->adaptive_gain;
     for (unsigned i = 0; i < STATS_GAIN_COUNT; ++i)
         target->adaptive_gain_seconds[i] = st1->adaptive_gain_seconds[i] + st2->adaptive_gain_seconds[i];
-    target->adaptive_gain_reduced_seconds = st1->adaptive_gain_reduced_seconds + st2->adaptive_gain_reduced_seconds;
     target->adaptive_loud_undecoded = st1->adaptive_loud_undecoded + st2->adaptive_loud_undecoded;
     target->adaptive_loud_decoded = st1->adaptive_loud_decoded + st2->adaptive_loud_decoded;
+    target->adaptive_gain_changes = st1->adaptive_gain_changes + st2->adaptive_gain_changes;
     target->adaptive_noise_dbfs = adaptive_best->adaptive_noise_dbfs;
+    target->adaptive_range_gain_limit = adaptive_best->adaptive_range_gain_limit;
 }

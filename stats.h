@@ -135,10 +135,11 @@ struct stats {
     bool adaptive_valid;                                // is the following data valid?
     int adaptive_gain;                                  // Current gain step in use
     uint32_t adaptive_gain_seconds[STATS_GAIN_COUNT];   // Seconds spent at each gain step
-    uint32_t adaptive_gain_reduced_seconds;             // Seconds spent at a reduced gain due to burst detection
     uint32_t adaptive_loud_undecoded;                   // Total number of loud, undecoded bursts
     uint32_t adaptive_loud_decoded;                     // Total number of loud, decoded messages
+    uint32_t adaptive_gain_changes;                     // Total number of gain changes caused by adaptive gain control
     double adaptive_noise_dbfs;                         // Current adaptive-dynamic-range smoothed noise measurement, dBFS
+    int adaptive_range_gain_limit;                      // Current adaptive-dynamic-range gain step limit
 };
 
 void add_stats(const struct stats *st1, const struct stats *st2, struct stats *target);
