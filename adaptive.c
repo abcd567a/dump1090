@@ -292,12 +292,8 @@ static void adaptive_burst_scan_windows(uint16_t *buf, unsigned windows)
 // return the number of loud samples seen
 static inline unsigned adaptive_burst_count_samples(uint16_t *buf, unsigned n)
 {
-    unsigned counter = 0;
-    while (n--) {
-        if (buf[0] > 46395) // -3dBFS
-            ++counter;
-        ++buf;
-    }
+    unsigned counter;
+    starch_count_above_u16(buf, n, 46395 /* -3dBFS */, &counter);
     return counter;
 }
 

@@ -305,6 +305,7 @@ static void showDSP()
     SHOW(magnitude_sc16);
     SHOW(magnitude_sc16q11);
     SHOW(mean_power_u16);
+    SHOW(count_above_u16);
 
 #undef SHOW
 
