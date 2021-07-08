@@ -344,7 +344,6 @@ static void showHelp(void)
 "                          (reduces CPU requirements)\n"
 "--no-crc-check           Disable messages with broken CRC (discouraged)\n"
 "--enable-df24            Enable decoding of DF24 Comm-D ELM messages\n"
-"--wisdom <path>          Read DSP wisdom from given path\n"
 "--lat <latitude>         Reference/receiver latitude for surface positions\n"
 "--lon <longitude>        Reference/receiver longitude for surface positions\n"
 "--max-range <distance>   Absolute maximum range for position decoding (in NM)\n"
@@ -420,6 +419,7 @@ static void showHelp(void)
 "\n"
 "      Misc\n"
 "\n"
+"--wisdom <path>          Read DSP wisdom from given path\n"
 "--version                Show version, build and DSP options\n"
 "--help                   Show this help\n"
     );
