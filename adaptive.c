@@ -464,10 +464,11 @@ static void adaptive_control_update()
     if (Modes.adaptive_range_control && !adaptive_range_change_timer) {
         float available_range = -20 * log10(adaptive_range_smoothed / 65536.0);
         // allow the gain limit to increase if this gain setting is acceptable
-        // (decreasing the limit is done separately in SCAN_UP / IDLE states when we decide to reduce gain)
-        if (available_range >= Modes.adaptive_range_target && current_gain > adaptive_range_gain_limit)
+        // (decreasing the limit is done separately depending on the current state as we make slightly different decisions in IDLE
+        // to provide hysteresis)
+        if (available_range >= Modes.adaptive_range_target && current_gain > adaptive_range_gain_limit) {
             adaptive_range_gain_limit = current_gain;
-
+        }
         switch (adaptive_range_state) {
         case RANGE_SCAN_UP:
             if (available_range < Modes.adaptive_range_target) {
@@ -476,8 +477,9 @@ static void adaptive_control_update()
                 gain_down = gain_not_up = true;
                 gain_down_reason = "probing dynamic range gain lower bound";
                 adaptive_range_state = RANGE_SCAN_DOWN;
-                if (adaptive_range_gain_limit >= current_gain)
+                if (adaptive_range_gain_limit >= current_gain) {
                     adaptive_range_gain_limit = current_gain - 1;
+                }
                 break;
             }
 
@@ -507,6 +509,10 @@ static void adaptive_control_update()
                 break;
             }
 
+            if (adaptive_range_gain_limit >= current_gain) {
+                adaptive_range_gain_limit = current_gain - 1;
+            }
+
             if (sdrGetGain() <= adaptive_gain_min) {
                 fprintf(stderr, "adaptive: reached lower gain limit, halting dynamic range scan here\n");
                 adaptive_range_state = RANGE_SCAN_IDLE;
@@ -526,8 +532,9 @@ static void adaptive_control_update()
             if (available_range + adaptive_gain_down_db / 2 < Modes.adaptive_range_target && sdrGetGain() > adaptive_gain_min) {
                 fprintf(stderr, "adaptive: available dynamic range (%.1fdB) + half gain step down (%.1fdB) < required dynamic range (%.1fdB), starting downward scan\n",
                         available_range, Modes.adaptive_range_target, adaptive_gain_down_db);
-                if (current_gain >= adaptive_range_gain_limit)
+                if (adaptive_range_gain_limit >= current_gain) {
                     adaptive_range_gain_limit = current_gain - 1;
+                }
                 adaptive_range_state = RANGE_SCAN_DOWN;
                 gain_down = gain_not_up = true;
                 gain_down_reason = "dynamic range fell below target value";
