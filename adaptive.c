@@ -182,11 +182,11 @@ void adaptive_init()
     adaptive_subblock_active = false;
 
     float N = roundf(adaptive_subblock_dutycycle_D * Modes.adaptive_duty_cycle);
-    if (N <= 0 || N > adaptive_subblock_dutycycle_D) {
-        fprintf(stderr, "warning: --adaptive-duty-cycle value %.1f%% is out of range, using 100%% instead\n",
-                Modes.adaptive_duty_cycle * 100.0);
+    if (N <= 0)
+        N = 1;
+    if (N > adaptive_subblock_dutycycle_D)
         N = adaptive_subblock_dutycycle_D;
-    }
+    fprintf(stderr, "adaptive: using %.0f%% duty cycle\n", 100.0 * N / adaptive_subblock_dutycycle_D);
     adaptive_subblock_dutycycle_N = (unsigned)N;
 
     adaptive_burst_window_remaining = adaptive_samples_per_window;
