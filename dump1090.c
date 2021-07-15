@@ -114,13 +114,16 @@ static void modesInitConfig(void) {
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.check_crc               = 1;
     Modes.fix_df                  = 1;
-    Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
     Modes.json_stats_interval     = 60000;
     Modes.json_location_accuracy  = 1;
     Modes.maxRange                = 1852 * 300; // 300NM default max range
     Modes.mode_ac_auto            = 1;
+
+    Modes.net_heartbeat_interval = MODES_NET_HEARTBEAT_INTERVAL;
+    Modes.net_output_flush_size = 1300;
+    Modes.net_output_flush_interval = 500;
 
     // adaptive
     Modes.adaptive_min_gain_db = 0;
