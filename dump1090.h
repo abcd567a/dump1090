@@ -394,6 +394,8 @@ struct _Modes {                             // Internal state
     float adaptive_min_gain_db;
     float adaptive_max_gain_db;
 
+    float adaptive_duty_cycle;
+
     bool adaptive_burst_control;
     float adaptive_burst_alpha;
     unsigned adaptive_burst_change_delay;

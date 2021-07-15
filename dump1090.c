@@ -126,6 +126,8 @@ static void modesInitConfig(void) {
     Modes.adaptive_min_gain_db = 0;
     Modes.adaptive_max_gain_db = 99999;
 
+    Modes.adaptive_duty_cycle = 0.5;
+
     Modes.adaptive_burst_control = false;
     Modes.adaptive_burst_alpha = 2.0 / (5 + 1);
     Modes.adaptive_burst_change_delay = 5;
@@ -372,6 +374,7 @@ static void showHelp(void)
 "                                       gain scanning (seconds)\n"
 "--adaptive-min-gain <g>              Set gain adjustment range lower limit (dB)\n"
 "--adaptive-max-gain <g>              Set gain adjustment range upper limit (dB)\n"
+"--adaptive-duty-cycle <p>            Set adaptive gain duty cycle %% (1..100)\n"
 "\n"
 // ------ 80 char limit ----------------------------------------------------------|
 "      Network connections\n"
@@ -764,6 +767,8 @@ int main(int argc, char **argv) {
             Modes.adaptive_min_gain_db = atof(argv[++j]);
         } else if (!strcmp(argv[j], "--adaptive-max-gain") && more) {
             Modes.adaptive_max_gain_db = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-duty-cycle") && more) {
+            Modes.adaptive_duty_cycle = atof(argv[++j]) / 100.0;
         } else if (!strcmp(argv[j], "--adaptive-burst")) {
             Modes.adaptive_burst_control = true;
         } else if (!strcmp(argv[j], "--adaptive-burst-alpha") && more) {
