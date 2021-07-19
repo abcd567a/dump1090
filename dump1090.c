@@ -110,7 +110,7 @@ static void modesInitConfig(void) {
     memset(&Modes, 0, sizeof(Modes));
 
     // Now initialise things that should not be 0/NULL to their defaults
-    Modes.gain                    = MODES_MAX_GAIN;
+    Modes.gain                    = MODES_DEFAULT_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.check_crc               = 1;
     Modes.fix_df                  = 1;
@@ -340,7 +340,7 @@ static void showHelp(void)
 "      Decoder settings\n"
 "\n"
 // ------ 80 char limit ----------------------------------------------------------|
-"--gain <db>              Set gain (default: max gain. Use -10 for auto-gain)\n"
+"--gain <db>              Set gain in dB (default: varies by SDR type)\n"
 "--freq <hz>              Set frequency (default: 1090 Mhz)\n"
 "--fix                    Enable single-bit error correction using CRC\n"
 "--fix-2bit               Enable two-bit error correction using CRC\n"

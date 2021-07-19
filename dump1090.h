@@ -92,8 +92,8 @@
 #define MODES_RTL_BUF_SIZE         (16*16384)                 // 256k
 #define MODES_MAG_BUF_SAMPLES      (MODES_RTL_BUF_SIZE / 2)   // Each sample is 2 bytes
 #define MODES_MAG_BUFFERS          12                         // Number of magnitude buffers (should be smaller than RTL_BUFFERS for flowcontrol to work)
-#define MODES_AUTO_GAIN            -10                        // Use automatic gain
-#define MODES_MAX_GAIN             999999                     // Use max available gain
+#define MODES_LEGACY_AUTO_GAIN     -10                        // old gain value for "use automatic gain"
+#define MODES_DEFAULT_GAIN         999999                     // Use default SDR gain
 #define MODES_MSG_SQUELCH_DB       4.0                        // Minimum SNR, in dB
 #define MODES_MSG_ENCODER_ERRS     3                          // Maximum number of encoding errors
 

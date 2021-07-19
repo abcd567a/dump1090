@@ -255,17 +255,17 @@ bool rtlsdrOpen(void)
         RTLSDR.gains = gains;
 
         int selected = -1;
-        if (Modes.gain == MODES_AUTO_GAIN) {
+        if (Modes.gain == MODES_LEGACY_AUTO_GAIN) {
             selected = numgains;
-        } else if (Modes.gain == MODES_MAX_GAIN) {
+        } else if (Modes.gain == MODES_DEFAULT_GAIN) {
             selected = numgains - 1;
         } else {
-            for (int i = 0; i < numgains; ++i) {
+            for (int i = 0; i <= numgains; ++i) {
                 if (selected == -1 || fabs(gains[i]/10.0 - Modes.gain) < fabs(gains[selected]/10.0 - Modes.gain))
                     selected = i;
             }
         }
-        
+
         rtlsdrSetGain(selected);
     }
 

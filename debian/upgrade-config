@@ -102,6 +102,9 @@ if [ "${EXTRAS_NET_RO_INTERVAL:-1300}" != "0.2" ]; then EXTRA_OPTIONS="$EXTRA_OP
 # special case for device index 0 (the default)
 if [ "${RECEIVER_SERIAL}" = "0" ]; then RECEIVER_SERIAL=""; fi
 
+# special case for gain -10 -> gain 60
+if [ "${RECEIVER_GAIN}" = "-10" ]; then RECEIVER_GAIN="60"; fi
+
 # special case for ports set to zero (new config uses a blank entry for that)
 if [ "${NET_RAW_INPUT_PORTS}" = "0" ]; then NET_RAW_INPUT_PORTS=""; fi
 if [ "${NET_RAW_OUTPUT_PORTS}" = "0" ]; then NET_RAW_OUTPUT_PORTS=""; fi
