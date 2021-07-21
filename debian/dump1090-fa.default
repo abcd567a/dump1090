@@ -15,6 +15,8 @@ RECEIVER_GAIN=60
 
 # Adjust gain to try to achieve optimal dynamic range / noise floor?
 ADAPTIVE_DYNAMIC_RANGE=yes
+# Target dynamic range in dB (leave blank to autoselect based on SDR type)
+ADAPTIVE_DYNAMIC_RANGE_TARGET=
 # Reduce gain when loud message bursts from nearby aircraft are seen?
 ADAPTIVE_BURST=no
 # Gain range to allow when changing gain, in dB (empty = no limit)

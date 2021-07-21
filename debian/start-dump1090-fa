@@ -48,6 +48,7 @@ else
     if [ -n "$WISDOM" -a -f "$WISDOM" ]; then OPTS="$OPTS --wisdom $WISDOM"; fi
 
     if [ "$ADAPTIVE_DYNAMIC_RANGE" = "yes" ]; then OPTS="$OPTS --adaptive-range"; fi
+    if [ -n "$ADAPTIVE_DYNAMIC_RANGE_TARGET" ]; then OPTS="$OPTS --adaptive-range-target $ADAPTIVE_DYNAMIC_RANGE_TARGET"; fi
     if [ "$ADAPTIVE_BURST" = "yes" ]; then OPTS="$OPTS --adaptive-burst"; fi
     if [ -n "$ADAPTIVE_MIN_GAIN" ]; then OPTS="$OPTS --adaptive-min-gain $ADAPTIVE_MIN_GAIN"; fi
     if [ -n "$ADAPTIVE_MAX_GAIN" ]; then OPTS="$OPTS --adaptive-max-gain $ADAPTIVE_MAX_GAIN"; fi
