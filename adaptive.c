@@ -46,7 +46,7 @@ static float adaptive_gain_down_db;
 // every subblock boundary is also a window boundary.
 
 
-const unsigned adaptive_subblocks_per_block = 20;   // subblocks per block
+static const unsigned adaptive_subblocks_per_block = 20;   // subblocks per block
 static unsigned adaptive_subblocks_remaining;              // subblocks remaining in the current block
 
 // Duty cycle is expressed as N/D
@@ -59,7 +59,10 @@ static unsigned adaptive_subblocks_remaining;              // subblocks remainin
 // subblock, modulo D, and marking the subblock as active each time the counter rolls over.
 
 static unsigned adaptive_subblock_dutycycle_N;                                        // subblock duty cycle numerator N
-const unsigned adaptive_subblock_dutycycle_D = adaptive_subblocks_per_block;          // subblock duty cycle denominator D
+
+// stretch gcc doesn't like this as a separate const
+#define adaptive_subblock_dutycycle_D adaptive_subblocks_per_block
+
 static unsigned adaptive_subblock_dutycycle_counter;   // subblock duty cycle counter (modulo D)
 static bool adaptive_subblock_active;                  // is the current subblock active i.e. samples should be processed, not skipped?
 
