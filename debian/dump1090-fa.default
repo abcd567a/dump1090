@@ -57,3 +57,6 @@ EXTRA_OPTIONS=""
 # If OVERRIDE_OPTIONS is set, only those options are used; all other options
 # in this config file are ignored.
 OVERRIDE_OPTIONS=""
+
+# This is a marker to make it easier for scripts to identify a v6-style config file
+CONFIG_STYLE=6

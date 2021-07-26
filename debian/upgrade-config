@@ -21,13 +21,6 @@ then
     exit 0
 fi
 
-# Use EXTRA_OPTIONS as a marker for a new-style config file
-if grep -q EXTRA_OPTIONS ${OLDCONFIG}
-then
-    echo "$OLDCONFIG seems to already be a new-style config, nothing to upgrade" >&2
-    exit 0
-fi
-
 if [ ! -f $PACKAGECONFIG ]
 then
     echo "$PACKAGECONFIG does not exist, cannot continue" >&2
@@ -59,6 +52,23 @@ EXTRAS_NET_HEARTBEAT="60"
 
 # read the old config
 . "$OLDCONFIG"
+
+# if there's no CONFIG_STYLE, infer a version
+if [ -z "$CONFIG_STYLE" ]
+then
+   if [ -n "$RECEIVER_OPTIONS" -o -n "$DECODER_OPTIONS" -o -n "$NET_OPTIONS" -o -n "$JSON_OPTIONS" ]
+   then
+       CONFIG_STYLE=5
+   else
+       CONFIG_STYLE=6
+   fi
+fi
+
+if [ "$CONFIG_STYLE" = "6" ]
+then
+    echo "$OLDCONFIG seems to already be a new-style config, nothing to upgrade" >&2
+    exit 0
+fi
 
 # process all the options from the old config file and accumulate settings in env vars
 process_options() {
