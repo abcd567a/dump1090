@@ -143,7 +143,7 @@ static void modesInitConfig(void) {
     Modes.adaptive_range_alpha = 2.0 / (5 + 1);
     Modes.adaptive_range_percentile = 40;
     Modes.adaptive_range_change_delay = 10;
-    Modes.adaptive_range_rescan_delay = 900;
+    Modes.adaptive_range_rescan_delay = 3600;
 
     sdrInitConfig();
 }
