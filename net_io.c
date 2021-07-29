@@ -2352,6 +2352,14 @@ static void writeFATSVEvent(struct modesMessage *mm, struct aircraft *a)
             }
             break;
 
+        case COMMB_GICB_CAPS:
+            // BDS 1,7: common usage GICB capability report
+            if (memcmp(mm->MB, a->fatsv_emitted_bds_17, 7) != 0) {
+                memcpy(a->fatsv_emitted_bds_17, mm->MB, 7);
+                writeFATSVEventMessage(mm, "gicb_caps", mm->MB, 7);
+            }
+            break;
+
         default:
             // nothing
             break;

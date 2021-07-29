@@ -250,6 +250,7 @@ struct aircraft {
     nav_modes_t   fatsv_emitted_nav_modes;        //      -"-         enabled navigation modes
     float         fatsv_emitted_nav_qnh;          //      -"-         altimeter setting
     unsigned char fatsv_emitted_bds_10[7];        //      -"-         BDS 1,0 message
+    unsigned char fatsv_emitted_bds_17[7];        //      -"-         BDS 1,7 message
     unsigned char fatsv_emitted_bds_30[7];        //      -"-         BDS 3,0 message
     unsigned char fatsv_emitted_es_status[7];     //      -"-         ES operational status message
     unsigned char fatsv_emitted_es_acas_ra[7];    //      -"-         ES ACAS RA report message
