@@ -783,7 +783,7 @@ static int decodeBDS44(struct modesMessage *mm, bool store)
     unsigned humidity_valid = getbit(msg, 50);
     unsigned humidity_raw = getbits(msg, 51, 56);
 
-    if (source == MRAR_SOURCE_INVALID || source > 5)
+    if (source == MRAR_SOURCE_INVALID || source >= MRAR_SOURCE_RESERVED)
         return 0; // invalid or reserved source
 
     if (!wind_valid || !sat_valid)

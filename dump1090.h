@@ -244,7 +244,8 @@ typedef enum {
    MRAR_SOURCE_INS = 1,
    MRAR_SOURCE_GNSS = 2,
    MRAR_SOURCE_DMEDME = 3,
-   MRAR_SOURCE_VORDME = 4
+   MRAR_SOURCE_VORDME = 4,
+   MRAR_SOURCE_RESERVED = 5
 } mrar_source_t;
 
 // BDS4,4 and BDS4,5 hazard reports
