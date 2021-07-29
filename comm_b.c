@@ -87,7 +87,32 @@ void decodeCommB(struct modesMessage *mm)
 
 static int decodeEmptyResponse(struct modesMessage *mm, bool store)
 {
-    for (unsigned i = 0; i < 7; ++i) {
+    // 00000000000000 is a common response. Ignore it.
+    //
+    // Also, it's common to see responses that look like this:
+    //    40000000000000
+    //    50000000000000
+    //    60000000000000
+    // typically in grouped bursts (one of each message) from
+    // the same aircraft.
+    //
+    // I speculate that these are response to interrogations for
+    // BDS 4,0 5,0 and 6,0 respectively where the transponder
+    // doesn't support the register or has no data loaded for it.
+    // Treat them like empty responses.
+
+    switch (mm->MB[0]) {
+    case 0x00:
+    case 0x40:
+    case 0x50:
+    case 0x60:
+        break;
+
+    default:
+        return 0;
+    }
+
+    for (unsigned i = 1; i < 7; ++i) {
         if (mm->MB[i] != 0) {
             return 0;
         }
