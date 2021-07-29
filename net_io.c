@@ -2299,7 +2299,7 @@ __attribute__ ((format (printf,4,5))) static char *appendFATSV(char *p, char *en
 }
 
 #define TSV_MAX_PACKET_SIZE 800
-#define TSV_VERSION "8E"
+#define TSV_VERSION "9E"
 
 static void writeFATSVPositionUpdate(float lat, float lon, float alt)
 {
