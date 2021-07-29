@@ -252,6 +252,7 @@ struct aircraft {
     unsigned char fatsv_emitted_bds_10[7];        //      -"-         BDS 1,0 message
     unsigned char fatsv_emitted_bds_17[7];        //      -"-         BDS 1,7 message
     unsigned char fatsv_emitted_bds_30[7];        //      -"-         BDS 3,0 message
+    unsigned char fatsv_emitted_unknown_commb[7]; //      -"-         unrecognized Comm-B message
     unsigned char fatsv_emitted_es_status[7];     //      -"-         ES operational status message
     unsigned char fatsv_emitted_es_acas_ra[7];    //      -"-         ES ACAS RA report message
     char          fatsv_emitted_callsign[9];      //      -"-         callsign

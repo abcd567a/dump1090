@@ -1126,7 +1126,7 @@ static int handleFaupCommand(struct client *c, char *p) {
 
     // Traverse through message for commands
     while (msg_field != NULL) {
-        if (strcmp(msg_field, "upload_rate_multiplier") == 0) {
+        if (!strcmp(msg_field, "upload_rate_multiplier")) {
             msg_field = strtok (NULL, "\t");
             multiplier = atof(msg_field);
 
@@ -1138,6 +1138,14 @@ static int handleFaupCommand(struct client *c, char *p) {
 
             fprintf(stderr, "handleFaupCommand(): Adjusting message rate to FlightAware by %0.2fx\n", multiplier);
             Modes.faup_rate_multiplier = multiplier;
+            break;
+        }
+
+        if (!strcmp(msg_field, "upload_unknown_commb")) {
+            msg_field = strtok (NULL, "\t");
+            unsigned enable = atoi(msg_field);
+            fprintf(stderr, "handleFaupCommand(): %s upload of unknown Comm-B messages\n", enable ? "Enabling" : "Disabling");
+            Modes.faup_upload_unknown_commb = enable;
             break;
         }
         msg_field = strtok (NULL, "\t");
@@ -2357,6 +2365,15 @@ static void writeFATSVEvent(struct modesMessage *mm, struct aircraft *a)
             if (memcmp(mm->MB, a->fatsv_emitted_bds_17, 7) != 0) {
                 memcpy(a->fatsv_emitted_bds_17, mm->MB, 7);
                 writeFATSVEventMessage(mm, "gicb_caps", mm->MB, 7);
+            }
+            break;
+
+        case COMMB_UNKNOWN:
+            // If enabled, upload raw unrecognized Comm-B messages
+            // for server-side analysis
+            if (Modes.faup_upload_unknown_commb && memcmp(mm->MB, a->fatsv_emitted_unknown_commb, 7) != 0) {
+                memcpy(a->fatsv_emitted_unknown_commb, mm->MB, 7);
+                writeFATSVEventMessage(mm, "unknown_commb", mm->MB, 7);
             }
             break;
 

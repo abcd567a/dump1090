@@ -385,6 +385,7 @@ struct _Modes {                             // Internal state
     uint64_t json_stats_interval;    // Interval between rewriting the json stats file, in milliseconds
     int   json_location_accuracy;    // Accuracy of location metadata: 0=none, 1=approx, 2=exact
     double faup_rate_multiplier;     // Multiplier to adjust rate of faup1090 messages emitted
+    bool faup_upload_unknown_commb;  // faup1090: should we upload Comm-B messages that weren't in a recognized format?
 
     int   json_aircraft_history_next;
     struct {
