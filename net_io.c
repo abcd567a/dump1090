@@ -1612,6 +1612,29 @@ static const char *nav_altitude_source_enum_string(nav_altitude_source_t src)
     }
 }
 
+static const char *mrar_source_enum_string(mrar_source_t src)
+{
+    switch (src) {
+    case MRAR_SOURCE_INVALID:  return "invalid";
+    case MRAR_SOURCE_INS:      return "ins";
+    case MRAR_SOURCE_GNSS:     return "gnss";
+    case MRAR_SOURCE_DMEDME:   return "dmedme";
+    case MRAR_SOURCE_VORDME:   return "vordme";
+    default:                   return "reserved";
+    }
+}
+
+static const char *hazard_enum_string(hazard_t hazard)
+{
+    switch (hazard) {
+    case HAZARD_NIL:       return "nil";
+    case HAZARD_LIGHT:     return "light";
+    case HAZARD_MODERATE:  return "moderate";
+    case HAZARD_SEVERE:    return "severe";
+    default:               return "invalid";
+    }
+}
+
 char *generateAircraftJson(const char *url_path, int *len) {
     uint64_t now = mstime();
     struct aircraft *a;
@@ -1715,11 +1738,22 @@ char *generateAircraftJson(const char *url_path, int *len) {
             p = safe_snprintf(p, end, ",\"gva\":%u", a->gva);
         if (trackDataValid(&a->sda_valid))
             p = safe_snprintf(p, end, ",\"sda\":%u", a->sda);
+        if (trackDataValid(&a->mrar_source_valid))
+            p = safe_snprintf(p, end, ",\"mrar_source\":\"%s\"", mrar_source_enum_string(a->mrar_source));
+        if (trackDataValid(&a->wind_valid))
+            p = safe_snprintf(p, end, ",\"wind_speed\":%.0f,\"wind_dir\":%.1f", a->wind_speed, a->wind_dir);
+        if (trackDataValid(&a->temperature_valid))
+            p = safe_snprintf(p, end, ",\"temperature\":%.2f", a->temperature);
+        if (trackDataValid(&a->pressure_valid))
+            p = safe_snprintf(p, end, ",\"pressure\":%.0f", a->pressure);
+        if (trackDataValid(&a->turbulence_valid))
+            p = safe_snprintf(p, end, ",\"turbulence\":\"%s\"", hazard_enum_string(a->turbulence));
+        if (trackDataValid(&a->humidity_valid))
+            p = safe_snprintf(p, end, ",\"humidity\":%.1f", a->humidity);
         if (a->modeA_hit)
             p = safe_snprintf(p, end, ",\"modea\":true");
         if (a->modeC_hit)
             p = safe_snprintf(p, end, ",\"modec\":true");
-
 
         p = safe_snprintf(p, end, ",\"mlat\":");
         p = append_flags(p, end, a, SOURCE_MLAT);
