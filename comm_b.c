@@ -875,6 +875,7 @@ static int decodeBDS44(struct modesMessage *mm, bool store)
 
     if (store) {
         mm->commb_format = COMMB_MRAR;
+        mm->mrar_source_valid = 1;
         mm->mrar_source = (mrar_source_t) source;
 
         if (wind_valid) {
