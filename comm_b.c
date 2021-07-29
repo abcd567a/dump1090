@@ -47,12 +47,11 @@ static CommBDecoderFn comm_b_decoders[] = {
 
 void decodeCommB(struct modesMessage *mm)
 {
-    mm->commb_format = COMMB_UNKNOWN;
-
     // If DR or UM are set, this message is _probably_ noise
     // as nothing really seems to use the multisite broadcast stuff?
     // Also skip anything that had errors corrected
     if (mm->DR != 0 || mm->UM != 0 || mm->correctedbits > 0) {
+        mm->commb_format = COMMB_NOT_DECODED;
         return;
     }
 
@@ -79,6 +78,8 @@ void decodeCommB(struct modesMessage *mm)
             // decode it
             bestDecoder(mm, true);
         }
+    } else {
+        mm->commb_format = COMMB_UNKNOWN;
     }
 }
 
