@@ -2585,7 +2585,13 @@ static void writeFATSV()
             (airgroundValid && a->airground == AG_AIRBORNE && a->fatsv_emitted_airground == AG_GROUND) ||
             (airgroundValid && a->airground == AG_GROUND && a->fatsv_emitted_airground == AG_AIRBORNE) ||
             (squawkValid && a->squawk != a->fatsv_emitted_squawk) ||
-            (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency);
+            (trackDataValid(&a->emergency_valid) && a->emergency != a->fatsv_emitted_emergency) ||
+            (trackDataValid(&a->mrar_source_valid) && a->mrar_source_valid.updated > a->fatsv_last_emitted) ||
+            (trackDataValid(&a->wind_valid) && a->wind_valid.updated > a->fatsv_last_emitted) ||
+            (trackDataValid(&a->pressure_valid) && a->pressure_valid.updated > a->fatsv_last_emitted) ||
+            (trackDataValid(&a->temperature_valid) && a->temperature_valid.updated > a->fatsv_last_emitted) ||
+            (trackDataValid(&a->turbulence_valid) && a->turbulence_valid.updated > a->fatsv_last_emitted) ||
+            (trackDataValid(&a->humidity_valid) && a->humidity_valid.updated > a->fatsv_last_emitted);
 
         uint64_t minAge;
         double adjustedMinAge;
@@ -2687,10 +2693,17 @@ static void writeFATSV()
         p = appendFATSVMeta(p, end, "nav_alt_mcp", a, &a->nav_altitude_mcp_valid, "%u",   a->nav_altitude_mcp);
         p = appendFATSVMeta(p, end, "nav_alt_fms", a, &a->nav_altitude_fms_valid, "%u",   a->nav_altitude_fms);
         p = appendFATSVMeta(p, end, "nav_alt_src", a, &a->nav_altitude_src_valid, "%s", nav_altitude_source_enum_string(a->nav_altitude_src));
-        p = appendFATSVMeta(p, end, "nav_heading", a, &a->nav_heading_valid,   "%.1f", a->nav_heading);
-        p = appendFATSVMeta(p, end, "nav_modes",   a, &a->nav_modes_valid,     "{%s}", nav_modes_flags_string(a->nav_modes));
-        p = appendFATSVMeta(p, end, "nav_qnh",     a, &a->nav_qnh_valid,       "%.1f", a->nav_qnh);
-        p = appendFATSVMeta(p, end, "emergency",   a, &a->emergency_valid,     "%s",   emergency_enum_string(a->emergency));
+        p = appendFATSVMeta(p, end, "nav_heading", a, &a->nav_heading_valid,    "%.1f", a->nav_heading);
+        p = appendFATSVMeta(p, end, "nav_modes",   a, &a->nav_modes_valid,      "{%s}", nav_modes_flags_string(a->nav_modes));
+        p = appendFATSVMeta(p, end, "nav_qnh",     a, &a->nav_qnh_valid,        "%.1f", a->nav_qnh);
+        p = appendFATSVMeta(p, end, "emergency",   a, &a->emergency_valid,      "%s",   emergency_enum_string(a->emergency));
+        p = appendFATSVMeta(p, end, "mrar_source", a, &a->mrar_source_valid,    "%s",   mrar_source_enum_string(a->mrar_source));
+        p = appendFATSVMeta(p, end, "wind_speed",  a, &a->wind_valid,           "%.0f", a->wind_speed);
+        p = appendFATSVMeta(p, end, "wind_dir",    a, &a->wind_valid,           "%.1f", a->wind_dir);
+        p = appendFATSVMeta(p, end, "temperature", a, &a->temperature_valid,    "%.2f", a->temperature);
+        p = appendFATSVMeta(p, end, "pressure",    a, &a->pressure_valid,       "%.0f", a->pressure);
+        p = appendFATSVMeta(p, end, "turbulence",  a, &a->turbulence_valid,     "%s",   hazard_enum_string(a->turbulence));
+        p = appendFATSVMeta(p, end, "humidity",    a, &a->humidity_valid,       "%.0f", a->humidity);
 
         // if we didn't get anything interesting, bail out.
         // We don't need to do anything special to unwind prepareWrite().
