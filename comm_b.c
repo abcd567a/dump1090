@@ -32,6 +32,7 @@ static int decodeBDS40(struct modesMessage *mm, bool store);
 static int decodeBDS44(struct modesMessage *mm, bool store);
 static int decodeBDS50(struct modesMessage *mm, bool store);
 static int decodeBDS60(struct modesMessage *mm, bool store);
+static int decodeBDS05(struct modesMessage *mm, bool store);
 
 static CommBDecoderFn comm_b_decoders[] = {
     &decodeEmptyResponse,
@@ -42,7 +43,8 @@ static CommBDecoderFn comm_b_decoders[] = {
     &decodeBDS40,
     &decodeBDS50,
     &decodeBDS60,
-    &decodeBDS44
+    &decodeBDS44,
+    &decodeBDS05
 };
 
 void decodeCommB(struct modesMessage *mm)
@@ -907,4 +909,52 @@ static int decodeBDS44(struct modesMessage *mm, bool store)
     }
 
     return score;
+}
+
+// BDS0,5 extended squitter airborne position
+// (apparently this gets queried via comm-b sometimes??)
+// We don't try to _use_ this as a position, but we can
+// at least try to recognize it, to exclude other
+// comm-b types (in particular they can be mistaken for MRAR)
+static int decodeBDS05(struct modesMessage *mm, bool store)
+{
+    // We recognize these by matching the position altitude against
+    // the altitude in the surrounding message, so we need a
+    // DF20 not a DF21
+    if (mm->msgtype != 20)
+        return 0;
+
+    unsigned char *msg = mm->MB;
+
+    unsigned typecode = getbits(msg, 1, 5);
+    if (typecode < 9 || typecode > 18)
+        return 0; // only consider typecodes that could be an airborne position with baro altitude
+
+    unsigned t_bit = getbit(msg, 21);
+    if (t_bit)  // unlikely
+        return 0;
+
+    unsigned ac12 = getbits(msg, 9, 20);
+    if (!ac12)
+        return 0;
+
+    // Insert M=0 to make an AC13 value, match against the
+    // AC13 value in the surrounding message
+    unsigned ac13 = ((ac12 & 0x0FC0) << 1) | (ac12 & 0x003F);
+    if (mm->AC != ac13)
+        return 0; // no altitude match
+
+    unsigned lat = getbits(msg, 23, 39);
+    unsigned lon = getbits(msg, 40, 56);
+    if (lat == 0 || lon == 0) // unlikely position
+        return 0;
+
+    if (store) {
+        mm->commb_format = COMMB_AIRBORNE_POSITION;
+        // No further decoding done, we don't really trust this
+        // enough to use as real input to CPR
+    }
+
+    // Score this high enough to override everything else
+    return 100;
 }

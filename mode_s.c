@@ -1699,6 +1699,8 @@ static const char *commb_format_to_string(commb_format_t format) {
         return "BDS6,0 Heading and speed report";
     case COMMB_MRAR:
         return "BDS4,4 Meterological routine air report";
+    case COMMB_AIRBORNE_POSITION:
+        return "BDS0,5 Extended squitter airborne position";
     default:
         return "unknown format";
     }

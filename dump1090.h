@@ -211,7 +211,8 @@ typedef enum {
     COMMB_VERTICAL_INTENT,
     COMMB_TRACK_TURN,
     COMMB_HEADING_SPEED,
-    COMMB_MRAR
+    COMMB_MRAR,
+    COMMB_AIRBORNE_POSITION
 } commb_format_t;
 
 typedef enum {
