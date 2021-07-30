@@ -358,7 +358,7 @@ static void showHelp(void)
 "      Adaptive gain\n"
 "\n"
 "--adaptive-burst                     Adjust gain for too-loud message bursts\n"
-"--adaptive-range-change-delay <s>     Set delay after changing gain before\n"
+"--adaptive-burst-change-delay <s>     Set delay after changing gain before\n"
 "                                       resuming burst control (seconds)\n"
 "--adaptive-burst-alpha <a>            Set burst rate smoothing factor\n"
 "                                       (0..1, smaller=more smoothing)\n"
