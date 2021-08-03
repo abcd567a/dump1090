@@ -839,12 +839,14 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
             "\"TypeCode\":%d,"
             "\"SubtypeCode\":%d,"
             "\"SignalLevel\":%f,"
+            "\"Gain\":%f,"
             "\"IsMlat\":%s,",
             mm->addr,
             mm->msgtype, cacf,
             mm->metype,
             mm->mesub,
             mm->signalLevel, // what precision and range is needed for RSSI?
+            sdrGetGainDb(sdrGetGain()),
             is_mlat_str);
 
     //// callsign
