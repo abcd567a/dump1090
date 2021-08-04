@@ -2037,6 +2037,30 @@ char *generateHistoryJson(const char *url_path, int *len)
     return strdup(Modes.json_aircraft_history[history_index].content);
 }
 
+static void ratelimitWriteError(const char *format, ...)
+{
+    static uint64_t lastError = 0;
+    static unsigned suppressed = 0;
+
+    uint64_t now = mstime();
+    if (now - lastError < 60000) {
+        ++suppressed;
+        return;
+    }
+
+    lastError = now;
+
+    va_list ap;
+    va_start(ap, format);
+    vfprintf(stderr, format, ap);
+    if (suppressed) {
+        fprintf(stderr, " (%u more error messages suppressed)", suppressed);
+        suppressed = 0;
+    }
+    fprintf(stderr, "\n");
+    va_end(ap);
+}
+
 // Write JSON to file
 void writeJsonToFile(const char *file, char * (*generator) (const char *,int*))
 {
@@ -2054,8 +2078,10 @@ void writeJsonToFile(const char *file, char * (*generator) (const char *,int*))
     snprintf(tmppath, PATH_MAX, "%s/%s.XXXXXX", Modes.json_dir, file);
     tmppath[PATH_MAX-1] = 0;
     fd = mkstemp(tmppath);
-    if (fd < 0)
+    if (fd < 0) {
+        ratelimitWriteError("failed to create %s (while updating %s/%s): %s", tmppath, Modes.json_dir, file, strerror(errno));
         return;
+    }
 
     mask = umask(0);
     umask(mask);
@@ -2065,15 +2091,23 @@ void writeJsonToFile(const char *file, char * (*generator) (const char *,int*))
     pathbuf[PATH_MAX-1] = 0;
     content = generator(pathbuf, &len);
 
-    if (write(fd, content, len) != len)
+    if (write(fd, content, len) != len) {
+        ratelimitWriteError("failed to write to %s (while updating %s/%s): %s", tmppath, Modes.json_dir, file, strerror(errno));
         goto error_1;
+    }
 
-    if (close(fd) < 0)
+    if (close(fd) < 0) {
+        ratelimitWriteError("failed to write to %s (while updating %s/%s): %s", tmppath, Modes.json_dir, file, strerror(errno));
         goto error_2;
+    }
 
     snprintf(pathbuf, PATH_MAX, "%s/%s", Modes.json_dir, file);
     pathbuf[PATH_MAX-1] = 0;
-    rename(tmppath, pathbuf);
+    if (rename(tmppath, pathbuf) < 0) {
+        ratelimitWriteError("failed to rename %s to %s: %s", tmppath, pathbuf, strerror(errno));
+        goto error_2;
+    }
+
     free(content);
     return;
 
