@@ -110,11 +110,10 @@ static void modesInitConfig(void) {
     memset(&Modes, 0, sizeof(Modes));
 
     // Now initialise things that should not be 0/NULL to their defaults
-    Modes.gain                    = MODES_MAX_GAIN;
+    Modes.gain                    = MODES_DEFAULT_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
     Modes.check_crc               = 1;
     Modes.fix_df                  = 1;
-    Modes.net_heartbeat_interval  = MODES_NET_HEARTBEAT_INTERVAL;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
     Modes.json_stats_interval     = 60000;
@@ -122,9 +121,15 @@ static void modesInitConfig(void) {
     Modes.maxRange                = 1852 * 300; // 300NM default max range
     Modes.mode_ac_auto            = 1;
 
+    Modes.net_heartbeat_interval = MODES_NET_HEARTBEAT_INTERVAL;
+    Modes.net_output_flush_size = 1300;
+    Modes.net_output_flush_interval = 500;
+
     // adaptive
     Modes.adaptive_min_gain_db = 0;
     Modes.adaptive_max_gain_db = 99999;
+
+    Modes.adaptive_duty_cycle = 0.5;
 
     Modes.adaptive_burst_control = false;
     Modes.adaptive_burst_alpha = 2.0 / (5 + 1);
@@ -138,7 +143,7 @@ static void modesInitConfig(void) {
     Modes.adaptive_range_alpha = 2.0 / (5 + 1);
     Modes.adaptive_range_percentile = 40;
     Modes.adaptive_range_change_delay = 10;
-    Modes.adaptive_range_rescan_delay = 900;
+    Modes.adaptive_range_rescan_delay = 3600;
 
     sdrInitConfig();
 }
@@ -335,7 +340,7 @@ static void showHelp(void)
 "      Decoder settings\n"
 "\n"
 // ------ 80 char limit ----------------------------------------------------------|
-"--gain <db>              Set gain (default: max gain. Use -10 for auto-gain)\n"
+"--gain <db>              Set gain in dB (default: varies by SDR type)\n"
 "--freq <hz>              Set frequency (default: 1090 Mhz)\n"
 "--fix                    Enable single-bit error correction using CRC\n"
 "--fix-2bit               Enable two-bit error correction using CRC\n"
@@ -353,7 +358,7 @@ static void showHelp(void)
 "      Adaptive gain\n"
 "\n"
 "--adaptive-burst                     Adjust gain for too-loud message bursts\n"
-"--adaptive-range-change-delay <s>     Set delay after changing gain before\n"
+"--adaptive-burst-change-delay <s>     Set delay after changing gain before\n"
 "                                       resuming burst control (seconds)\n"
 "--adaptive-burst-alpha <a>            Set burst rate smoothing factor\n"
 "                                       (0..1, smaller=more smoothing)\n"
@@ -372,6 +377,7 @@ static void showHelp(void)
 "                                       gain scanning (seconds)\n"
 "--adaptive-min-gain <g>              Set gain adjustment range lower limit (dB)\n"
 "--adaptive-max-gain <g>              Set gain adjustment range upper limit (dB)\n"
+"--adaptive-duty-cycle <p>            Set adaptive gain duty cycle %% (1..100)\n"
 "\n"
 // ------ 80 char limit ----------------------------------------------------------|
 "      Network connections\n"
@@ -764,6 +770,8 @@ int main(int argc, char **argv) {
             Modes.adaptive_min_gain_db = atof(argv[++j]);
         } else if (!strcmp(argv[j], "--adaptive-max-gain") && more) {
             Modes.adaptive_max_gain_db = atof(argv[++j]);
+        } else if (!strcmp(argv[j], "--adaptive-duty-cycle") && more) {
+            Modes.adaptive_duty_cycle = atof(argv[++j]) / 100.0;
         } else if (!strcmp(argv[j], "--adaptive-burst")) {
             Modes.adaptive_burst_control = true;
         } else if (!strcmp(argv[j], "--adaptive-burst-alpha") && more) {

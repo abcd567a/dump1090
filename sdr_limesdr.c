@@ -279,7 +279,7 @@ bool limesdrOpen(void)
             goto error;
         }
     } else {
-        if (Modes.gain == MODES_MAX_GAIN) {
+        if (Modes.gain == MODES_DEFAULT_GAIN) {
             if (LMS_SetNormalizedGain(LimeSDR.dev, LMS_CH_RX, LimeSDR.stream.channel, 1.0)) {
                 limesdrLogHandler(LMS_LOG_ERROR, "unable to set gain");
                 goto error;

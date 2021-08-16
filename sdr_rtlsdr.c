@@ -53,7 +53,7 @@
 
 #include <rtl-sdr.h>
 
-#ifdef __arm__
+#if defined(__arm__) || defined(__aarch64__)
 // Assume we need to use a bounce buffer to avoid performance problems on Pis running kernel 5.x and using zerocopy
 #  define USE_BOUNCE_BUFFER
 #endif
@@ -255,17 +255,17 @@ bool rtlsdrOpen(void)
         RTLSDR.gains = gains;
 
         int selected = -1;
-        if (Modes.gain == MODES_AUTO_GAIN) {
+        if (Modes.gain == MODES_LEGACY_AUTO_GAIN) {
             selected = numgains;
-        } else if (Modes.gain == MODES_MAX_GAIN) {
+        } else if (Modes.gain == MODES_DEFAULT_GAIN) {
             selected = numgains - 1;
         } else {
-            for (int i = 0; i < numgains; ++i) {
+            for (int i = 0; i <= numgains; ++i) {
                 if (selected == -1 || fabs(gains[i]/10.0 - Modes.gain) < fabs(gains[selected]/10.0 - Modes.gain))
                     selected = i;
             }
         }
-        
+
         rtlsdrSetGain(selected);
     }
 

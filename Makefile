@@ -107,8 +107,11 @@ ifeq ($(RTLSDR), yes)
     # some packaged .pc files are massively broken, try to handle it
 
     # FreeBSD's librtlsdr.pc includes -std=gnu89 in cflags
+    # some linux librtlsdr packages return a bare -I/ with no path in --cflags
     RTLSDR_CFLAGS := $(shell pkg-config --cflags librtlsdr)
-    CFLAGS += $(filter-out -std=%,$(RTLSDR_CFLAGS))
+    RTLSDR_CFLAGS := $(filter-out -std=%,$(RTLSDR_CFLAGS))
+    RTLSDR_CFLAGS := $(filter-out -I/,$(RTLSDR_CFLAGS))
+    CFLAGS += $(RTLSDR_CFLAGS)
 
     # some linux librtlsdr packages return a bare -L with no path in --libs
     # which horribly confuses things because it eats the next option on the command line
