@@ -1,8 +1,8 @@
-dump1090-fa (6.0~dev) UNRELEASED; urgency=medium
+dump1090-fa (6.0) UNRELEASED; urgency=medium
 
   * in development
 
- -- Oliver Jowett <oliver.jowett@flightaware.com>  Sat, 13 Mar 2021 12:41:06 +0800
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Tues, 17 Aug 2021 12:41:06 +0800
 
 dump1090-fa (5.0) stable; urgency=medium
 
