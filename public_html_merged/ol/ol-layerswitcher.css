@@ -18,11 +18,11 @@
 }
 
 .layer-switcher .panel {
-    padding: 1em;
+    padding: 0 1em 0 0;
     margin: 0;
-    border: 4px solid var(--modal-bgcolor);
+    border: 4px solid #eee;
     border-radius: 4px;
-    background-color: var(--body-bgcolor);
+    background-color: white;
     display: none;
     max-height: 100%;
     overflow-y: auto;
@@ -60,14 +60,10 @@
 }
 
 .layer-switcher ul {
-    padding: 0;
-    margin:0;
+    padding-left: 2em;
     list-style: none;
 }
 
-.layer-switcher li.group label {
-    color: var(--body-text);
-}
 .layer-switcher li.group > label {
     font-weight: bold;
 }
