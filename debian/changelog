@@ -1,3 +1,9 @@
+dump1090-fa (7.0~dev) UNRELEASED; urgency=medium
+
+  * in development
+
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Thu, 23 Sep 2021 13:13:45 +0800
+
 dump1090-fa (6.1) stable; urgency=medium
 
   * No-change 6.1 release for PiAware 6.1
