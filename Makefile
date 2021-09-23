@@ -39,7 +39,11 @@ else
   LIMESDR ?= no
 endif
 
-UNAME := $(shell uname)
+HOST_UNAME := $(shell uname)
+HOST_ARCH := $(shell uname -m)
+
+UNAME ?= $(HOST_UNAME)
+ARCH ?= $(HOST_ARCH)
 
 ifeq ($(UNAME), Linux)
   CPPFLAGS += -D_DEFAULT_SOURCE
@@ -150,7 +154,6 @@ endif
 ## starch (runtime DSP code selection) mix, architecture-specific
 ##
 
-ARCH ?= $(shell uname -m)
 ifneq ($(CPUFEATURES),yes)
   # need to be able to detect CPU features at runtime to enable any non-standard compiler flags
   STARCH_MIX := generic
@@ -180,6 +183,7 @@ include dsp/generated/makefile.$(STARCH_MIX)
 showconfig:
 	@echo "Building with:" >&2
 	@echo "  Version string:  $(DUMP1090_VERSION)" >&2
+	@echo "  Architecture:    $(ARCH)" >&2
 	@echo "  DSP mix:         $(STARCH_MIX)" >&2
 	@echo "  RTLSDR support:  $(RTLSDR)" >&2
 	@echo "  BladeRF support: $(BLADERF)" >&2
