@@ -163,13 +163,17 @@ else
     # AVX, AVX2
     STARCH_MIX := x86
     CPPFLAGS += -DSTARCH_MIX_X86
+  else ifeq ($(findstring aarch,$(ARCH)),aarch)
+    STARCH_MIX := aarch64
+    CPPFLAGS += -DSTARCH_MIX_AARCH64
+  else ifeq ($(findstring arm64,$(ARCH)),arm64)
+    # Apple calls this arm64, not aarch64
+    STARCH_MIX := aarch64
+    CPPFLAGS += -DSTARCH_MIX_AARCH64
   else ifeq ($(findstring arm,$(ARCH)),arm)
     # ARMv7 NEON
     STARCH_MIX := arm
     CPPFLAGS += -DSTARCH_MIX_ARM
-  else ifeq ($(findstring aarch,$(ARCH)),aarch)
-    STARCH_MIX := aarch64
-    CPPFLAGS += -DSTARCH_MIX_AARCH64
   else
     STARCH_MIX := generic
     CPPFLAGS += -DSTARCH_MIX_GENERIC
