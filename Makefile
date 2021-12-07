@@ -62,7 +62,10 @@ ifeq ($(UNAME), Darwin)
   COMPAT += compat/clock_nanosleep/clock_nanosleep.o
   LIBS_USB += -lusb-1.0
   LIBS_CURSES := -lncurses
-  CPUFEATURES ?= yes
+  # cpufeatures reportedly does not work (yet) on darwin arm64
+  ifneq $($(ARCH),arm64)
+    CPUFEATURES ?= yes
+  endif
 endif
 
 ifeq ($(UNAME), OpenBSD)
