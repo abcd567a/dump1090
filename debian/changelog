@@ -1,4 +1,4 @@
-dump1090-fa (7.0) UNRELEASED; urgency=medium
+dump1090-fa (7.0) stable; urgency=medium
 
   * dump1090: Allow env vars (not only command line overrdies) to set CPU_FEATURES_{ARCH,UNAME}
   * dump1090: Treat ARCH=arm64 like ARCH=aarch64
