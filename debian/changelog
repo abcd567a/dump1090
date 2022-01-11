@@ -1,3 +1,9 @@
+dump1090-fa (7.1~dev) UNRELEASED; urgency=medium
+
+  * No change release for 7.1
+
+ -- Eric Tran <eric.tran@flightaware.com>  Tue, 11 Jan 2022 07:37:20 -0600
+
 dump1090-fa (7.0) stable; urgency=medium
 
   * dump1090: Allow env vars (not only command line overrdies) to set CPU_FEATURES_{ARCH,UNAME}
