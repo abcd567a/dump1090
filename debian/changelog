@@ -1,8 +1,8 @@
 dump1090-fa (7.1) stable; urgency=medium
 
-  * No change release for 7.1
+  * Preserve start/upgrade postinst logic for pre 7.1 updates until we support compat 10 behavior
 
- -- Eric Tran <eric.tran@flightaware.com>  Tue, 11 Jan 2022 07:37:20 -0600
+ -- Eric Tran <eric.tran@flightaware.com>  Wed, 12 Jan 2022 11:37:20 -0600
 
 dump1090-fa (7.0) stable; urgency=medium
 
