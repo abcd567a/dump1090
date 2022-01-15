@@ -63,7 +63,7 @@ ifeq ($(UNAME), Darwin)
   LIBS_USB += -lusb-1.0
   LIBS_CURSES := -lncurses
   # cpufeatures reportedly does not work (yet) on darwin arm64
-  ifneq $($(ARCH),arm64)
+  ifneq ($(ARCH),arm64)
     CPUFEATURES ?= yes
   endif
 endif
