@@ -2,17 +2,17 @@
 
 ## Customize display via URL query strings
 
-Syntax: <ip_address>/dump1090-fa/?parameter=value
+Syntax: <ip_address>/skyaware/?parameter=value
 
 Examples:
 
-    http://<ip_address>/dump1090-fa/?sidebar=hide
+    http://<ip_address>/skyaware/?sidebar=hide
 
-    http://<ip_address>/dump1090-fa/?altitudeChart=hide
+    http://<ip_address>/skyaware/?altitudeChart=hide
 
-    http://<ip_address>/dump1090-fa/?rangeRings=hide
+    http://<ip_address>/skyaware/?rangeRings=hide
 
-    http://<ip_address>/dump1090-fa/?ringCount=3&ringBaseDistance=100&ringInterval=50
+    http://<ip_address>/skyaware/?ringCount=3&ringBaseDistance=100&ringInterval=50
 
 | Parameter | Possible Values |
 | :---------: | :---------: |
