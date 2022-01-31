@@ -1,4 +1,4 @@
-# SkyAware 4.0 Features
+# SkyAware Features
 
 ## Customize display via URL query strings
 
