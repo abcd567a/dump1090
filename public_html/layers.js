@@ -48,16 +48,6 @@ function createBaseLayers() {
         }));
 
         world.push(new ol.layer.Tile({
-                source: new ol.source.XYZ({
-			"url" : "http://tiles.wmflabs.org/bw-mapnik/{z}/{x}/{y}.png",
-			"attributions" : "© <a href=\"https://www.openstreetmap.org/copyright\" target=\"_blank\">OpenStreetMap</a>  contributors."
-                }),
-                name: 'osm_blackwhite',
-                title: 'OSM Black and White',
-                type: 'base',
-        }));
-
-        world.push(new ol.layer.Tile({
                 source: new ol.source.OSM({
                         "url" : "https://{a-z}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
                         "attributions" : 'Courtesy of <a href="https://carto.com">CARTO.com</a>'
