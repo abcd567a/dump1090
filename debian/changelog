@@ -1,3 +1,9 @@
+dump1090-fa (8.0~dev) UNRELEASED; urgency=medium
+
+  * in development
+
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Thu, 09 Jun 2022 17:05:29 +0800
+
 dump1090-fa (7.2) stable; urgency=medium
 
   * dump1090: Fix Makefile syntax error for Darwin OS build (courtesy @CodyCodeman, PR #170)
