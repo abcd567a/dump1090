@@ -1083,7 +1083,11 @@ void sendBeastSettings(struct client *c, const char *settings)
     char *buf, *p;
 
     len = strlen(settings) * 3;
-    buf = p = alloca(len);
+    buf = p = malloc(len);
+    if (!buf) {
+        fprintf(stderr, "Out of memory sending beast settings string\n");
+        exit(1);
+    }
 
     while (*settings) {
         *p++ = 0x1a;
@@ -1092,6 +1096,7 @@ void sendBeastSettings(struct client *c, const char *settings)
     }
 
     anetWrite(c->fd, buf, len);
+    free(buf);
 }
 
 // Move a network client to a new service
