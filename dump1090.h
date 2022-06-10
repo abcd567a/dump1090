@@ -79,6 +79,7 @@
 #include <sys/ioctl.h>
 #include <time.h>
 #include <limits.h>
+#include <strings.h>
 
 #include "compat/compat.h"
 #include "dsp/generated/starch.h"
