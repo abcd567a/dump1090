@@ -413,7 +413,7 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+        $.ajax({ url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
                 timeout: 5000,
                 cache: false,
                 data: window.location.search.substring(1),
