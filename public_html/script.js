@@ -413,10 +413,11 @@ function initialize() {
 
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
-        $.ajax({ url: 'data/receiver.json',
+	// TODO: Change url to prod before merging
+        $.ajax({ type: 'GET',
+		url: 'https://pkuruvila.flightaware.com/ajax/skyaware/receiver_info.rvt',
                 timeout: 5000,
                 cache: false,
-                data: window.location.search.substring(1),
                 dataType: 'json' })
 
                  .done(function(data) {
