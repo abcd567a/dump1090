@@ -259,3 +259,7 @@ function createBaseLayers() {
 
         return layers;
 }
+
+module.exports = {
+        createBaseLayers: createBaseLayers
+}

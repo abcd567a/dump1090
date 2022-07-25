@@ -305,3 +305,7 @@ function format_nac_v (value) {
 			return "n/a";
 	}
 }
+
+module.exports = {
+	get_unit_label: get_unit_label
+}

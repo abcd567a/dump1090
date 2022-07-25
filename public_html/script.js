@@ -414,7 +414,7 @@ function initialize() {
         // Get receiver metadata, reconfigure using it, then continue
         // with initialization
         $.ajax({ type: 'GET',
-		url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
+		url: 'https://pkuruvila.flightaware.com/ajax/skyaware/receiver_info.rvt',
                 timeout: 5000,
                 cache: false,
                 dataType: 'json' })
@@ -677,7 +677,7 @@ function end_load_history() {
 }
 
 function start_data_fetching() {
-	var dataFetcher = new SkyAwareDataFetcher({
+	var dataFetcher = new EntryPoint.SkyAwareDataFetcher({
 		onNewData: onNewData,
 		onDataError: onDataError,
 		refreshInterval: RefreshInterval
@@ -848,7 +848,7 @@ function initialize_map() {
 
 	// Initialize OL3
 
-	layers = createBaseLayers();
+	layers = EntryPoint.createBaseLayers();
 
 	var iconsLayer = new ol.layer.Vector({
 		name: 'ac_positions',
@@ -1555,10 +1555,10 @@ function refreshTableInfo() {
     TrackedAircraftPositions = 0
     TrackedHistorySize = 0
 
-    $(".altitudeUnit").text(get_unit_label("altitude", DisplayUnits));
-    $(".speedUnit").text(get_unit_label("speed", DisplayUnits));
-    $(".distanceUnit").text(get_unit_label("distance", DisplayUnits));
-    $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
+    $(".altitudeUnit").text(EntryPoint.get_unit_label("altitude", DisplayUnits));
+    $(".speedUnit").text(EntryPoint.get_unit_label("speed", DisplayUnits));
+    $(".distanceUnit").text(EntryPoint.get_unit_label("distance", DisplayUnits));
+    $(".verticalRateUnit").text(EntryPoint.get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
         var tableplane = PlanesOrdered[i];
@@ -2716,4 +2716,8 @@ function toggleTISBAircraft(switchFilter) {
 		$('#tisb_datasource_checkbox').addClass('sourceCheckboxChecked');
 	}
 	localStorage.setItem('sourceTISBFilter', sourceTISBFilter);
+}
+
+module.exports = {
+	initialize: initialize,
 }

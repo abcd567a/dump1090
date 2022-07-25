@@ -357,3 +357,7 @@ SkyAwareDataFetcher.prototype._dataMap = {
 		cast: 'number'
 	}
 };
+
+module.exports = {
+	SkyAwareDataFetcher: SkyAwareDataFetcher
+}
