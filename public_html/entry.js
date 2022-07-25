@@ -14,7 +14,8 @@ import './jquery/plugins/jquery.validate.min.js';
 import './ol/v6.3.1/ol.js';
 import './ol/ol-layerswitcher.js';
 import './noUiSlider/distribute/nouislider.min.js';
-// default imports
+
+// JavaScript assets
 import './config.js?v=7.2';
 import './markers.js?v=7.2';
 import './dbloader.js?v=7.2';
