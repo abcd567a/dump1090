@@ -1,0 +1,52 @@
+name: Build and Deploy SkyAware
+
+on:
+  push:
+    branches: [ actions_demo ]
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
+  AWS_DEFAULT_OUTPUT: json
+
+jobs:
+  build-and-deploy:
+    runs-on: [ self-hosted ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: 12
+    - name: Get yarn cache path
+      run: echo "dir=$(yarn cache dir)" >> $GITHUB_ENV
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    - name: Install dependencies
+      run: |
+        cd public_html
+        yarn --prefer-offline
+        yarn install webpack webpack-cli --save-dev
+        # yarn install --save deploy-aws-s3-cloudfront
+    - name: Build
+      run: |
+        cd public_html
+        # yarn run build
+        cp ol/v6.3.1/ol.js.map dist
+        cp status.json dist
+    - name: Deploy to S3
+      run: |
+        cd public_html
+        # deletes existing bucket content
+        aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive
+        # copies website content to S3 bucket
+        aws s3 cp ./ s3://${{ secrets.S3_BUCKET }} --cache-control 'public, max-age=31536000' --recursive
+        # invalidate CloudFront cache
+        aws configure set preview.cloudfront true
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*"
