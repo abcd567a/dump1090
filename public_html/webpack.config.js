@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlMinimizerPlugin = require("html-minimizer-webpack-plugin");
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
   resolve: {
@@ -16,6 +18,7 @@ module.exports = {
     }
   },
   mode: 'development',
+  devtool: 'source-map',
 	//TODO: add jquery/ol libraries to bundle
   entry: {
     bundle: [
@@ -47,12 +50,16 @@ module.exports = {
     ]
   },
   optimization: {
-    minimize: false
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({ parallel: true }),
+      new HtmlMinimizerPlugin()
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './template.html',
-      filename: 'bundle.html',
+      filename: 'index.html',
       inject: 'head',
       scriptLoading: 'blocking'
     })
