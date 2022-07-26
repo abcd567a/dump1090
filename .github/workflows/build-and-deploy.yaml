@@ -32,8 +32,8 @@ jobs:
       run: |
         cd public_html
         yarn --prefer-offline
-        yarn install webpack webpack-cli --save-dev
-        # yarn install --save deploy-aws-s3-cloudfront
+        yarn add webpack webpack-cli --save-dev
+        # yarn add --save deploy-aws-s3-cloudfront
     - name: Build
       run: |
         cd public_html
