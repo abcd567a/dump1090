@@ -37,12 +37,12 @@ jobs:
     - name: Build
       run: |
         cd public_html
-        # yarn run build
+        yarn run build
         cp ol/v6.3.1/ol.js.map dist
         cp status.json dist
     - name: Deploy to S3
       run: |
-        cd public_html
+        cd public_html/dist
         # deletes existing bucket content
         aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive
         # copies website content to S3 bucket
