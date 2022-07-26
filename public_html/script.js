@@ -2434,7 +2434,7 @@ function toggleLayer(element, layer) {
 function uiTypeCheck() {
     $.ajax('/status.json', {
 		success: function(data) {
-			var type = data.type || 'piaware';
+			var type = data.type || 'anywhere';
 
 			switch (type) {
 				case 'piaware':
