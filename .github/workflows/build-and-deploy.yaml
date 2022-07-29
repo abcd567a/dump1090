@@ -9,8 +9,6 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
   AWS_DEFAULT_REGION: us-east-1
   AWS_DEFAULT_OUTPUT: json
-  S3_BUCKET: ${{ secrets.S3_BUCKET }}
-  CLOUDFRONT_ID: ${{ secrets.CLOUDFRONT_ID }}
 
 
 jobs:
