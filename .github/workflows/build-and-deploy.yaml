@@ -38,15 +38,16 @@ jobs:
       run: |
         cd public_html
         yarn run build
-        cp ol/v6.3.1/ol.js.map dist
-        cp status.json dist
+        # build runs the following:
+        # webpack (bundle/minify assets)
+        # cp ol/v6.3.1/ol.js.map dist (copy ol.js.map to bundled directory for source maps)
+        # cp status.json dist (copy status.json to bundled directory for SkyAware Anywhere Logo)
     - name: Deploy to S3
       run: |
         cd public_html/dist
-        # deletes existing bucket content
-        aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive
-        # copies website content to S3 bucket
-        aws s3 cp ./ s3://${{ secrets.S3_BUCKET }} --cache-control 'public, max-age=31536000' --recursive
-        # invalidate CloudFront cache
-        aws configure set preview.cloudfront true
-        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*"
+        yarn run deploy
+        # deploy runs the following:
+        # aws s3 rm s3://${{ secrets.S3_BUCKET }} --recursive (deletes existing bucket content)
+        # aws s3 cp ./ s3://${{ secrets.S3_BUCKET }} --cache-control 'public, max-age=31536000' --recursive (copies website content to S3 bucket)
+        # aws configure set preview.cloudfront true (enable CloudFront preview service)
+        # aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths "/*" (invalidate CloudFront cache)
