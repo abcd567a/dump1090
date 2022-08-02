@@ -1083,55 +1083,6 @@ function initialize_map() {
                     setRangeRingVisibility('hide');
                 }
 	}
-
-        // Add terrain-limit rings. To enable this:
-        //
-        //  create a panorama for your receiver location on heywhatsthat.com
-        //
-        //  note the "view" value from the URL at the top of the panorama
-        //    i.e. the XXXX in http://www.heywhatsthat.com/?view=XXXX
-        //
-        // fetch a json file from the API for the altitudes you want to see:
-        //
-        //  wget -O /usr/share/dump1090-mutability/html/upintheair.json \
-        //    'http://www.heywhatsthat.com/api/upintheair.json?id=XXXX&refraction=0.25&alts=3048,9144'
-        //
-        // NB: altitudes are in _meters_, you can specify a list of altitudes
-
-        // kick off an ajax request that will add the rings when it's done
-        var request = $.ajax({ url: 'upintheair.json',
-                               timeout: 5000,
-                               cache: true,
-                               dataType: 'json' });
-        request.done(function(data) {
-                var ringStyle = new ol.style.Style({
-                        fill: null,
-                        stroke: new ol.style.Stroke({
-                                color: '#000000',
-                                width: 1
-                        })
-                });
-
-                for (var i = 0; i < data.rings.length; ++i) {
-                        var geom = new ol.geom.LineString([]);
-                        var points = data.rings[i].points;
-                        if (points.length > 0) {
-                                for (var j = 0; j < points.length; ++j) {
-                                        geom.appendCoordinate([ points[j][1], points[j][0] ]);
-                                }
-                                geom.appendCoordinate([ points[0][1], points[0][0] ]);
-                                geom.transform('EPSG:4326', 'EPSG:3857');
-
-                                var feature = new ol.Feature(geom);
-                                feature.setStyle(ringStyle);
-                                StaticFeatures.push(feature);
-                        }
-                }
-        });
-
-        request.fail(function(jqxhr, status, error) {
-                // no rings available, do nothing
-        });
 }
 
 function createSiteCircleFeatures() {
