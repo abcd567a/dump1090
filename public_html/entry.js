@@ -16,16 +16,16 @@ import './ol/ol-layerswitcher.js';
 import './noUiSlider/distribute/nouislider.min.js';
 
 // JavaScript assets
-import './config.js?v=7.2';
-import './markers.js?v=7.2';
-import './dbloader.js?v=7.2';
-import './registrations.js?v=7.2';
-import './planeObject.js?v=7.2';
-import './formatter.js?v=7.2';
-import './flags.js?v=7.2';
-import './layers.js?v=7.2';
-import './data.js?v=7.2';
-import './script.js?v=7.2';
+import './config.js';
+import './markers.js';
+import './dbloader.js';
+import './registrations.js';
+import './planeObject.js';
+import './formatter.js';
+import './flags.js';
+import './layers.js';
+import './data.js';
+import './script.js';
 
 // support legacy code
 import $ from 'jquery';
