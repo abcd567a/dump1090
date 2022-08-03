@@ -415,12 +415,12 @@ function initialize() {
         // with initialization
         $.ajax({ type: 'GET',
 		url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
-                xhrFields: {
+		xhrFields: {
 		   withCredentials: true
-                },
-                timeout: 5000,
-                cache: false,
-                dataType: 'json' })
+		},
+		timeout: 5000,
+		cache: false,
+		dataType: 'json' })
 
                  .done(function(data) {
                     // Stash a copy for possible socket usage
