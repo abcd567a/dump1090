@@ -1106,7 +1106,7 @@ function createSiteCircleFeatures() {
 	    	font: '10px Helvetica Neue, sans-serif',
 	    	fill: new ol.style.Fill({ color: '#000' }),
 				offsetY: -8,
-				text: format_distance_long(distance, DisplayUnits, 0)
+				text: EntryPoint.format_distance_long(distance, DisplayUnits, 0)
 
 			})
 		});
@@ -1311,7 +1311,7 @@ function refreshSelected() {
         }
 
         $('#selected_category').text(selected.category ? selected.category : "n/a");
-        $('#selected_sitedist').text(format_distance_long(selected.sitedist, DisplayUnits));
+        $('#selected_sitedist').text(EntryPoint.format_distance_long(selected.sitedist, DisplayUnits));
         $('#selected_message_count').text(selected.messages);
         $('#selected_photo_link').html(getFlightAwarePhotoLink(selected.registration));
         $('#selected_altitude_geom').text(format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
