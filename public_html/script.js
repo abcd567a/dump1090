@@ -415,6 +415,9 @@ function initialize() {
         // with initialization
         $.ajax({ type: 'GET',
 		url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
+                xhrFields: {
+		   withCredentials: true
+                },
                 timeout: 5000,
                 cache: false,
                 dataType: 'json' })
