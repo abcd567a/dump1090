@@ -40,7 +40,7 @@ global.ol.Observable = Observable;
 // export functions, classes, etc. from JS assets
 export { initialize } from './script';
 export { createBaseLayers } from './layers';
-export { get_unit_label } from './formatter';
+export { get_unit_label, format_distance_long } from './formatter';
 export { SkyAwareDataFetcher } from './data';
 
 // TODO: try to get ol library to work

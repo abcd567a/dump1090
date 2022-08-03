@@ -307,5 +307,6 @@ function format_nac_v (value) {
 }
 
 module.exports = {
-	get_unit_label: get_unit_label
+	get_unit_label: get_unit_label,
+	format_distance_long: format_distance_long
 }
