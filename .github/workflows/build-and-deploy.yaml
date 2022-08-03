@@ -38,8 +38,6 @@ jobs:
       run: |
         cd public_html
         yarn run build
-        cp ol/v6.3.1/ol.js.map dist
-        cp status.json dist
     - name: Deploy to S3
       run: |
         cd public_html/dist
