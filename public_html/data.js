@@ -16,13 +16,13 @@ SkyAwareDataFetcher.prototype.init = function(opts){
 	 */
 
 	// If receiverData isn't set then we can't do anything
-	if (typeof receiverData == 'undefined') {
+	if (typeof EntryPoint.receiverData == 'undefined') {
 		alert('Error fetching ADS-B sites for display');
 		return;
 	}
 
 	// Local storage ref for receiverData
-	this._opts.receiverData = receiverData;
+	this._opts.receiverData = EntryPoint.receiverData;
 
 	// Ensure the current user has sites to view; if not, send them elsewhere
 	if (this._opts.receiverData.locations.length == 0) {

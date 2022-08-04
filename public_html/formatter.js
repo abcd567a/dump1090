@@ -308,5 +308,20 @@ function format_nac_v (value) {
 
 module.exports = {
 	get_unit_label: get_unit_label,
-	format_distance_long: format_distance_long
+	format_distance_long: format_distance_long,
+	format_distance_brief: format_distance_brief,
+	format_distance_short: format_distance_short,
+	format_altitude_brief: format_altitude_brief,
+	format_altitude_long: format_altitude_long,
+	format_speed_brief: format_speed_brief,
+	format_speed_long: format_speed_long,
+	format_vert_rate_brief: format_vert_rate_brief,
+	format_vert_rate_long: format_vert_rate_long,
+	format_nac_p: format_nac_p,
+	format_nac_v: format_nac_v,
+	format_data_source: format_data_source,
+	format_onground: format_onground,
+	format_latlng: format_latlng,
+	format_track_brief: format_track_brief,
+	format_track_long: format_track_long,
 }

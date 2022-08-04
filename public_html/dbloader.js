@@ -148,3 +148,7 @@ function db_ajax_request_complete() {
                 ajaxreq.always(db_ajax_request_complete);
         }
 }
+
+module.exports = {
+        getAircraftData: getAircraftData
+}

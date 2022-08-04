@@ -3,7 +3,7 @@
 function PlaneObject(icao) {
 	// Info about the plane
         this.icao      = icao;
-        this.icaorange = findICAORange(icao);
+        this.icaorange = EntryPoint.findICAORange(icao);
         this.flight    = null;
         this.squawk    = null;
         this.selected  = false;
@@ -84,7 +84,7 @@ function PlaneObject(icao) {
         this.wtc = null;
 
         // request metadata
-        getAircraftData(this.icao).done(function(data) {
+        EntryPoint.getAircraftData(this.icao).done(function(data) {
                 if ("r" in data) {
                         this.registration = data.r;
                 }
@@ -301,13 +301,13 @@ PlaneObject.prototype.clearLines = function() {
         for (var i = this.track_linesegs.length - 1; i >= 0 ; --i) {
                 var seg = this.track_linesegs[i];
                 if (seg.feature !== null) {
-                        PlaneTrailFeatures.remove(seg.feature);
+                        EntryPoint.PlaneTrailFeatures.remove(seg.feature);
                         seg.feature = null;
                 }
         }
 
         if (this.elastic_feature !== null) {
-                PlaneTrailFeatures.remove(this.elastic_feature);
+                EntryPoint.PlaneTrailFeatures.remove(this.elastic_feature);
                 this.elastic_feature = null;
         }
 };
@@ -331,8 +331,8 @@ PlaneObject.prototype.getDataSource = function() {
 
 PlaneObject.prototype.getMarkerColor = function() {
         // Emergency squawks override everything else
-        if (this.squawk in SpecialSquawks)
-                return SpecialSquawks[this.squawk].markerColor;
+        if (this.squawk in EntryPoint.SpecialSquawks)
+                return EntryPoint.SpecialSquawks[this.squawk].markerColor;
 
         var h, s, l;
 
@@ -350,7 +350,7 @@ PlaneObject.prototype.getMarkerColor = function() {
         }
 
         // If this marker is selected, change color
-        if (this.selected && !SelectedAllPlanes){
+        if (this.selected && !EntryPoint.SelectedAllPlanes){
                 h += ColorByAlt.selected.h;
                 s += ColorByAlt.selected.s;
                 l += ColorByAlt.selected.l;
@@ -429,13 +429,13 @@ PlaneObject.prototype.getAltitudeColor = function(altitude) {
 }
 
 PlaneObject.prototype.updateIcon = function() {
-        var scaleFactor = Math.max(0.2, Math.min(1.2, 0.15 * Math.pow(1.25, ZoomLvl))).toFixed(1);
+        var scaleFactor = Math.max(0.2, Math.min(1.2, 0.15 * Math.pow(1.25, EntryPoint.ZoomLvl))).toFixed(1);
 
         var col = this.getMarkerColor();
         var opacity = 1.0;
         var outline = (this.position_from_mlat ? OutlineMlatColor : OutlineADSBColor);
-        var add_stroke = (this.selected && !SelectedAllPlanes) ? ' stroke="black" stroke-width="1px"' : '';
-        var baseMarker = getBaseMarker(this.category, this.icaotype, this.typeDescription, this.wtc);
+        var add_stroke = (this.selected && !EntryPoint.SelectedAllPlanes) ? ' stroke="black" stroke-width="1px"' : '';
+        var baseMarker = EntryPoint.getBaseMarker(this.category, this.icaotype, this.typeDescription, this.wtc);
         var rotation = this.track;
         if (rotation === null) {
                 rotation = this.true_heading;
@@ -449,7 +449,7 @@ PlaneObject.prototype.updateIcon = function() {
         //var transparentBorderWidth = (32 / baseMarker.scale / scaleFactor).toFixed(1);
 
         var svgKey = col + '!' + outline + '!' + baseMarker.svg + '!' + add_stroke + "!" + scaleFactor;
-        var styleKey = opacity + '!' + rotation + '!' + AircraftLabels;
+        var styleKey = opacity + '!' + rotation + '!' + EntryPoint.AircraftLabels;
 
         if (this.markerStyle === null || this.markerIcon === null || this.markerSvgKey != svgKey) {
                 //console.log(this.icao + " new icon and style " + this.markerSvgKey + " -> " + svgKey);
@@ -460,7 +460,7 @@ PlaneObject.prototype.updateIcon = function() {
                         anchorYUnits: 'fraction',
                         scale: 1.2 * scaleFactor,
                         imgSize: baseMarker.size,
-                        src: svgPathToURI(baseMarker.svg, outline, col, add_stroke),
+                        src: EntryPoint.svgPathToURI(baseMarker.svg, outline, col, add_stroke),
                         rotation: (baseMarker.noRotate ? 0 : rotation * Math.PI / 180.0),
                         opacity: opacity,
                         rotateWithView: (baseMarker.noRotate ? false : true)
@@ -468,7 +468,7 @@ PlaneObject.prototype.updateIcon = function() {
 
                 this.markerIcon = icon;
 
-		if (AircraftLabels && this.flight != null) {
+		if (EntryPoint.AircraftLabels && this.flight != null) {
                         this.markerStyle = new ol.style.Style({
                                 image: this.markerIcon,
                                 text: new ol.style.Text({
@@ -506,7 +506,7 @@ PlaneObject.prototype.updateIcon = function() {
                 if (this.staticIcon) {
                         this.staticIcon.setOpacity(opacity);
                 }
-                if (AircraftLabels && this.flight != null) {
+                if (EntryPoint.AircraftLabels && this.flight != null) {
                         this.markerStyle = new ol.style.Style({
                                 image: this.markerIcon,
                                 text: new ol.style.Text({
@@ -638,7 +638,7 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
                         //console.log("hiding " + this.icao);
                         this.clearMarker();
                         this.visible = false;
-                        if (SelectedPlane == this.icao)
+                        if (EntryPoint.SelectedPlane == this.icao)
                                 selectPlaneByHex(null,false);
                 }
         } else {
@@ -659,8 +659,8 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
 
 PlaneObject.prototype.clearMarker = function() {
         if (this.marker) {
-                PlaneIconFeatures.remove(this.marker);
-                PlaneIconFeatures.remove(this.markerStatic);
+                EntryPoint.PlaneIconFeatures.remove(this.marker);
+                EntryPoint.PlaneIconFeatures.remove(this.markerStatic);
                 /* FIXME google.maps.event.clearListeners(this.marker, 'click'); */
                 this.marker = this.markerStatic = null;
         }
@@ -683,12 +683,12 @@ PlaneObject.prototype.updateMarker = function(moved) {
                 this.marker = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(this.position)));
                 this.marker.hex = this.icao;
                 this.marker.setStyle(this.markerStyle);
-                PlaneIconFeatures.push(this.marker);
+                EntryPoint.PlaneIconFeatures.push(this.marker);
 
                 this.markerStatic = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat(this.position)));
                 this.markerStatic.hex = this.icao;
                 this.markerStatic.setStyle(this.markerStaticStyle);
-                PlaneIconFeatures.push(this.markerStatic);
+                EntryPoint.PlaneIconFeatures.push(this.markerStatic);
 	}
 };
 
@@ -738,7 +738,7 @@ PlaneObject.prototype.updateLines = function() {
         // (which should be faster than remove-and-add when PlaneTrailFeatures is large)
         var oldElastic = -1;
         if (this.elastic_feature !== null) {
-                oldElastic = PlaneTrailFeatures.getArray().indexOf(this.elastic_feature);
+                oldElastic = EntryPoint.PlaneTrailFeatures.getArray().indexOf(this.elastic_feature);
         }
 
         // create the new elastic band feature
@@ -753,9 +753,9 @@ PlaneObject.prototype.updateLines = function() {
         }
 
         if (oldElastic < 0) {
-                PlaneTrailFeatures.push(this.elastic_feature);
+                EntryPoint.PlaneTrailFeatures.push(this.elastic_feature);
         } else {
-                PlaneTrailFeatures.setAt(oldElastic, this.elastic_feature);
+                EntryPoint.PlaneTrailFeatures.setAt(oldElastic, this.elastic_feature);
         }
 
         // create any missing fixed line features
@@ -769,7 +769,7 @@ PlaneObject.prototype.updateLines = function() {
                                 seg.feature.setStyle(this.altitudeLines(seg.altitude));
                         }
 
-                        PlaneTrailFeatures.push(seg.feature);
+                        EntryPoint.PlaneTrailFeatures.push(seg.feature);
                 }
         }
 };
@@ -778,3 +778,7 @@ PlaneObject.prototype.destroy = function() {
         this.clearLines();
         this.clearMarker();
 };
+
+module.exports = {
+        PlaneObject: PlaneObject
+}

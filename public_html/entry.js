@@ -24,24 +24,36 @@ import './planeObject.js';
 import './formatter.js';
 import './flags.js';
 import './layers.js';
-import './data.js';
 import './script.js';
+import './data.js';
 
 // support legacy code
 import $ from 'jquery';
 global.$ = $;
 
 // declare globally accessible variables
+// Please note I had to refactor code to make use of globally accessible variables. ex: ZoomLvl = 'blahblah' ==> EntryPoint.ZoomLvl = 'blahblah' and so on
 import Control from 'ol/control/Control';
 import { Observable } from 'ol';
 global.ol.control.Control = Control;
 global.ol.Observable = Observable;
+global.receiverData;
+global.ZoomLvl;
+global.AircraftLabels;
 
 // export functions, classes, etc. from JS assets
-export { initialize } from './script';
+export { initialize, sortByICAO, sortByCountry, sortByFlight, sortBySquawk, sortByAltitude, sortBySpeed, sortByDistance, sortByTrack, sortByMsgs,
+	sortBySeen,	sortByRegistration, sortByAircraftType, sortByVerticalRate, sortByLatitude, sortByLongitude, sortByDataSource,
+	SpecialSquawks, AircraftLabels, OLMap, PlaneIconFeatures, PlaneTrailFeatures, SelectedPlane, SelectedAllPlanes } from './script';
 export { createBaseLayers } from './layers';
-export { get_unit_label, format_distance_long } from './formatter';
+export { get_unit_label, format_distance_long, format_distance_brief, format_distance_short, format_altitude_brief, format_altitude_long, 
+	format_speed_brief, format_speed_long, format_vert_rate_brief, format_vert_rate_long, format_nac_p, 
+	format_nac_v, format_data_source, format_onground, format_latlng, format_track_brief, format_track_long } from './formatter';
 export { SkyAwareDataFetcher } from './data';
+export { PlaneObject } from './planeObject';
+export { findICAORange } from './flags';
+export { getAircraftData } from './dbloader';
+export { getBaseMarker, svgPathToURI } from './markers';
 
 // TODO: try to get ol library to work
 // export { Observable, Collection } from 'ol';
