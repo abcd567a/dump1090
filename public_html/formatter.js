@@ -324,4 +324,6 @@ module.exports = {
 	format_latlng: format_latlng,
 	format_track_brief: format_track_brief,
 	format_track_long: format_track_long,
+	convert_altitude: convert_altitude,
+	convert_speed: convert_speed
 }

@@ -4,7 +4,7 @@
 import './style.css';
 import './ol/v6.3.1/ol.css';
 import './ol/ol-layerswitcher.css';
-import './noUiSlider/distribute/nouislider.css';
+// import './noUiSlider/distribute/nouislider.css';
 // import './jquery/jquery-ui-1.11.4-smoothness.css';
 
 // library imports
@@ -40,15 +40,17 @@ global.ol.Observable = Observable;
 global.receiverData;
 global.ZoomLvl;
 global.AircraftLabels;
+global.SitePositions;
 
 // export functions, classes, etc. from JS assets
-export { initialize, sortByICAO, sortByCountry, sortByFlight, sortBySquawk, sortByAltitude, sortBySpeed, sortByDistance, sortByTrack, sortByMsgs,
-	sortBySeen,	sortByRegistration, sortByAircraftType, sortByVerticalRate, sortByLatitude, sortByLongitude, sortByDataSource,
-	SpecialSquawks, AircraftLabels, OLMap, PlaneIconFeatures, PlaneTrailFeatures, SelectedPlane, SelectedAllPlanes } from './script';
+export { initialize, sortByICAO, sortByCountry, sortByFlight, sortBySquawk, sortByAltitude, sortBySpeed, sortByDistance, 
+	sortByTrack, sortByMsgs, sortBySeen, sortByRegistration, sortByAircraftType, sortByVerticalRate, sortByLatitude, 
+	sortByLongitude, sortByDataSource, resetMap, selectAllPlanes,deselectAllPlanes, refreshSelected, SelectPlaneByHex, 
+	SpecialSquawks, AircraftLabels, OLMap, PlaneIconFeatures, PlaneTrailFeatures, SelectedPlane, SelectedAllPlanes,  } from './script';
 export { createBaseLayers } from './layers';
 export { get_unit_label, format_distance_long, format_distance_brief, format_distance_short, format_altitude_brief, format_altitude_long, 
-	format_speed_brief, format_speed_long, format_vert_rate_brief, format_vert_rate_long, format_nac_p, 
-	format_nac_v, format_data_source, format_onground, format_latlng, format_track_brief, format_track_long } from './formatter';
+	format_speed_brief, format_speed_long, format_vert_rate_brief, format_vert_rate_long, format_nac_p, format_nac_v, format_data_source,
+	format_onground, format_latlng, format_track_brief, format_track_long, convert_altitude, convert_speed } from './formatter';
 export { SkyAwareDataFetcher } from './data';
 export { PlaneObject } from './planeObject';
 export { findICAORange } from './flags';

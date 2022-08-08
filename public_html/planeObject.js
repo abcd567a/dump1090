@@ -102,7 +102,7 @@ function PlaneObject(icao) {
                 }
 
                 if (this.selected) {
-                        refreshSelected();
+                        EntryPoint.refreshSelected();
                 }
         }.bind(this));
 }
@@ -138,7 +138,7 @@ PlaneObject.prototype.isFiltered = function() {
                 return true;
         }
 
-        var planeAltitude = this.altitude === "ground" ? 0 : convert_altitude(this.altitude, this.filter.altitudeUnits);
+        var planeAltitude = this.altitude === "ground" ? 0 : EntryPoint.convert_altitude(this.altitude, this.filter.altitudeUnits);
         var isFilteredByAltitude = planeAltitude < this.filter.minAltitude || planeAltitude > this.filter.maxAltitude;
         if (isFilteredByAltitude) {
                 return true;
@@ -149,7 +149,7 @@ PlaneObject.prototype.isFiltered = function() {
                 return true;
         }
 
-        var convertedSpeed = convert_speed(this.speed, this.filter.speedUnits)
+        var convertedSpeed = EntryPoint.convert_speed(this.speed, this.filter.speedUnits)
         var isFilteredBySpeed = convertedSpeed < this.filter.minSpeedFilter || convertedSpeed > this.filter.maxSpeedFilter;
         if (isFilteredBySpeed) {
                 return true;
@@ -572,8 +572,8 @@ PlaneObject.prototype.updateData = function(receiver_timestamp, data) {
                 this.last_position_time = receiver_timestamp - data.seen_pos;
 
                 // Only calculate site distance if we have one and only one site position
-                if (SitePositions !== null && SitePositions.length == 1) {
-                        this.sitedist = ol.sphere.getDistance(SitePositions[0], this.position);
+                if (EntryPoint.SitePositions !== null && EntryPoint.SitePositions.length == 1) {
+                        this.sitedist = ol.sphere.getDistance(EntryPoint.SitePositions[0], this.position);
                 }
 
                 this.position_from_mlat = false;
@@ -639,7 +639,7 @@ PlaneObject.prototype.updateTick = function(receiver_timestamp, last_timestamp) 
                         this.clearMarker();
                         this.visible = false;
                         if (EntryPoint.SelectedPlane == this.icao)
-                                selectPlaneByHex(null,false);
+                                EntryPoint.selectPlaneByHex(null,false);
                 }
         } else {
                 if (this.position !== null && (this.selected || this.seen_pos < 60)) {

@@ -426,7 +426,8 @@ function initialize() {
                     if (typeof data.lat !== "undefined") {
                         // Local case
                         SiteShow = true;
-                        SitePositions = [[data.lon, data.lat]]
+                        SitePositions = [[data.lon, data.lat]];
+						EntryPoint.SitePositions = SitePositions;
                         DefaultCenterLat = data.lat;
                         DefaultCenterLon = data.lon;
                     } else if (typeof data.locations === 'object' && data.locations.length > 0) {
@@ -461,6 +462,10 @@ function initialize() {
 
                         // And now set all the receiver locations
                         SitePositions = data.locations.map(function(loc){
+                            return [loc.lon, loc.lat];
+                        });
+
+						EntryPoint.SitePositions = data.locations.map(function(loc){
                             return [loc.lon, loc.lat];
                         });
                     }
@@ -2686,6 +2691,12 @@ module.exports = {
 	sortByLatitude: sortByLatitude,
 	sortByLongitude: sortByLongitude,
 	sortByDataSource: sortByDataSource,
+	resetMap: resetMap,
+	selectAllPlanes: selectAllPlanes,
+	deselectAllPlanes: deselectAllPlanes,
+	refreshSelected: refreshSelected,
+	onNewData: onNewData,
+	selectPlaneByHex: selectPlaneByHex,
 	SpecialSquawks: SpecialSquawks,
 	AircraftLabels: AircraftLabels,
 	OLMap: OLMap,
