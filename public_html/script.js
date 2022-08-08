@@ -1836,13 +1836,16 @@ function toggleAircraftLabels(switchToggle) {
 	if (showAircraftLabels === 'deselected') {
 		// hide aircraft labels
 		AircraftLabels = false;
+		// make globally accessible for webpack
+		EntryPoint.AircraftLabels = false;
 		$('#aircraft_label_checkbox').removeClass('settingsCheckboxChecked');
 	} else {
 		// show aicraft labels
 		AircraftLabels = true;
+		// make globally accessible for webpack
+		EntryPoint.AircraftLabels = true;
 		$('#aircraft_label_checkbox').addClass('settingsCheckboxChecked');
 	}
-
         localStorage.setItem('showAircraftLabels', showAircraftLabels);
 }
 
@@ -2698,7 +2701,7 @@ module.exports = {
 	onNewData: onNewData,
 	selectPlaneByHex: selectPlaneByHex,
 	SpecialSquawks: SpecialSquawks,
-	AircraftLabels: AircraftLabels,
+	// AircraftLabels: AircraftLabels,
 	OLMap: OLMap,
 	//StaticFeatures: StaticFeatures,
 	// SiteCircleFeatures: SiteCircleFeatures,

@@ -46,7 +46,7 @@ global.SitePositions;
 export { initialize, sortByICAO, sortByCountry, sortByFlight, sortBySquawk, sortByAltitude, sortBySpeed, sortByDistance, 
 	sortByTrack, sortByMsgs, sortBySeen, sortByRegistration, sortByAircraftType, sortByVerticalRate, sortByLatitude, 
 	sortByLongitude, sortByDataSource, resetMap, selectAllPlanes,deselectAllPlanes, refreshSelected, SelectPlaneByHex, 
-	SpecialSquawks, AircraftLabels, OLMap, PlaneIconFeatures, PlaneTrailFeatures, SelectedPlane, SelectedAllPlanes,  } from './script';
+	SpecialSquawks, OLMap, PlaneIconFeatures, PlaneTrailFeatures, SelectedPlane, SelectedAllPlanes, } from './script';
 export { createBaseLayers } from './layers';
 export { get_unit_label, format_distance_long, format_distance_brief, format_distance_short, format_altitude_brief, format_altitude_long, 
 	format_speed_brief, format_speed_long, format_vert_rate_brief, format_vert_rate_long, format_nac_p, format_nac_v, format_data_source,
