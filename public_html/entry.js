@@ -4,7 +4,7 @@
 import './style.css';
 import './ol/v6.3.1/ol.css';
 import './ol/ol-layerswitcher.css';
-// import './noUiSlider/distribute/nouislider.css';
+import './noUiSlider/distribute/nouislider.css';
 // import './jquery/jquery-ui-1.11.4-smoothness.css';
 
 // library imports
