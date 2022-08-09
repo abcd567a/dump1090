@@ -134,8 +134,8 @@ html, body {
     cursor: ew-resize;
     display: block;
     position: absolute;
-    top: 125px;
-    left: -24px;
+    top: 205px;
+    left: 1156px;
     float: right;
     width: 24px;
     height: 25px;
@@ -872,6 +872,16 @@ select.error, textarea.error, input.error {
     border-radius: 4px;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
+}
+
+.receiver_row_template{
+    cursor: pointer;
+    color: #002F5D;
+    background-color: #E5F6FC;
+}
+
+.receiver_row_template:hover{
+    background-color: #CCD5F8;
 }
 
 .italicize {

@@ -29,6 +29,7 @@ var Dump1090Version = "unknown version";
 var RefreshInterval = 1000;
 
 var PlaneRowTemplate = null;
+var ReceiverRowTemplate = null;
 
 var TrackedAircraft = 0;
 var TrackedAircraftPositions = 0;
@@ -185,6 +186,7 @@ function onNewData(data) {
                 refreshTableInfo();
                 refreshSelected();
                 refreshHighlighted();
+				refreshReceiverInfo();
                 
                 if (ReceiverClock) {
                         var rcv = new Date(now * 1000);
@@ -218,6 +220,8 @@ function initialize() {
 	uiTypeCheck();
 
 	PlaneRowTemplate = document.getElementById("plane_row_template");
+
+	ReceiverRowTemplate = document.getElementById("receiver_row_template");
 
 	refreshClock();
 
@@ -380,6 +384,11 @@ function initialize() {
                 $('#filter_panel').toggle();
         });
 
+		$('#receiver_select_button').on('click', function() {
+				this.classList.toggle("config_button_active");
+				$('#receiver_select_panel').toggle();
+		});
+
         // Event handlers for to column checkboxes
         checkbox_div_map.forEach(function (checkbox, div) {
                 $(div).on('click', function() {
@@ -434,30 +443,10 @@ function initialize() {
                         // Remote case
                         SiteShow = true;
                         // Figure out default center/zoom
-                        if (data.locations.length == 1) {
-                            // Only one location provided, go with legacy code path
+                        if (data.locations.length >= 1) {
+                            // Set default center to first receiver location pair provided
                             DefaultCenterLat = data.locations[0].lat;
                             DefaultCenterLon = data.locations[0].lon;
-                        } else {
-                            // Multiple locations, derive correct default center/zoom
-                            // Create an OL-sompatible coord array
-                            var coords = data.locations.map(function(loc){
-                                return ol.proj.fromLonLat([loc.lon, loc.lat]);
-                            });
-                            // Create an extent to use for our defaults
-                            // we'll buffer (pad) the extent by 400nm to allow for range rings
-                            var buffer = 400 * 1852;
-                            var extent = ol.extent.buffer(ol.extent.boundingExtent(coords), buffer);
-                            // This is sorta hacky, but to get the center and zoom, we
-                            // just create a throwaway view and fit it to the extent
-                            var view = new ol.View();
-                            var $canvas = $('#map_canvas');
-                            var size = [$canvas.width(), $canvas.height()];
-                            view.fit(extent, {size: size});
-                            var center = ol.proj.toLonLat(view.getCenter());
-                            DefaultCenterLat = center[1];
-                            DefaultCenterLon = center[0];
-                            DefaultZoomLvl = view.getZoom();
                         }
 
                         // And now set all the receiver locations
@@ -830,18 +819,18 @@ function initialize_map() {
 	var groupByDataTypeBox = localStorage.getItem('groupByDataType');
 
 	// Initialize sorting
-	// Only show distance column if we have exactly one site
-	if (SitePositions.length == 1) {
+	// Only show distance column if we have exactly one site (changing so now, we do show distance column for first receiver device)
+	if (SitePositions.length >= 1) {
 		if (groupByDataTypeBox === 'deselected') {
 			sortByDistance();
 		}
-	} else {
-		PlaneRowTemplate.cells[9].style.display = 'none'; // hide distance column
-		document.getElementById("distance").style.display = 'none'; // hide distance header
+	}/* else {
+		// PlaneRowTemplate.cells[9].style.display = 'none'; // hide distance column
+		// document.getElementById("distance").style.display = 'none'; // hide distance header
 		if (groupByDataTypeBox === 'deselected') {
 			sortByAltitude();
 		}
-	}
+	}*/
 
 	// Maybe hide flag info
 	if (!ShowFlags) {
@@ -1581,6 +1570,22 @@ function refreshTableInfo() {
     }
 
     resortTable();
+}
+
+function get_receiver_number () {
+	$("#active_receiver_count").text(EntryPoint.SitePositions.length);
+	// Add some functionality to fetch the current receiver number
+}
+
+function refreshReceiverInfo() {
+	$(".receiver_device_selected").text(get_receiver_number());
+	var ReceiverList = EntryPoint.SitePositions;
+	for (var i=0; i < ReceiverList.length; ++i){
+		var receiver = ReceiverList[i];
+		$("#receiver_name").text(`Receiver ${i+1}`);
+		$("#receiver_lat").text(receiver[0]);
+		$("#receiver_lon").text(receiver[1]);
+	}
 }
 
 //

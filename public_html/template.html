@@ -199,12 +199,17 @@
 											<td><span class="infoBlockTitleText">With Positions:</span> <span id="dump1090_total_ac_positions">n/a</span></td>
 											<td><span class="infoBlockTitleText">History:</span> <span id="dump1090_total_history">n/a</span> positions</td>
 										</tr>
+
+										<tr class="infoblock_body">
+											<td><span class="infoBlockTitleText">Calculating Distance (<span class="distanceUnit"></span>) from:</span> <span id="receiver_device_selected">Receiver Device <span class="receiver_device_num"></span></td>
+										</tr>
 									</table>
 								</div> <!-- dump1090_infoblock -->
 
 								<div class="config_button_row">
 									<button id="filter_button" class="config_button">Filters (<span class="italicize"><span id="active_filter_count">0</span> Enabled)</span></button>
 									<button id="column_select_button" class="config_button">Select Columns</button>
+									<button id="receiver_select_button" class="config_button">Select Receiver Device (<span class="italicize"><span id="active_receiver_count">0</span>)</span></button>
 								</div>
 
 								<div id="filter_panel" class="panel">
@@ -334,6 +339,24 @@
 												<div class="columnOptionText">Photos</div>
 											</div>
 										</div>
+								</div>
+								<div id="receiver_select_panel" class="panel">
+									<table id="receivers_table" style="width: 100%">
+										<thead class="aircraft_table_header">
+											<tr>
+												<td id="receiver_name_header" onclick="console.log('EntryPoint.sortByReceiver(); function goes here.');">Receiver</td>
+												<td id="receiver_lat_header"  onclick="console.log('EntryPoint.sortByReceiverLat(); function goes here.');">Latitude</td>
+												<td id="receiver_lon_header"  onclick="console.log('EntryPoint.sortByReceiverLon(); function goes here.');">Longitude</td>
+											</tr>
+										</thead>
+										<tbody>
+											<tr id="receiver_row_template" class="receiver_row_template">
+												<td id="receiver_name" style="text-indent: 5px;">RECEIVER_DEVICE_NUM</td>
+												<td id="receiver_lat" style="text-align: right;">LAT</td>
+												<td id="receiver_lon" style="text-align: right;">LON</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 
 								<div id="planes_table_container">
