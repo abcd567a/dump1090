@@ -2,7 +2,7 @@ name: Build and Deploy SkyAware
 
 on:
   push:
-    branches: [ skyaware_extraction, abstract_data ]
+    branches: [ abstract_data ]
 
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
