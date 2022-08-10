@@ -185,7 +185,7 @@ function createBaseLayers() {
                             }),
                             text: new ol.style.Text({
                                 text: showLabel ? feature.get("name") : "",
-                                overflow: OLMap.getView().getZoom() > 5,
+                                overflow: EntryPoint.OLMap.getView().getZoom() > 5,
                                 scale: 1.25,
                                 fill: new ol.style.Fill({
                                     color: '#000000'
@@ -258,4 +258,8 @@ function createBaseLayers() {
         }
 
         return layers;
+}
+
+module.exports = {
+        createBaseLayers: createBaseLayers
 }

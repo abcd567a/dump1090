@@ -23,10 +23,7 @@ var SpecialSquawks = {
 };
 
 // Get current map settings
-var CenterLat, CenterLon, ZoomLvl, MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
-
-// Raw receiver data stash
-var receiverData;
+var CenterLat, CenterLon, /*ZoomLvl,*/ MapType, SiteCirclesCount, SiteCirclesBaseDistance, SiteCirclesInterval;
 
 var Dump1090Version = "unknown version";
 var RefreshInterval = 1000;
@@ -121,7 +118,7 @@ function processReceiverUpdate(data) {
                 if (Planes[hex]) {
                         plane = Planes[hex];
                 } else {
-                        plane = new PlaneObject(hex);
+                        plane = new EntryPoint.PlaneObject(hex);
                         plane.filter = PlaneFilter;
                         plane.tr = PlaneRowTemplate.cloneNode(true);
 
@@ -415,18 +412,22 @@ function initialize() {
         // with initialization
         $.ajax({ type: 'GET',
 		url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
-                timeout: 5000,
-                cache: false,
-                dataType: 'json' })
+		xhrFields: {
+		   withCredentials: true
+		},
+		timeout: 5000,
+		cache: false,
+		dataType: 'json' })
 
                  .done(function(data) {
                     // Stash a copy for possible socket usage
-                    receiverData = data;
+                    EntryPoint.receiverData = data;
 
                     if (typeof data.lat !== "undefined") {
                         // Local case
                         SiteShow = true;
-                        SitePositions = [[data.lon, data.lat]]
+                        SitePositions = [[data.lon, data.lat]];
+						EntryPoint.SitePositions = SitePositions;
                         DefaultCenterLat = data.lat;
                         DefaultCenterLon = data.lon;
                     } else if (typeof data.locations === 'object' && data.locations.length > 0) {
@@ -464,6 +465,9 @@ function initialize() {
                             return [loc.lon, loc.lat];
                         });
 
+						EntryPoint.SitePositions = data.locations.map(function(loc){
+                            return [loc.lon, loc.lat];
+                        });
                     }
 
                     Dump1090Version = data.version;
@@ -677,7 +681,7 @@ function end_load_history() {
 }
 
 function start_data_fetching() {
-	var dataFetcher = new SkyAwareDataFetcher({
+	var dataFetcher = new EntryPoint.SkyAwareDataFetcher({
 		onNewData: onNewData,
 		onDataError: onDataError,
 		refreshInterval: RefreshInterval
@@ -821,7 +825,7 @@ function initialize_map() {
 	// Load stored map settings if present
 	CenterLat = Number(localStorage['CenterLat']) || DefaultCenterLat;
 	CenterLon = Number(localStorage['CenterLon']) || DefaultCenterLon;
-	ZoomLvl = Number(localStorage['ZoomLvl']) || DefaultZoomLvl;
+	EntryPoint.ZoomLvl = Number(localStorage['ZoomLvl']) || DefaultZoomLvl;
 	MapType = localStorage['MapType'];
 	var groupByDataTypeBox = localStorage.getItem('groupByDataType');
 
@@ -848,7 +852,7 @@ function initialize_map() {
 
 	// Initialize OL3
 
-	layers = createBaseLayers();
+	layers = EntryPoint.createBaseLayers();
 
 	var iconsLayer = new ol.layer.Vector({
 		name: 'ac_positions',
@@ -938,7 +942,7 @@ function initialize_map() {
 		layers: layers,
 		view: new ol.View({
 			center: ol.proj.fromLonLat([CenterLon, CenterLat]),
-			zoom: ZoomLvl
+			zoom: EntryPoint.ZoomLvl
 		}),
 		controls: [new ol.control.Zoom(),
 			   new ol.control.Rotate(),
@@ -972,7 +976,7 @@ function initialize_map() {
 	});
     
 	OLMap.getView().on('change:resolution', function(event) {
-		ZoomLvl = localStorage['ZoomLvl']  = OLMap.getView().getZoom();
+		EntryPoint.ZoomLvl = localStorage['ZoomLvl']  = OLMap.getView().getZoom();
 		for (var plane in Planes) {
 			Planes[plane].updateMarker(false);
 		};
@@ -1083,55 +1087,6 @@ function initialize_map() {
                     setRangeRingVisibility('hide');
                 }
 	}
-
-        // Add terrain-limit rings. To enable this:
-        //
-        //  create a panorama for your receiver location on heywhatsthat.com
-        //
-        //  note the "view" value from the URL at the top of the panorama
-        //    i.e. the XXXX in http://www.heywhatsthat.com/?view=XXXX
-        //
-        // fetch a json file from the API for the altitudes you want to see:
-        //
-        //  wget -O /usr/share/dump1090-mutability/html/upintheair.json \
-        //    'http://www.heywhatsthat.com/api/upintheair.json?id=XXXX&refraction=0.25&alts=3048,9144'
-        //
-        // NB: altitudes are in _meters_, you can specify a list of altitudes
-
-        // kick off an ajax request that will add the rings when it's done
-        var request = $.ajax({ url: 'upintheair.json',
-                               timeout: 5000,
-                               cache: true,
-                               dataType: 'json' });
-        request.done(function(data) {
-                var ringStyle = new ol.style.Style({
-                        fill: null,
-                        stroke: new ol.style.Stroke({
-                                color: '#000000',
-                                width: 1
-                        })
-                });
-
-                for (var i = 0; i < data.rings.length; ++i) {
-                        var geom = new ol.geom.LineString([]);
-                        var points = data.rings[i].points;
-                        if (points.length > 0) {
-                                for (var j = 0; j < points.length; ++j) {
-                                        geom.appendCoordinate([ points[j][1], points[j][0] ]);
-                                }
-                                geom.appendCoordinate([ points[0][1], points[0][0] ]);
-                                geom.transform('EPSG:4326', 'EPSG:3857');
-
-                                var feature = new ol.Feature(geom);
-                                feature.setStyle(ringStyle);
-                                StaticFeatures.push(feature);
-                        }
-                }
-        });
-
-        request.fail(function(jqxhr, status, error) {
-                // no rings available, do nothing
-        });
 }
 
 function createSiteCircleFeatures() {
@@ -1152,7 +1107,7 @@ function createSiteCircleFeatures() {
 	    	font: '10px Helvetica Neue, sans-serif',
 	    	fill: new ol.style.Fill({ color: '#000' }),
 				offsetY: -8,
-				text: format_distance_long(distance, DisplayUnits, 0)
+				text: EntryPoint.format_distance_long(distance, DisplayUnits, 0)
 
 			})
 		});
@@ -1285,15 +1240,15 @@ function refreshSelected() {
 
 	// Not using this logic for the redesigned info panel at the time, but leaving it in  if/when adding it back
 	// var emerg = document.getElementById('selected_emergency');
-	// if (selected.squawk in SpecialSquawks) {
-	//         emerg.className = SpecialSquawks[selected.squawk].cssClass;
-	//         emerg.textContent = NBSP + 'Squawking: ' + SpecialSquawks[selected.squawk].text + NBSP ;
+	// if (selected.squawk in EntryPoint.SpecialSquawks) {
+	//         emerg.className = EntryPoint.SpecialSquawks[selected.squawk].cssClass;
+	//         emerg.textContent = NBSP + 'Squawking: ' + EntryPoint.SpecialSquawks[selected.squawk].text + NBSP ;
 	// } else {
 	//         emerg.className = 'hidden';
 	// }
 
-        $("#selected_altitude").text(format_altitude_long(selected.altitude, selected.vert_rate, DisplayUnits));
-        $('#selected_onground').text(format_onground(selected.altitude));
+        $("#selected_altitude").text(EntryPoint.format_altitude_long(selected.altitude, selected.vert_rate, DisplayUnits));
+        $('#selected_onground').text(EntryPoint.format_onground(selected.altitude));
 
         if (selected.squawk === null || selected.squawk === '0000') {
                 $('#selected_squawk').text('n/a');
@@ -1301,14 +1256,14 @@ function refreshSelected() {
                 $('#selected_squawk').text(selected.squawk);
         }
 
-        $('#selected_speed').text(format_speed_long(selected.gs, DisplayUnits));
-        $('#selected_ias').text(format_speed_long(selected.ias, DisplayUnits));
-        $('#selected_tas').text(format_speed_long(selected.tas, DisplayUnits));
-        $('#selected_vertical_rate').text(format_vert_rate_long(selected.baro_rate, DisplayUnits));
-        $('#selected_vertical_rate_geo').text(format_vert_rate_long(selected.geom_rate, DisplayUnits));
+        $('#selected_speed').text(EntryPoint.format_speed_long(selected.gs, DisplayUnits));
+        $('#selected_ias').text(EntryPoint.format_speed_long(selected.ias, DisplayUnits));
+        $('#selected_tas').text(EntryPoint.format_speed_long(selected.tas, DisplayUnits));
+        $('#selected_vertical_rate').text(EntryPoint.format_vert_rate_long(selected.baro_rate, DisplayUnits));
+        $('#selected_vertical_rate_geo').text(EntryPoint.format_vert_rate_long(selected.geom_rate, DisplayUnits));
         $('#selected_icao').text(selected.icao.toUpperCase());
         $('#airframes_post_icao').attr('value',selected.icao);
-        $('#selected_track').text(format_track_long(selected.track));
+        $('#selected_track').text(EntryPoint.format_track_long(selected.track));
 
 	if (selected.seen <= 1) {
 		$('#selected_seen').text('now');
@@ -1335,7 +1290,7 @@ function refreshSelected() {
                 $('#selected_position').text('n/a');
                 $('#selected_follow').addClass('hidden');
         } else {
-                $('#selected_position').text(format_latlng(selected.position));
+                $('#selected_position').text(EntryPoint.format_latlng(selected.position));
                 $('#position_age').text(selected.seen_pos.toFixed(1) + 's');
                 $('#selected_follow').removeClass('hidden');
                 if (FollowSelected) {
@@ -1357,14 +1312,14 @@ function refreshSelected() {
         }
 
         $('#selected_category').text(selected.category ? selected.category : "n/a");
-        $('#selected_sitedist').text(format_distance_long(selected.sitedist, DisplayUnits));
+        $('#selected_sitedist').text(EntryPoint.format_distance_long(selected.sitedist, DisplayUnits));
         $('#selected_message_count').text(selected.messages);
         $('#selected_photo_link').html(getFlightAwarePhotoLink(selected.registration));
-        $('#selected_altitude_geom').text(format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
-        $('#selected_mag_heading').text(format_track_long(selected.mag_heading));
-        $('#selected_true_heading').text(format_track_long(selected.true_heading));
-        $('#selected_ias').text(format_speed_long(selected.ias, DisplayUnits));
-        $('#selected_tas').text(format_speed_long(selected.tas, DisplayUnits));
+        $('#selected_altitude_geom').text(EntryPoint.format_altitude_long(selected.alt_geom, selected.geom_rate, DisplayUnits));
+        $('#selected_mag_heading').text(EntryPoint.format_track_long(selected.mag_heading));
+        $('#selected_true_heading').text(EntryPoint.format_track_long(selected.true_heading));
+        $('#selected_ias').text(EntryPoint.format_speed_long(selected.ias, DisplayUnits));
+        $('#selected_tas').text(EntryPoint.format_speed_long(selected.tas, DisplayUnits));
         if (selected.mach == null) {
                 $('#selected_mach').text('n/a');
         } else {
@@ -1380,14 +1335,14 @@ function refreshSelected() {
         } else {
                 $('#selected_trackrate').text(selected.track_rate.toFixed(2));
         }
-        $('#selected_geom_rate').text(format_vert_rate_long(selected.geom_rate, DisplayUnits));
+        $('#selected_geom_rate').text(EntryPoint.format_vert_rate_long(selected.geom_rate, DisplayUnits));
         if (selected.nav_qnh == null) {
                 $('#selected_nav_qnh').text("n/a");
         } else {
                 $('#selected_nav_qnh').text(selected.nav_qnh.toFixed(1) + " hPa");
         }
-        $('#selected_nav_altitude').text(format_altitude_long(selected.nav_altitude, 0, DisplayUnits));
-        $('#selected_nav_heading').text(format_track_long(selected.nav_heading));
+        $('#selected_nav_altitude').text(EntryPoint.format_altitude_long(selected.nav_altitude, 0, DisplayUnits));
+        $('#selected_nav_heading').text(EntryPoint.format_track_long(selected.nav_heading));
         if (selected.nav_modes == null) {
                 $('#selected_nav_modes').text("n/a");
         } else {
@@ -1403,14 +1358,14 @@ function refreshSelected() {
 			}
 		}
 
-		$('#selected_nac_p').text(format_nac_p(selected.nac_p));
-		$('#selected_nac_v').text(format_nac_v(selected.nac_v));
+		$('#selected_nac_p').text(EntryPoint.format_nac_p(selected.nac_p));
+		$('#selected_nac_v').text(EntryPoint.format_nac_v(selected.nac_v));
 		if (selected.rc == null) {
 			$('#selected_rc').text("n/a");
 		} else if (selected.rc == 0) {
 			$('#selected_rc').text("unknown");
 		} else {
-			$('#selected_rc').text(format_distance_short(selected.rc, DisplayUnits));
+			$('#selected_rc').text(EntryPoint.format_distance_short(selected.rc, DisplayUnits));
 		}
 
 		if (selected.sil == null || selected.sil_type == null) {
@@ -1529,9 +1484,9 @@ function refreshHighlighted() {
 		$('#highlighted_registration').text("n/a");
 	}
 
-	$('#highlighted_speed').text(format_speed_long(highlighted.speed, DisplayUnits));
+	$('#highlighted_speed').text(EntryPoint.format_speed_long(highlighted.speed, DisplayUnits));
 
-	$("#highlighted_altitude").text(format_altitude_long(highlighted.altitude, highlighted.vert_rate, DisplayUnits));
+	$("#highlighted_altitude").text(EntryPoint.format_altitude_long(highlighted.altitude, highlighted.vert_rate, DisplayUnits));
 
 	$('#highlighted_icao').text(highlighted.icao.toUpperCase());
 
@@ -1555,10 +1510,10 @@ function refreshTableInfo() {
     TrackedAircraftPositions = 0
     TrackedHistorySize = 0
 
-    $(".altitudeUnit").text(get_unit_label("altitude", DisplayUnits));
-    $(".speedUnit").text(get_unit_label("speed", DisplayUnits));
-    $(".distanceUnit").text(get_unit_label("distance", DisplayUnits));
-    $(".verticalRateUnit").text(get_unit_label("verticalRate", DisplayUnits));
+    $(".altitudeUnit").text(EntryPoint.get_unit_label("altitude", DisplayUnits));
+    $(".speedUnit").text(EntryPoint.get_unit_label("speed", DisplayUnits));
+    $(".distanceUnit").text(EntryPoint.get_unit_label("distance", DisplayUnits));
+    $(".verticalRateUnit").text(EntryPoint.get_unit_label("verticalRate", DisplayUnits));
 
     for (var i = 0; i < PlanesOrdered.length; ++i) {
         var tableplane = PlanesOrdered[i];
@@ -1586,8 +1541,8 @@ function refreshTableInfo() {
             if (tableplane.icao == SelectedPlane)
                 classes += " selected";
 
-            if (tableplane.squawk in SpecialSquawks) {
-                classes = classes + " " + SpecialSquawks[tableplane.squawk].cssClass;
+            if (tableplane.squawk in EntryPoint.SpecialSquawks) {
+                classes = classes + " " + EntryPoint.SpecialSquawks[tableplane.squawk].cssClass;
                 show_squawk_warning = true;
             }
 
@@ -1602,16 +1557,16 @@ function refreshTableInfo() {
             tableplane.tr.cells[3].textContent = (tableplane.registration !== null ? tableplane.registration : "");
             tableplane.tr.cells[4].textContent = (tableplane.icaotype !== null ? tableplane.icaotype : "");
             tableplane.tr.cells[5].textContent = (tableplane.squawk !== null ? tableplane.squawk : "");
-            tableplane.tr.cells[6].innerHTML = format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
-            tableplane.tr.cells[7].textContent = format_speed_brief(tableplane.gs, DisplayUnits);
-            tableplane.tr.cells[8].textContent = format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
-            tableplane.tr.cells[9].textContent = format_distance_brief(tableplane.sitedist, DisplayUnits);
-            tableplane.tr.cells[10].textContent = format_track_brief(tableplane.track);
+            tableplane.tr.cells[6].innerHTML = EntryPoint.format_altitude_brief(tableplane.altitude, tableplane.vert_rate, DisplayUnits);
+            tableplane.tr.cells[7].textContent = EntryPoint.format_speed_brief(tableplane.gs, DisplayUnits);
+            tableplane.tr.cells[8].textContent = EntryPoint.format_vert_rate_brief(tableplane.vert_rate, DisplayUnits);
+            tableplane.tr.cells[9].textContent = EntryPoint.format_distance_brief(tableplane.sitedist, DisplayUnits);
+            tableplane.tr.cells[10].textContent = EntryPoint.format_track_brief(tableplane.track);
             tableplane.tr.cells[11].textContent = tableplane.messages;
             tableplane.tr.cells[12].textContent = tableplane.seen.toFixed(0);
             tableplane.tr.cells[13].textContent = (tableplane.position !== null ? tableplane.position[1].toFixed(4) : "");
             tableplane.tr.cells[14].textContent = (tableplane.position !== null ? tableplane.position[0].toFixed(4) : "");
-            tableplane.tr.cells[15].textContent = format_data_source(tableplane.getDataSource());
+            tableplane.tr.cells[15].textContent = EntryPoint.format_data_source(tableplane.getDataSource());
             tableplane.tr.cells[16].innerHTML = getAirframesModeSLink(tableplane.icao);
             tableplane.tr.cells[17].innerHTML = getFlightAwareModeSLink(tableplane.icao, tableplane.flight);
             tableplane.tr.cells[18].innerHTML = getFlightAwarePhotoLink(tableplane.registration);
@@ -1881,13 +1836,16 @@ function toggleAircraftLabels(switchToggle) {
 	if (showAircraftLabels === 'deselected') {
 		// hide aircraft labels
 		AircraftLabels = false;
+		// make globally accessible for webpack
+		EntryPoint.AircraftLabels = false;
 		$('#aircraft_label_checkbox').removeClass('settingsCheckboxChecked');
 	} else {
 		// show aicraft labels
 		AircraftLabels = true;
+		// make globally accessible for webpack
+		EntryPoint.AircraftLabels = true;
 		$('#aircraft_label_checkbox').addClass('settingsCheckboxChecked');
 	}
-
         localStorage.setItem('showAircraftLabels', showAircraftLabels);
 }
 
@@ -1936,7 +1894,7 @@ function resetMap() {
 	// Reset localStorage values and map settings
 	localStorage['CenterLat'] = CenterLat = DefaultCenterLat;
 	localStorage['CenterLon'] = CenterLon = DefaultCenterLon;
-	localStorage['ZoomLvl']   = ZoomLvl = DefaultZoomLvl;
+	localStorage['ZoomLvl']   = EntryPoint.ZoomLvl = DefaultZoomLvl;
 
 	// Reset to default range rings
 	localStorage['SiteCirclesCount'] = SiteCirclesCount = DefaultSiteCirclesCount;
@@ -1946,7 +1904,7 @@ function resetMap() {
 	createSiteCircleFeatures();
 
 	// Set and refresh
-	OLMap.getView().setZoom(ZoomLvl);
+	OLMap.getView().setZoom(EntryPoint.ZoomLvl);
 	OLMap.getView().setCenter(ol.proj.fromLonLat([CenterLon, CenterLat]));
 	
 	selectPlaneByHex(null,false);
@@ -2434,7 +2392,7 @@ function toggleLayer(element, layer) {
 function uiTypeCheck() {
     $.ajax('/status.json', {
 		success: function(data) {
-			var type = data.type || 'piaware';
+			var type = data.type || 'anywhere';
 
 			switch (type) {
 				case 'piaware':
@@ -2478,14 +2436,14 @@ function restrictUrlRequest(c) {
 // Function to zoom, but not by too much per 'amount'
 function zoomMap(c, zoomOut) {
     c = restrictUrlRequest(c);
-    ZoomLvl = OLMap.getView().getZoom();
+    EntryPoint.ZoomLvl = OLMap.getView().getZoom();
     if (zoomOut) {
-	ZoomLvl *= Math.pow(0.95, c);
+	EntryPoint.ZoomLvl *= Math.pow(0.95, c);
     } else {
-	ZoomLvl /= Math.pow(0.95, c);
+	EntryPoint.ZoomLvl /= Math.pow(0.95, c);
     }
-    localStorage['ZoomLvl'] = ZoomLvl;
-    OLMap.getView().setZoom(ZoomLvl);
+    localStorage['ZoomLvl'] = EntryPoint.ZoomLvl;
+    OLMap.getView().setZoom(EntryPoint.ZoomLvl);
 }
 
 // Function to move map at 0.005% of the extent per 'move'
@@ -2716,4 +2674,46 @@ function toggleTISBAircraft(switchFilter) {
 		$('#tisb_datasource_checkbox').addClass('sourceCheckboxChecked');
 	}
 	localStorage.setItem('sourceTISBFilter', sourceTISBFilter);
+}
+
+module.exports = {
+	initialize: initialize,
+	sortByICAO: sortByICAO,
+	sortByCountry: sortByCountry,
+	sortByFlight: sortByFlight,
+	sortBySquawk: sortBySquawk,
+	sortByAltitude: sortByAltitude,
+	sortBySpeed: sortBySpeed,
+	sortByDistance: sortByDistance,
+	sortByTrack: sortByTrack,
+	sortByMsgs: sortByMsgs,
+	sortBySeen: sortBySeen,
+	sortByRegistration: sortByRegistration,
+	sortByAircraftType: sortByAircraftType,
+	sortByVerticalRate: sortByVerticalRate,
+	sortByLatitude: sortByLatitude,
+	sortByLongitude: sortByLongitude,
+	sortByDataSource: sortByDataSource,
+	resetMap: resetMap,
+	selectAllPlanes: selectAllPlanes,
+	deselectAllPlanes: deselectAllPlanes,
+	refreshSelected: refreshSelected,
+	onNewData: onNewData,
+	selectPlaneByHex: selectPlaneByHex,
+	SpecialSquawks: SpecialSquawks,
+	// AircraftLabels: AircraftLabels,
+	OLMap: OLMap,
+	//StaticFeatures: StaticFeatures,
+	// SiteCircleFeatures: SiteCircleFeatures,
+	PlaneIconFeatures: PlaneIconFeatures,
+	PlaneTrailFeatures: PlaneTrailFeatures,
+	// Planes: Planes,
+	// PlanesOrdered: PlanesOrdered,
+	// PlaneFilter: PlaneFilter,
+	SelectedPlane: SelectedPlane,
+	SelectedAllPlanes: SelectedAllPlanes,
+	// HighlightedPlane: HighlightedPlane,
+	// FollowSelected: FollowSelected,
+	// infoBoxOriginalPosition: infoBoxOriginalPosition,
+	// customAltitudeColors: customAltitudeColors,
 }

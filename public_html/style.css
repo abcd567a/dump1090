@@ -14,8 +14,8 @@ html, body {
 	bottom: 0;
 	margin: 0;
     background: #ffffff;
-	width: 100%;
 	height: 400px;
+    width: 100%;
 }
 .infoblock-container {
 	overflow: scroll;
@@ -982,5 +982,6 @@ select.error, textarea.error, input.error {
 }
 
 .ui-resizable {
+    position: relative;
     min-width: 400px;
 }

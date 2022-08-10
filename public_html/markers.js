@@ -417,3 +417,8 @@ function svgPathToSvg(path, stroke, fill, selected_stroke) {
 function svgPathToURI(path, stroke, fill, selected_stroke) {
         return "data:image/svg+xml;base64," + btoa(svgPathToSvg(path, stroke, fill, selected_stroke));
 }
+
+module.exports = {
+        getBaseMarker: getBaseMarker,
+        svgPathToURI: svgPathToURI
+}

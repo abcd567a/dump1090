@@ -232,3 +232,7 @@ function findICAORange(icao) {
 
         return unassigned_range;
 }
+
+module.exports = {
+        findICAORange: findICAORange
+}

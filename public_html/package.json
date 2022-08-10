@@ -1,0 +1,33 @@
+{
+  "name": "public_html",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack && cp ol/v6.3.1/ol.js.map dist && cp status.json dist && cp -r db dist && cp -r flags-tiny dist && cp -r geojson dist",
+    "deploy": "aws rm s3://${{ secrets.S3_BUCKET }} --recursive && aws s3 cp ./ s3://${ secrets.S3_BUCKET }} --cache-control 'public, max-age=31536000' --recursive && aws configure set preview.cloudfront true && aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_ID }} --paths '/*';"
+  },
+  "repository": {
+    "type": "git",
+    "url": "(https://github.com/flightaware/dump1090.git)"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "css-loader": "^6.7.1",
+    "html-loader": "^4.1.0",
+    "html-webpack-plugin": "^5.5.0",
+    "ol": "^6.15.1",
+    "path": "^0.12.7",
+    "style-loader": "^3.3.1",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "html-minimizer-webpack-plugin": "^4.0.0",
+    "jquery": "^3.6.0",
+    "terser-webpack-plugin": "^5.3.3"
+  }
+}

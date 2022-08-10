@@ -3,39 +3,14 @@
 	<head>
 		<meta charset="utf-8"/>
 		<link rel="icon" type="images/x-icon" href="images/favicon.ico" />
-		<link rel="stylesheet" type="text/css" href="style.css?v=7.2" />
 		<link rel="stylesheet" href="jquery/jquery-ui-1.11.4-smoothness.css" />
-		<script src="jquery/jquery-3.0.0.min.js"></script>
-		<script src="jquery/jquery-ui-1.11.4.min.js"></script>
-		<script src="jquery/plugins/jquery.validate.min.js"></script>
 
-
-		<link rel="stylesheet" href="ol/v6.3.1/ol.css" type="text/css" />
-		<script src="ol/v6.3.1/ol.js" type="text/javascript"></script>
-
-
-		<link rel="stylesheet" href="ol/ol-layerswitcher.css" type="text/css"/>
-		<script src="ol/ol-layerswitcher.js" type="text/javascript"></script>
-
+		<script src="ol/v6.3.1/ol.js"></script>
 
 		<script src="noUiSlider/distribute/nouislider.min.js"></script>
-		<link rel="stylesheet" href="noUiSlider/distribute/nouislider.min.css"/>
-
-
-		<script type="text/javascript" src="config.js?v=7.2"></script>
-		<script type="text/javascript" src="markers.js?v=7.2"></script>
-		<script type="text/javascript" src="dbloader.js?v=7.2"></script>
-		<script type="text/javascript" src="registrations.js?v=7.2"></script>
-		<script type="text/javascript" src="planeObject.js?v=7.2"></script>
-		<script type="text/javascript" src="formatter.js?v=7.2"></script>
-		<script type="text/javascript" src="flags.js?v=7.2"></script>
-		<script type="text/javascript" src="layers.js?v=7.2"></script>
-		<script type="text/javascript" src="data.js?v=7.2"></script>
-		<script type="text/javascript" src="script.js?v=7.2"></script>
 		<title>SkyAware Anywhere</title>
 	</head>
-
-	<body onload="initialize()">
+	<body onload="EntryPoint.initialize()">
 		<div id="loader" class="hidden">
 			<img src="spinny.gif" id="spinny" alt="Loading...">
 			<progress id="loader_progress"></progress>
@@ -64,9 +39,9 @@
 			</div>
 			<div class="buttonContainer">
 				<div class="dateTime" id="clock_div"></div>
-				<div class="button buttonHeader" onclick="resetMap();"><span class="buttonText">Reset Map</span></div>
-				<div class="button buttonHeader" onclick="selectAllPlanes();"><span class="buttonText">Show All Tracks</span></div>
-				<div class="button buttonHeader" onclick="deselectAllPlanes();"><span class="buttonText">Hide All Tracks</span></div>
+				<div class="button buttonHeader" onclick="EntryPoint.resetMap();"><span class="buttonText">Reset Map</span></div>
+				<div class="button buttonHeader" onclick="EntryPoint.selectAllPlanes();"><span class="buttonText">Show All Tracks</span></div>
+				<div class="button buttonHeader" onclick="EntryPoint.deselectAllPlanes();"><span class="buttonText">Hide All Tracks</span></div>
 			</div>
 			<div class="settingsContainer"><img src="images/settings-icon.png" id="settingsCog" srcset="images/settings-icon.png 1x, images/settings-icon@2x.png 2x, images/settings-icon@3x.png 3x"></div>
 		</div>
@@ -366,22 +341,22 @@
 										<table id="tableinfo" style="width: 100%">
 											<thead class="aircraft_table_header">
 												<tr>
-													<td id="icao" onclick="sortByICAO();">ICAO</td>
-													<td id="flag" onclick="sortByCountry()"><!-- column for flag image --></td>
-													<td id="flight" onclick="sortByFlight();">  Ident  </td>
-													<td id="registration" onclick="sortByRegistration();">Registration</td>
-													<td id="aircraft_type" onclick="sortByAircraftType();"> Aircraft type</td>
-													<td id="squawk" onclick="sortBySquawk();">Squawk</td>
-													<td id="altitude" onclick="sortByAltitude();">Altitude (<span class="altitudeUnit"></span>)</td>
-													<td id="speed" onclick="sortBySpeed();">Speed (<span class="speedUnit"></span>)</td>
-													<td id="vert_rate" onclick="sortByVerticalRate();">Vertical Rate (<span class="verticalRateUnit"></span>)</td>
-													<td id="distance" onclick="sortByDistance();">Distance (<span class="distanceUnit"></span>)</td>
-													<td id="track" onclick="sortByTrack();">Heading</td>
-													<td id="msgs" onclick="sortByMsgs();">Msgs</td>
-													<td id="seen" onclick="sortBySeen();">Age</td>
-													<td id="lat" onclick="sortByLatitude();">Latitude</td>
-													<td id="lon" onclick="sortByLongitude();">Longitude</td>
-													<td id="data_source" onclick="sortByDataSource();">Data Source</td>
+													<td id="icao" onclick="EntryPoint.sortByICAO();">ICAO</td>
+													<td id="flag" onclick="EntryPoint.sortByCountry()"><!-- column for flag image --></td>
+													<td id="flight" onclick="EntryPoint.sortByFlight();">  Ident  </td>
+													<td id="registration" onclick="EntryPoint.sortByRegistration();">Registration</td>
+													<td id="aircraft_type" onclick="EntryPoint.sortByAircraftType();"> Aircraft type</td>
+													<td id="squawk" onclick="EntryPoint.sortBySquawk();">Squawk</td>
+													<td id="altitude" onclick="EntryPoint.sortByAltitude();">Altitude (<span class="altitudeUnit"></span>)</td>
+													<td id="speed" onclick="EntryPoint.sortBySpeed();">Speed (<span class="speedUnit"></span>)</td>
+													<td id="vert_rate" onclick="EntryPoint.sortByVerticalRate();">Vertical Rate (<span class="verticalRateUnit"></span>)</td>
+													<td id="distance" onclick="EntryPoint.sortByDistance();">Distance (<span class="distanceUnit"></span>)</td>
+													<td id="track" onclick="EntryPoint.sortByTrack();">Heading</td>
+													<td id="msgs" onclick="EntryPoint.sortByMsgs();">Msgs</td>
+													<td id="seen" onclick="EntryPoint.sortBySeen();">Age</td>
+													<td id="lat" onclick="EntryPoint.sortByLatitude();">Latitude</td>
+													<td id="lon" onclick="EntryPoint.sortByLongitude();">Longitude</td>
+													<td id="data_source" onclick="EntryPoint.sortByDataSource();">Data Source</td>
 													<td id="airframes_mode_s_link">Airframes.org</td>
 													<td id="flightaware_mode_s_link">FlightAware</td>
 													<td id="flightaware_photo_link">Photos</td>
@@ -390,7 +365,7 @@
 											<tbody>
 												<tr id="plane_row_template" class="plane_table_row hidden">
 													<td class="icaoCodeColumn">ICAO</td>
-													<td><img style="width: 20px; height: 12px" src="about:blank" alt="Flag"></td>
+													<td><img style="width: 20px; height:12px" alt="Flag"></td>
 													<td>FLIGHT</td>
 													<td>REGISTRATION</td>
 													<td>AIRCRAFT_TYPE</td>
