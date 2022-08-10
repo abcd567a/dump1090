@@ -107,7 +107,7 @@ SkyAwareDataFetcher.prototype.reconnectSocket = function(){
 		error: function(xhr){
 			if (xhr.status == 403) {	
 				// This means the user has no ADS-B sites, so send them elsewhere	
-				window.location.href = '/adsb/';	
+				window.location.href = 'https://flightaware.com/adsb/';
 			} else {	
 				alert('Error fetching ADS-B sites for display');	
 			}	
