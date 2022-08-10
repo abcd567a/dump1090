@@ -115,5 +115,3 @@ Minimal testing on 12.1-RELEASE, YMMV.
 # pkg install hackrf
 $ gmake
 ```
-
-Hello, world.
