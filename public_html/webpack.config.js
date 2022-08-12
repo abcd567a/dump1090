@@ -19,7 +19,7 @@ module.exports = {
   },
   mode: 'development',
   devtool: 'source-map',
-	//TODO: add jquery/ol libraries to bundle
+	//TODO: add ol libraries to bundle
   entry: {
     bundle: [
       path.resolve(__dirname, 'entry.js')
