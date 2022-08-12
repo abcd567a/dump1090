@@ -100,10 +100,14 @@ SkyAwareDataFetcher.prototype.setupSocket = function(){
  */
 SkyAwareDataFetcher.prototype.reconnectSocket = function(){
 	var fetcher = this;
-	$.ajax({
+	$.ajax({ type: 'GET',
+		url: 'https://flightaware.com/ajax/skyaware/receiver_info.rvt',
+		xhrFields: {
+		   withCredentials: true
+		},
+		timeout: 5000,
+		cache: false,
 		dataType: 'json',
-		url: 'data/receiver.json',
-		data: window.location.search.substring(1),
 		error: function(xhr){
 			if (xhr.status == 403) {	
 				// This means the user has no ADS-B sites, so send them elsewhere	
