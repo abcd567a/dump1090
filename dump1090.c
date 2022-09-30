@@ -136,7 +136,7 @@ static void modesInitConfig(void) {
     Modes.adaptive_burst_change_delay = 5;
     Modes.adaptive_burst_loud_runlength = 10;
     Modes.adaptive_burst_loud_rate = 5.0;
-    Modes.adaptive_burst_quiet_runlength = 10;    
+    Modes.adaptive_burst_quiet_runlength = 10;
     Modes.adaptive_burst_quiet_rate = 5.0;
 
     Modes.adaptive_range_control = false;
@@ -769,7 +769,7 @@ int main(int argc, char **argv) {
                 fprintf(stderr,
                         "Failed to read wisdom file %s: %s\n", argv[j], strerror(errno));
                 exit(1);
-            }            
+            }
         } else if (!strcmp(argv[j], "--adaptive-min-gain") && more) {
             Modes.adaptive_min_gain_db = atof(argv[++j]);
         } else if (!strcmp(argv[j], "--adaptive-max-gain") && more) {
@@ -834,7 +834,7 @@ int main(int argc, char **argv) {
     if (!sdrOpen()) {
         exit(1);
     }
-   
+
     if (Modes.net) {
         modesInitNet();
     }
