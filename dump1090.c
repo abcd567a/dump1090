@@ -441,6 +441,10 @@ static void showHelp(void)
 void flush_stats(uint64_t now);
 void flush_stats(uint64_t now)
 {
+    if (Modes.sdr_type != SDR_NONE) {
+        Modes.stats_current.sdr_gain = sdrGetGain();
+    }
+
     add_stats(&Modes.stats_current, &Modes.stats_periodic, &Modes.stats_periodic);
     add_stats(&Modes.stats_current, &Modes.stats_alltime, &Modes.stats_alltime);
     add_stats(&Modes.stats_current, &Modes.stats_latest, &Modes.stats_latest);
@@ -840,6 +844,13 @@ int main(int argc, char **argv) {
     }
 
     // init stats:
+    reset_stats(&Modes.stats_current);
+    reset_stats(&Modes.stats_alltime);
+    reset_stats(&Modes.stats_periodic);
+    reset_stats(&Modes.stats_latest);
+    reset_stats(&Modes.stats_5min);
+    reset_stats(&Modes.stats_15min);
+
     Modes.stats_current.start = Modes.stats_current.end =
         Modes.stats_alltime.start = Modes.stats_alltime.end =
         Modes.stats_periodic.start = Modes.stats_periodic.end =
@@ -847,8 +858,10 @@ int main(int argc, char **argv) {
         Modes.stats_5min.start = Modes.stats_5min.end =
         Modes.stats_15min.start = Modes.stats_15min.end = mstime();
 
-    for (j = 0; j < 15; ++j)
+    for (j = 0; j < 15; ++j) {
+        reset_stats(&Modes.stats_1min[j]);
         Modes.stats_1min[j].start = Modes.stats_1min[j].end = Modes.stats_current.start;
+    }
 
     adaptive_init();
 

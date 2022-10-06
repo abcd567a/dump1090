@@ -1884,7 +1884,10 @@ static char * appendStatsJson(char *p,
         if (st->peak_signal_power > 0)
             p = safe_snprintf(p, end, ",\"peak_signal\":%.1f", 10 * log10(st->peak_signal_power));
 
-        p = safe_snprintf(p, end, ",\"strong_signals\":%d}", st->strong_signal_count);
+        p = safe_snprintf(p, end, ",\"strong_signals\":%d", st->strong_signal_count);
+        if (st->sdr_gain >= 0)
+            p = safe_snprintf(p, end, ",\"gain_db\":%.1f", sdrGetGainDb(st->sdr_gain));
+        p = safe_snprintf(p, end, "}");
     }
 
     if (Modes.net) {
@@ -1972,7 +1975,7 @@ static char * appendStatsJson(char *p,
                           ",\"loud_decoded\":%u"
                           ",\"noise_dbfs\":%.1f"
                           ",\"gain_seconds\":[",
-                          sdrGetGainDb(st->adaptive_gain),
+                          sdrGetGainDb(st->sdr_gain),
                           sdrGetGainDb(st->adaptive_range_gain_limit),
                           st->adaptive_gain_changes,
                           st->adaptive_loud_undecoded,
