@@ -628,6 +628,8 @@ int main(int argc, char **argv) {
             Modes.nfix_crc = 0;
         } else if (!strcmp(argv[j],"--no-fix-df")) {
             Modes.fix_df = 0;
+        } else if (!strcmp(argv[j],"--no-crc-check")) {
+            fprintf(stderr, "warning: --no-crc-check no longer supported, option ignored (please raise an issue on github if you have a usecase that needs this)\n");
         } else if (!strcmp(argv[j],"--phase-enhance")) {
             // Ignored, always enabled
         } else if (!strcmp(argv[j],"--raw")) {
