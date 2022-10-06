@@ -112,7 +112,6 @@ static void modesInitConfig(void) {
     // Now initialise things that should not be 0/NULL to their defaults
     Modes.gain                    = MODES_DEFAULT_GAIN;
     Modes.freq                    = MODES_DEFAULT_FREQ;
-    Modes.check_crc               = 1;
     Modes.fix_df                  = 1;
     Modes.interactive_display_ttl = MODES_INTERACTIVE_DISPLAY_TTL;
     Modes.json_interval           = 1000;
@@ -349,7 +348,6 @@ static void showHelp(void)
 "--no-fix                 Disable error correction using CRC\n"
 "--no-fix-df              Disable error correction of the DF message field\n"
 "                          (reduces CPU requirements)\n"
-"--no-crc-check           Disable messages with broken CRC (discouraged)\n"
 "--enable-df24            Enable decoding of DF24 Comm-D ELM messages\n"
 "--lat <latitude>         Reference/receiver latitude for surface positions\n"
 "--lon <longitude>        Reference/receiver longitude for surface positions\n"
@@ -631,7 +629,7 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--no-fix-df")) {
             Modes.fix_df = 0;
         } else if (!strcmp(argv[j],"--no-crc-check")) {
-            Modes.check_crc = 0;
+            fprintf(stderr, "warning: --no-crc-check no longer supported, option ignored (please raise an issue on github if you have a usecase that needs this)\n");
         } else if (!strcmp(argv[j],"--phase-enhance")) {
             // Ignored, always enabled
         } else if (!strcmp(argv[j],"--raw")) {
