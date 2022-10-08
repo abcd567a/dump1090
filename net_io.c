@@ -417,7 +417,7 @@ static void modesSendBeastVerbatimLocalOutput(struct modesMessage *mm) {
         return;
 
     // Do verbatim output for all messages
-    writeBeastMessage(&Modes.beast_verbatim_out, mm->timestampMsg, mm->signalLevel, mm->verbatim, mm->msgbits / 8);
+    writeBeastMessage(&Modes.beast_verbatim_local_out, mm->timestampMsg, mm->signalLevel, mm->verbatim, mm->msgbits / 8);
 }
 
 static void modesSendBeastCookedOutput(struct modesMessage *mm, struct aircraft *a) {
