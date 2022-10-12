@@ -470,7 +470,7 @@ static void adaptive_end_of_block()
     Modes.stats_current.adaptive_valid = true;
     Modes.stats_current.adaptive_range_gain_limit = adaptive_range_gain_limit;
 
-    unsigned current = sdrGetGain();
+    int current = sdrGetGain();
     if (current >= 0)
         ++Modes.stats_current.adaptive_gain_seconds[current < STATS_GAIN_COUNT ? current : STATS_GAIN_COUNT-1];
 }
