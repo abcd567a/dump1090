@@ -1,4 +1,4 @@
-dump1090-fa (8.0) UNRELEASED; urgency=medium
+dump1090-fa (8.0) stable; urgency=medium
 
   * dump1090: fix dropped samples stats accounting (#178 / #184)
   * dump1090: help text updates (#199, #145)
@@ -13,7 +13,7 @@ dump1090-fa (8.0) UNRELEASED; urgency=medium
   * SkyAware: update Swiss flag (#175)
   * SkyAware: update aircraft DB to 2022-09-28
 
- -- Eric Tran <eric.tran@flightaware.com>  Mon, 21 Nov 2022 09:48:29 -0600
+ -- Eric Tran <eric.tran@flightaware.com>  Tue, 06 Dec 2022 12:48:29 -0600
 
 dump1090-fa (7.2) stable; urgency=medium
 
