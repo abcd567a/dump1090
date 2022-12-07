@@ -1,3 +1,9 @@
+dump1090-fa (8.1) UNRELEASED; urgency=medium
+
+  * No change release for 8.1
+
+ -- Eric Tran <eric.tran@flightaware.com>  Wed, 07 Dec 2022 13:36:00 -0600
+
 dump1090-fa (8.0) stable; urgency=medium
 
   * dump1090: fix dropped samples stats accounting (#178 / #184)
