@@ -31,12 +31,17 @@ ifeq ($(PKGCONFIG), yes)
   ifndef LIMESDR
     LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
   endif
+
+  ifndef SOAPY
+    SOAPY := $(shell pkg-config --exists SoapySDR && echo "yes" || echo "no")
+  endif
 else
   # pkg-config not available. Only use explicitly enabled libraries.
   RTLSDR ?= no
   BLADERF ?= no
   HACKRF ?= no
   LIMESDR ?= no
+  SOAPY ?= no
 endif
 
 HOST_UNAME := $(shell uname)
@@ -156,9 +161,10 @@ ifeq ($(LIMESDR), yes)
 endif
 
 ifeq ($(SOAPY), yes)
-SDR_OBJ += sdr_soapy.o
-CFLAGS += $(shell pkg-config --cflags SoapySDR)
-LIBS_SDR += $(shell pkg-config --libs SoapySDR)
+  SDR_OBJ += sdr_soapy.o
+  DUMP1090_CPPFLAGS += -DENABLE_SOAPY
+  DUMP1090_CFLAGS += $(shell pkg-config --cflags SoapySDR)
+  LIBS_SDR += $(shell pkg-config --libs SoapySDR)
 endif
 
 
@@ -200,15 +206,14 @@ include dsp/generated/makefile.$(STARCH_MIX)
 
 showconfig:
 	@echo "Building with:" >&2
-	@echo "  Version string:  $(DUMP1090_VERSION)" >&2
-	@echo "  Architecture:    $(ARCH)" >&2
-	@echo "  DSP mix:         $(STARCH_MIX)" >&2
-	@echo "  RTLSDR support:  $(RTLSDR)" >&2
-	@echo "  BladeRF support: $(BLADERF)" >&2
-	@echo "  HackRF support:  $(HACKRF)" >&2
-	@echo "  LimeSDR support: $(LIMESDR)" >&2
-
-all: dump1090 view1090
+	@echo "  Version string:   $(DUMP1090_VERSION)" >&2
+	@echo "  Architecture:     $(ARCH)" >&2
+	@echo "  DSP mix:          $(STARCH_MIX)" >&2
+	@echo "  RTLSDR support:   $(RTLSDR)" >&2
+	@echo "  BladeRF support:  $(BLADERF)" >&2
+	@echo "  HackRF support:   $(HACKRF)" >&2
+	@echo "  LimeSDR support:  $(LIMESDR)" >&2
+	@echo "  SoapySDR support: $(SOAPY)" >&2
 
 %.o: %.c *.h
 	$(CC) $(ALL_CCFLAGS) -c $< -o $@

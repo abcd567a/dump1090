@@ -33,8 +33,9 @@
 #ifdef ENABLE_LIMESDR
 #  include "sdr_limesdr.h"
 #endif
-
-#include "sdr_soapy.h"
+#ifdef ENABLE_SOAPY
+#  include "sdr_soapy.h"
+#endif
 
 typedef struct {
     const char *name;
@@ -124,17 +125,16 @@ static sdr_handler sdr_handlers[] = {
     { "bladerf", SDR_BLADERF, bladeRFInitConfig, bladeRFShowHelp, bladeRFHandleOption, bladeRFOpen, bladeRFRun, noStop, bladeRFClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 
-<<<<<<< HEAD
 #ifdef ENABLE_HACKRF
     { "hackrf", SDR_HACKRF, hackRFInitConfig, hackRFShowHelp, hackRFHandleOption, hackRFOpen, hackRFRun, noStop, hackRFClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 #ifdef ENABLE_LIMESDR
     { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, noStop, limesdrClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
-=======
 #ifdef ENABLE_SOAPY
-    { "soapy", SDR_SOAPY, soapyInitConfig, soapyShowHelp, soapyHandleOption, soapyOpen, soapyRun, soapyClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
+    { "soapy", SDR_SOAPY, soapyInitConfig, soapyShowHelp, soapyHandleOption, soapyOpen, soapyRun, noStop, soapyClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
+
     { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noStop, noClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
     { "ifile", SDR_IFILE, ifileInitConfig, ifileShowHelp, ifileHandleOption, ifileOpen, ifileRun, noStop, ifileClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 
