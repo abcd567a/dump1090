@@ -155,6 +155,12 @@ ifeq ($(LIMESDR), yes)
   LIBS_SDR += $(shell pkg-config --libs LimeSuite)
 endif
 
+ifeq ($(SOAPY), yes)
+SDR_OBJ += sdr_soapy.o
+CFLAGS += $(shell pkg-config --cflags SoapySDR)
+LIBS_SDR += $(shell pkg-config --libs SoapySDR)
+endif
+
 
 ##
 ## starch (runtime DSP code selection) mix, architecture-specific
@@ -201,6 +207,8 @@ showconfig:
 	@echo "  BladeRF support: $(BLADERF)" >&2
 	@echo "  HackRF support:  $(HACKRF)" >&2
 	@echo "  LimeSDR support: $(LIMESDR)" >&2
+
+all: dump1090 view1090
 
 %.o: %.c *.h
 	$(CC) $(ALL_CCFLAGS) -c $< -o $@
