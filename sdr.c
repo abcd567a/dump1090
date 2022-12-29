@@ -132,7 +132,7 @@ static sdr_handler sdr_handlers[] = {
     { "limesdr", SDR_LIMESDR, limesdrInitConfig, limesdrShowHelp, limesdrHandleOption, limesdrOpen, limesdrRun, noStop, limesdrClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
 #endif
 #ifdef ENABLE_SOAPY
-    { "soapy", SDR_SOAPY, soapyInitConfig, soapyShowHelp, soapyHandleOption, soapyOpen, soapyRun, noStop, soapyClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },
+    { "soapy", SDR_SOAPY, soapyInitConfig, soapyShowHelp, soapyHandleOption, soapyOpen, soapyRun, noStop, soapyClose, soapyGetGain, soapyGetMaxGain, soapyGetGainDb, soapySetGain },
 #endif
 
     { "none", SDR_NONE, noInitConfig, noShowHelp, noHandleOption, noOpen, noRun, noStop, noClose, noGetGain, noGetMaxGain, noGetGainDb, noSetGain },

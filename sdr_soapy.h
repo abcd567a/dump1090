@@ -27,5 +27,9 @@ bool soapyOpen();
 void soapyRun();
 void soapyClose();
 bool soapyHandleOption(int argc, char **argv, int *jptr);
+int soapyGetGain();
+int soapyGetMaxGain();
+double soapyGetGainDb(int step);
+int soapySetGain(int step);
 
 #endif

@@ -27,7 +27,6 @@
 static struct {
     SoapySDRDevice *dev;
     SoapySDRStream *stream;
-    char* hw_key;
     bool dev_sdrplay;
 
     iq_convert_fn converter;
@@ -35,7 +34,9 @@ static struct {
 
     size_t channel;
     const char* antenna;
+    double bandwidth;
     bool enable_agc;
+    double rfgain;
 } SOAPY;
 
 //
@@ -46,13 +47,14 @@ void soapyInitConfig()
 {
     SOAPY.dev = NULL;
     SOAPY.stream = NULL;
-    SOAPY.hw_key = NULL;
     SOAPY.dev_sdrplay = false;
     SOAPY.converter = NULL;
     SOAPY.converter_state = NULL;
     SOAPY.channel = 0;
     SOAPY.antenna = NULL;
+    SOAPY.bandwidth = 0;
     SOAPY.enable_agc = false;
+    SOAPY.rfgain = MODES_DEFAULT_GAIN;
 }
 
 void soapyShowHelp()
@@ -62,8 +64,9 @@ void soapyShowHelp()
     printf("--device <string>        select/configure device\n");
     printf("--channel <num>          select channel if device supports multiple channels (default: 0)\n");
     printf("--antenna <string>       select antenna (default depends on device)\n");
+    printf("--bandwidth <hz>         set the baseband filter width (default: 3MHz, SDRPlay: 5MHz)\n");
     printf("--enable-agc             enable Automatic Gain Control if supported by device\n");
-
+    printf("--rfgain <db>            (SDRPlay) set RF gain in dB (min: 0, max: depends on device)\n");
     printf("\n");
 }
 
@@ -76,8 +79,12 @@ bool soapyHandleOption(int argc, char **argv, int *jptr)
         SOAPY.channel = atoi(argv[++j]);
     } else if (!strcmp(argv[j], "--antenna") && more) {
         SOAPY.antenna = strdup(argv[++j]);
+    } else if (!strcmp(argv[j], "--bandwidth") && more) {
+        SOAPY.bandwidth = atof(argv[++j]);
     } else if (!strcmp(argv[j], "--enable-agc") && more) {
         SOAPY.enable_agc = true;
+    } else if (!strcmp(argv[j], "--rfgain") && more) {
+        SOAPY.rfgain = atof(argv[++j]);
     } else {
         return false;
     }
@@ -126,7 +133,6 @@ bool soapyOpen(void)
     char* hw_key = SoapySDRDevice_getHardwareKey(SOAPY.dev);
     if (hw_key) {
         printf("soapy: hardware key is %s\n", hw_key);
-        SOAPY.hw_key = strdup(hw_key);
         SoapySDR_free(hw_key);
     }
 
@@ -143,10 +149,11 @@ bool soapyOpen(void)
     fprintf(stderr, "soapy: available antennas: ");
     for (size_t i = 0; i < length; i++) {
         fprintf(stderr, "%s", available_antennas[i]);
-        if (i+1 < length) printf(", ");
+        if (i+1 < length) fprintf(stderr, ", ");
     }
     fprintf(stderr, "\n");
-    SoapySDRStrings_clear(&available_antennas, length);
+    if (available_antennas)
+        SoapySDRStrings_clear(&available_antennas, length);
 
     if (SoapySDRDevice_setSampleRate(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, Modes.sample_rate) != 0) {
         fprintf(stderr, "soapy: setSampleRate failed: %s\n", SoapySDRDevice_lastError());
@@ -180,19 +187,43 @@ bool soapyOpen(void)
     }
 
     if (Modes.gain != MODES_DEFAULT_GAIN) {
-        double gain;
-        if (SOAPY.dev_sdrplay) {
-            gain = Modes.gain;
-        } else {
-            gain = Modes.gain / 10.0;
-        }
-        if (SoapySDRDevice_setGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain) != 0) {
-            fprintf(stderr, "soapy: setGain failed: %s\n", SoapySDRDevice_lastError());
+        if (soapySetGain(Modes.gain) < 0) {
+            fprintf(stderr, "soapy: set gain failed\n");
             goto error;
         }
     }
 
-    if (SoapySDRDevice_setBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, (SOAPY.dev_sdrplay ? 5.0e6 : 3.0e6)) != 0) {
+    if (SOAPY.dev_sdrplay && SOAPY.rfgain != MODES_DEFAULT_GAIN) {
+        if (SoapySDRDevice_setGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, "RFGR", SOAPY.rfgain) != 0) {
+            fprintf(stderr, "soapy: setGainElement for RFGR failed: %s\n", SoapySDRDevice_lastError());
+            goto error;
+        }
+    }
+
+    if (Modes.gain == MODES_DEFAULT_GAIN) {
+        // soapySetGain not called so report on default gain values
+        fprintf(stderr, "soapy: gain is %.1fdB",
+                SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
+        length = 0;
+        char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
+        for (size_t i = 0; i < length; i++) {
+            fprintf(stderr, ", %s=%.1fdB", gain_elements[i],
+                SoapySDRDevice_getGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain_elements[i]));
+        }
+        if (gain_elements)
+            SoapySDRStrings_clear(&gain_elements, length);
+        fprintf(stderr, "\n");
+    }
+
+    double bandwidth = SOAPY.bandwidth;
+    if (bandwidth == 0) {
+        // bandwidth by default is 3 MHz or 5 MHz if a SDRPlay device
+        if (SOAPY.dev_sdrplay)
+            bandwidth = 5.0e6;
+        else
+            bandwidth = 3.0e6;
+    }
+    if (SoapySDRDevice_setBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, bandwidth) != 0) {
         fprintf(stderr, "soapy: setBandwidth failed: %s\n", SoapySDRDevice_lastError());
         goto error;
     }
@@ -212,8 +243,7 @@ bool soapyOpen(void)
         fprintf(stderr, "soapy: AGC mode is %s\n",
                 SoapySDRDevice_getGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) == 0 ? "disabled" : "enabled");
     }
-    fprintf(stderr, "soapy: gain is %.1f dB\n",
-            SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
+
     char* antenna = SoapySDRDevice_getAntenna(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
     if (antenna != NULL) {
         fprintf(stderr, "soapy: antenna is %s\n", antenna);
@@ -365,10 +395,40 @@ void soapyClose()
         SOAPY.converter_state = NULL;
     }
 
-    if (SOAPY.hw_key) {
-        free(SOAPY.hw_key);
-        SOAPY.hw_key = NULL;
-    }
-
     fprintf(stderr, "all done\n");
+}
+
+int soapyGetGain() {
+    return SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
+}
+
+int soapyGetMaxGain() {
+    SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
+    return range.maximum - range.minimum;
+}
+
+double soapyGetGainDb(int step) {
+    SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
+    return range.minimum + step;
+}
+
+int soapySetGain(int step) {
+    // for SDRPlay, this sets IF gain (IFGR) to IFGRmin+step (IFGRmin=20dB)
+    if (SoapySDRDevice_setGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, step) != 0) {
+        fprintf(stderr, "soapy: setGain failed: %s\n", SoapySDRDevice_lastError());
+        return -1;
+    }
+    else {
+        fprintf(stderr, "soapy: gain set to %.1fdB", soapyGetGainDb(step));
+        size_t length = 0;
+        char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
+        for (size_t i = 0; i < length; i++) {
+            fprintf(stderr, ", %s=%.1fdB", gain_elements[i],
+                SoapySDRDevice_getGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain_elements[i]));
+        }
+        if (gain_elements)
+            SoapySDRStrings_clear(&gain_elements, length);
+        fprintf(stderr, "\n");
+    }
+    return soapyGetGain();
 }
