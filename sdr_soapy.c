@@ -404,12 +404,12 @@ int soapyGetGain() {
 
 int soapyGetMaxGain() {
     SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
-    return range.maximum - range.minimum;
+    return (range.maximum - range.minimum) / (!range.step ? 1 : range.step);
 }
 
 double soapyGetGainDb(int step) {
     SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
-    return range.minimum + step;
+    return (range.minimum + step) * (!range.step ? 1 : range.step);
 }
 
 int soapySetGain(int step) {
