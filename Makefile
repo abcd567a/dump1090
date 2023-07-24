@@ -169,6 +169,10 @@ else
     # AVX, AVX2
     STARCH_MIX := x86
     DUMP1090_CPPFLAGS += -DSTARCH_MIX_X86
+  else ifeq ($(ARCH),amd64)
+    # this is the Debian naming of x86_64
+    STARCH_MIX := x86
+    DUMP1090_CPPFLAGS += -DSTARCH_MIX_X86
   else ifeq ($(findstring aarch,$(ARCH)),aarch)
     STARCH_MIX := aarch64
     DUMP1090_CPPFLAGS += -DSTARCH_MIX_AARCH64
