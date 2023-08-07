@@ -461,13 +461,11 @@ void soapyRun()
 
 void soapyClose()
 {
-    fprintf(stderr, "close stream\n");
     if (SOAPY.stream) {
         SoapySDRDevice_closeStream(SOAPY.dev, SOAPY.stream);
         SOAPY.stream = NULL;
     }
 
-    fprintf(stderr, "close device\n");
     if (SOAPY.dev) {
         SoapySDRDevice_unmake(SOAPY.dev);
         SOAPY.dev = NULL;
