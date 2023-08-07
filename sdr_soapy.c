@@ -300,46 +300,63 @@ bool soapyOpen(void)
     }
 
 
-    fprintf(stderr, "soapy: frequency is %.1f MHz\n",
+    //
+    // Done configuring, report the final device state
+    //
+
+    fprintf(stderr, "soapy: total gain:      %.1fdB",
+            SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
+    char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
+    if (gain_elements) {
+        for (size_t i = 0; i < length; i++) {
+            fprintf(stderr, "; %s=%.1fdB", gain_elements[i],
+                    SoapySDRDevice_getGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain_elements[i]));
+        }
+        SoapySDRStrings_clear(&gain_elements, length);
+    }
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "soapy: frequency:       %.1f MHz\n",
             SoapySDRDevice_getFrequency(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) / 1e6);
-    fprintf(stderr, "soapy: sample rate is %.1f MHz\n",
+    fprintf(stderr, "soapy: sample rate:     %.1f MHz\n",
             SoapySDRDevice_getSampleRate(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) / 1e6);
-    fprintf(stderr, "soapy: bandwidth is %.1f MHz\n",
+    fprintf(stderr, "soapy: bandwidth:       %.1f MHz\n",
             SoapySDRDevice_getBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) / 1e6);
     if (has_agc) {
-        fprintf(stderr, "soapy: AGC mode is %s\n",
-                SoapySDRDevice_getGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) == 0 ? "disabled" : "enabled");
+        fprintf(stderr, "soapy: AGC mode:        %s\n",
+                SoapySDRDevice_getGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "automatic" : "manual");
     }
 
     char* antenna = SoapySDRDevice_getAntenna(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
-    if (antenna != NULL) {
-        fprintf(stderr, "soapy: antenna is %s\n", antenna);
+    if (antenna) {
+        fprintf(stderr, "soapy: antenna:         %s\n", antenna);
         SoapySDR_free(antenna);
     }
-    if (SoapySDRDevice_hasDCOffsetMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
-        fprintf(stderr, "soapy: DC offset mode is %s\n",
-                SoapySDRDevice_getDCOffsetMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "enabled" : "disabled");
-    }
+
     if (SoapySDRDevice_hasDCOffset(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
+        fprintf(stderr, "soapy: DC offset mode:  %s\n",
+                SoapySDRDevice_getDCOffsetMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "automatic" : "manual");
+
         double offsetI;
         double offsetQ;
         if (!SoapySDRDevice_getDCOffset(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &offsetI, &offsetQ)) {
-            fprintf(stderr, "soapy: DC offset is I=%.1f, Q=%.1f\n", offsetI, offsetQ);
+            fprintf(stderr, "soapy: DC offset:  I=%.3f Q=%.3f\n", offsetI, offsetQ);
         }
     }
-    if (SoapySDRDevice_hasIQBalanceMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
-        fprintf(stderr, "soapy: IQ balance mode is %s\n",
-                SoapySDRDevice_getIQBalanceMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "enabled" : "disabled");
-    }
+
     if (SoapySDRDevice_hasIQBalance(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
+        fprintf(stderr, "soapy: IQ balance mode: %s\n",
+                SoapySDRDevice_getIQBalanceMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "automatic" : "manual");
+
           double balanceI;
           double balanceQ;
           if (!SoapySDRDevice_getIQBalance(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &balanceI, &balanceQ)) {
               fprintf(stderr, "soapy: IQ balance is I=%.1f, Q=%.1f\n", balanceI, balanceQ);
           }
     }
+
     if (SoapySDRDevice_hasFrequencyCorrection(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
-        fprintf(stderr, "soapy: frequency correction is %.1f ppm\n",
+        fprintf(stderr, "soapy: freq correction: %.1f ppm\n",
                 SoapySDRDevice_getFrequencyCorrection(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
     }
 
