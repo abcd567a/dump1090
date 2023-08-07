@@ -199,7 +199,7 @@ bool soapyOpen(void)
     if (SOAPY.channel) {
         size_t supported_channels = SoapySDRDevice_getNumChannels(SOAPY.dev, SOAPY_SDR_RX);
         if (SOAPY.channel >= supported_channels) {
-            fprintf(stderr, "soapy: device only supports %ld channels\n", supported_channels);
+            fprintf(stderr, "soapy: device only supports %ld channels, not %ld\n", supported_channels, SOAPY.channel + 1);
             goto error;
         }
     }
