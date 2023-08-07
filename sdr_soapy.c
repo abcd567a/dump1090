@@ -40,6 +40,7 @@ static struct {
     char **gain_elements;
 
     SoapySDRRange gain_range;
+    int current_gain_step;
 } SOAPY;
 
 //
@@ -293,6 +294,9 @@ bool soapyOpen(void)
         }
     }
 
+    SOAPY.current_gain_step = (int) round( (SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) - SOAPY.gain_range.minimum) / SOAPY.gain_range.step );
+    if (Modes.adaptive_range_target == 0)
+        Modes.adaptive_range_target = (SOAPY.gain_range.maximum - SOAPY.gain_range.minimum) * 0.6; // just a wild guess
 
     if (SoapySDRDevice_setBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, SOAPY.bandwidth) != 0) {
         fprintf(stderr, "soapy: setBandwidth(%.1f MHz) failed: %s\n", SOAPY.bandwidth / 1e6, SoapySDRDevice_lastError());
@@ -484,37 +488,54 @@ void soapyClose()
     SOAPY.gain_elements = NULL;
 }
 
+//
+// This is a bit horrible; since soapy doesn't tell us the actual device steps,
+// we track the last requested gain step ourselves and always report that as
+// the current step. Otherwise adaptive gain will get confused if there are
+// any step values that can't actually be set, i.e.:
+//
+//   current gain is at step 4
+//   adaptive wants to increase gain, set gain = current + 1 = 5
+//   request gain 5, hardware can't actually do that, nearest is step 4
+//   adaptive wants to increase gain further, set gain = current + 1 = 5
+//   we make no progress
+
 int soapyGetGain() {
-    return SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
+    return SOAPY.current_gain_step;
 }
 
 int soapyGetMaxGain() {
-    SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
-    return (range.maximum - range.minimum) / (!range.step ? 1 : range.step);
+    return (int) ceil( (SOAPY.gain_range.maximum - SOAPY.gain_range.minimum) / SOAPY.gain_range.step );
 }
 
 double soapyGetGainDb(int step) {
-    SoapySDRRange range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
-    return (range.minimum + step) * (!range.step ? 1 : range.step);
+    double gain = SOAPY.gain_range.minimum + step * SOAPY.gain_range.step;
+    if (gain < SOAPY.gain_range.minimum)
+        gain = SOAPY.gain_range.minimum;
+    if (gain > SOAPY.gain_range.maximum)
+        gain = SOAPY.gain_range.maximum;
+    return gain;
 }
 
 int soapySetGain(int step) {
-    // for SDRPlay, this sets IF gain (IFGR) to IFGRmin+step (IFGRmin=20dB)
-    if (SoapySDRDevice_setGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, step) != 0) {
-        fprintf(stderr, "soapy: setGain failed: %s\n", SoapySDRDevice_lastError());
+    double gainDb = soapyGetGainDb(step);
+
+    if (SoapySDRDevice_setGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gainDb) != 0) {
+        fprintf(stderr, "soapy: setGain(%.1fdB) failed: %s\n", gainDb, SoapySDRDevice_lastError());
         return -1;
     }
-    else {
-        fprintf(stderr, "soapy: gain set to %.1fdB", soapyGetGainDb(step));
-        size_t length = 0;
-        char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
-        for (size_t i = 0; i < length; i++) {
-            fprintf(stderr, ", %s=%.1fdB", gain_elements[i],
+
+    fprintf(stderr, "soapy: total gain set to %.1fdB", SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
+    size_t length = 0;
+    char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
+    for (size_t i = 0; i < length; i++) {
+        fprintf(stderr, "; %s=%.1fdB", gain_elements[i],
                 SoapySDRDevice_getGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain_elements[i]));
-        }
-        if (gain_elements)
-            SoapySDRStrings_clear(&gain_elements, length);
-        fprintf(stderr, "\n");
     }
-    return soapyGetGain();
+    if (gain_elements)
+        SoapySDRStrings_clear(&gain_elements, length);
+    fprintf(stderr, "\n");
+
+    SOAPY.current_gain_step = step;
+    return step;
 }
