@@ -33,7 +33,6 @@ typedef struct _gain_element_config {
 static struct {
     SoapySDRDevice *dev;
     SoapySDRStream *stream;
-    bool dev_sdrplay;
 
     iq_convert_fn converter;
     struct converter_state *converter_state;
@@ -54,7 +53,6 @@ void soapyInitConfig()
 {
     SOAPY.dev = NULL;
     SOAPY.stream = NULL;
-    SOAPY.dev_sdrplay = false;
     SOAPY.converter = NULL;
     SOAPY.converter_state = NULL;
     SOAPY.channel = 0;
@@ -177,18 +175,41 @@ bool soapyOpen(void)
 
     SoapySDRKwargs result = SoapySDRDevice_getHardwareInfo(SOAPY.dev);
     if (result.size > 0) {
+        fprintf(stderr, "soapy: hardware info:  ");
         for (size_t i = 0; i < result.size; ++i) {
-            printf("%s=%s", result.keys[i], result.vals[i]);
-            if (i+1 < result.size) printf(", ");
+            if (i) fprintf(stderr, ", ");
+            fprintf(stderr, "%s=%s", result.keys[i], result.vals[i]);
         }
-        printf("\n");
+        fprintf(stderr, "\n");
     }
     SoapySDRKwargs_clear(&result);
 
+    char* driver_key = SoapySDRDevice_getDriverKey(SOAPY.dev);
+    if (driver_key) {
+        fprintf(stderr, "soapy: driver key:      %s\n", driver_key);
+
+        // Apply driver-specific defaults
+        if (!strcmp(driver_key, "SDRplay")) {
+            // Default to 5MHz bandwidth
+            if (SOAPY.bandwidth == 0)
+                SOAPY.bandwidth = 5.0e6;
+        }
+
+        SoapySDR_free(driver_key);
+    }
+
     char* hw_key = SoapySDRDevice_getHardwareKey(SOAPY.dev);
     if (hw_key) {
-        printf("soapy: hardware key is %s\n", hw_key);
+        fprintf(stderr, "soapy: hardware key:    %s\n", hw_key);
         SoapySDR_free(hw_key);
+    }
+
+    //
+    // Apply generic defaults
+    //
+
+    if (SOAPY.bandwidth == 0) {
+        SOAPY.bandwidth = 3.0e6;
     }
 
     if (SOAPY.channel) {
@@ -272,16 +293,9 @@ bool soapyOpen(void)
         fprintf(stderr, "\n");
     }
 
-    double bandwidth = SOAPY.bandwidth;
-    if (bandwidth == 0) {
-        // bandwidth by default is 3 MHz or 5 MHz if a SDRPlay device
-        if (SOAPY.dev_sdrplay)
-            bandwidth = 5.0e6;
-        else
-            bandwidth = 3.0e6;
-    }
-    if (SoapySDRDevice_setBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, bandwidth) != 0) {
-        fprintf(stderr, "soapy: setBandwidth failed: %s\n", SoapySDRDevice_lastError());
+
+    if (SoapySDRDevice_setBandwidth(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, SOAPY.bandwidth) != 0) {
+        fprintf(stderr, "soapy: setBandwidth(%.1f MHz) failed: %s\n", SOAPY.bandwidth / 1e6, SoapySDRDevice_lastError());
         goto error;
     }
 
