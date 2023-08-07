@@ -32,8 +32,8 @@ ifeq ($(PKGCONFIG), yes)
     LIMESDR := $(shell pkg-config --exists LimeSuite && echo "yes" || echo "no")
   endif
 
-  ifndef SOAPY
-    SOAPY := $(shell pkg-config --exists SoapySDR && echo "yes" || echo "no")
+  ifndef SOAPYSDR
+    SOAPYSDR := $(shell pkg-config --exists SoapySDR && echo "yes" || echo "no")
   endif
 else
   # pkg-config not available. Only use explicitly enabled libraries.
@@ -41,7 +41,7 @@ else
   BLADERF ?= no
   HACKRF ?= no
   LIMESDR ?= no
-  SOAPY ?= no
+  SOAPYSDR ?= no
 endif
 
 BUILD_UNAME := $(shell uname)
@@ -160,9 +160,9 @@ ifeq ($(LIMESDR), yes)
   LIBS_SDR += $(shell pkg-config --libs LimeSuite)
 endif
 
-ifeq ($(SOAPY), yes)
+ifeq ($(SOAPYSDR), yes)
   SDR_OBJ += sdr_soapy.o
-  DUMP1090_CPPFLAGS += -DENABLE_SOAPY
+  DUMP1090_CPPFLAGS += -DENABLE_SOAPYSDR
   DUMP1090_CFLAGS += $(shell pkg-config --cflags SoapySDR)
   LIBS_SDR += $(shell pkg-config --libs SoapySDR)
 endif
@@ -217,7 +217,7 @@ showconfig:
 	@echo "  BladeRF support:  $(BLADERF)" >&2
 	@echo "  HackRF support:   $(HACKRF)" >&2
 	@echo "  LimeSDR support:  $(LIMESDR)" >&2
-	@echo "  SoapySDR support: $(SOAPY)" >&2
+	@echo "  SoapySDR support: $(SOAPYSDR)" >&2
 
 %.o: %.c *.h
 	$(CC) $(ALL_CCFLAGS) -c $< -o $@

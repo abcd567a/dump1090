@@ -62,7 +62,7 @@ libhackrf.
 ``make LIMESDR=no`` will disable LimeSDR support and remove the dependency on
 libLimeSuite.
 
-``make SOAPY=no`` will disable SoapySDR support and remove the dependency on
+``make SOAPYSDR=no`` will disable SoapySDR support and remove the dependency on
 libSoapySDR.
 
 ## Building on OSX
