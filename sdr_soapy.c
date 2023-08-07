@@ -337,8 +337,8 @@ bool soapyOpen(void)
                 SoapySDRDevice_getFrequencyCorrection(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
     }
 
-    size_t channels[1] = { 0 };
-    SoapySDRKwargs stream_args = { 0 };
+    size_t channels[1] = { SOAPY.channel };
+    SoapySDRKwargs stream_args = { 0, NULL, NULL };
     if ((SOAPY.stream = SoapySDRDevice_setupStream(SOAPY.dev, SOAPY_SDR_RX, SOAPY_SDR_CS16, channels, 1, &stream_args)) == NULL) {
         fprintf(stderr, "soapy: setupStream failed: %s\n", SoapySDRDevice_lastError());
         goto error;
