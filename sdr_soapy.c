@@ -49,25 +49,26 @@ static struct {
 
 static void polyfill_SoapySDR_free(void *ignored)
 {
+    (void) ignored;
 }
 
-static SoapySDRStream *polyfill_SoapySDR_setupStream(SoapySDRDevice *device,
-                                                     const int direction,
-                                                     const char *format,
-                                                     const size_t *channels,
-                                                     const size_t numChans,
-                                                     const SoapySDRKwargs *args)
+static SoapySDRStream *polyfill_SoapySDRDevice_setupStream(SoapySDRDevice *device,
+                                                           const int direction,
+                                                           const char *format,
+                                                           const size_t *channels,
+                                                           const size_t numChans,
+                                                           const SoapySDRKwargs *args)
 {
     SoapySDRStream *result;
 
-    if (SoapySDR_setupStream(device, &result, direction, format, channels, numChans, args) == 0)
+    if (SoapySDRDevice_setupStream(device, &result, direction, format, channels, numChans, args) == 0)
         return result;
     else
         return NULL;
 }
 
 #define SoapySDR_free polyfill_SoapySDR_free
-#define SoapySDR_setupStream polyfill_SoapySDR_setupStream
+#define SoapySDRDevice_setupStream polyfill_SoapySDRDevice_setupStream
 
 #endif /* pre-0.8 API */
 
