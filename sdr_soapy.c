@@ -24,12 +24,6 @@
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 
-typedef struct _gain_element_config {
-  char* gain_element_name;
-  double gain_element_db;
-  struct _gain_element_config* next;
-} gain_element_config_t;
-
 static struct {
     SoapySDRDevice *dev;
     SoapySDRStream *stream;
@@ -41,8 +35,11 @@ static struct {
     const char* antenna;
     double bandwidth;
     bool enable_agc;
-    gain_element_config_t* gain_element_first;
-    gain_element_config_t* gain_element_last;
+
+    int num_gain_elements;
+    char **gain_elements;
+
+    SoapySDRRange gain_range;
 } SOAPY;
 
 //
@@ -59,8 +56,8 @@ void soapyInitConfig()
     SOAPY.antenna = NULL;
     SOAPY.bandwidth = 0;
     SOAPY.enable_agc = false;
-    SOAPY.gain_element_first = NULL;
-    SOAPY.gain_element_last = NULL;
+    SOAPY.num_gain_elements = 0;
+    SOAPY.gain_elements = NULL;
 }
 
 void soapyShowHelp()
@@ -90,27 +87,14 @@ bool soapyHandleOption(int argc, char **argv, int *jptr)
     } else if (!strcmp(argv[j], "--enable-agc") && more) {
         SOAPY.enable_agc = true;
     } else if (!strcmp(argv[j], "--gain-element") && more) {
-        char* gain_element_opt = strdup(argv[++j]);
-        if (gain_element_opt != NULL) {
-            char* saveptr;
-            char* gain_element_name = strtok_r(gain_element_opt, ":", &saveptr);
-            char* db_str = strtok_r(NULL, ":", &saveptr);
-            if (gain_element_name != NULL) {
-                gain_element_config_t* gain_element_config = (gain_element_config_t*) calloc(1, sizeof(gain_element_config_t));
-                if (gain_element_config == NULL) {
-                    fprintf(stderr, "soapy: Unable to allocate memory for gain element config\n");
-                } else {
-                    gain_element_config->gain_element_name = gain_element_name;
-                    gain_element_config->gain_element_db = db_str != NULL ? atof(db_str) : MODES_DEFAULT_GAIN;
-                    if (SOAPY.gain_element_last == NULL) {
-                        SOAPY.gain_element_first = gain_element_config;
-                        SOAPY.gain_element_last = gain_element_config;
-                    } else {
-                        SOAPY.gain_element_last->next = gain_element_config;
-                        SOAPY.gain_element_last = gain_element_config;
-                    }
-                }
-            }
+        ++SOAPY.num_gain_elements;
+        if (! (SOAPY.gain_elements = realloc(SOAPY.gain_elements, SOAPY.num_gain_elements * sizeof(*SOAPY.gain_elements))) ) {
+            perror("realloc");
+            abort();
+        }
+        if (! (SOAPY.gain_elements[SOAPY.num_gain_elements-1] = strdup(argv[++j])) ) {
+            perror("strdup");
+            abort();
         }
     } else {
         return false;
@@ -241,6 +225,12 @@ bool soapyOpen(void)
         goto error;
     }
 
+    SOAPY.gain_range = SoapySDRDevice_getGainRange(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
+    if (SOAPY.gain_range.step <= 0)
+        SOAPY.gain_range.step = 1.0;
+    else if (SOAPY.gain_range.step <= 0.1)
+        SOAPY.gain_range.step = 0.1;
+
     bool has_agc = SoapySDRDevice_hasGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel);
     if (SOAPY.enable_agc) {
         if (has_agc) {
@@ -253,44 +243,44 @@ bool soapyOpen(void)
             fprintf(stderr, "soapy: device does not support enabling AGC\n");
             goto error;
         }
-    }
-    else if(has_agc) {
-        // by default, disable AGC
-        if (SoapySDRDevice_setGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, 0) != 0) {
-            fprintf(stderr, "soapy: setGainMode failed: %s\n", SoapySDRDevice_lastError());
-            goto error;
-        }
-    }
+    } else {
+        // Manual gain path
 
-    if (Modes.gain != MODES_DEFAULT_GAIN) {
-        if (soapySetGain(Modes.gain) < 0) {
-            fprintf(stderr, "soapy: set gain failed\n");
-            goto error;
-        }
-    }
-
-    for (gain_element_config_t* cfg = SOAPY.gain_element_first; cfg != NULL; cfg = cfg->next) {
-        if (cfg->gain_element_db != MODES_DEFAULT_GAIN) {
-            if (SoapySDRDevice_setGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, cfg->gain_element_name, cfg->gain_element_db) != 0) {
-                fprintf(stderr, "soapy: setGainElement for %s failed: %s\n", cfg->gain_element_name, SoapySDRDevice_lastError());
+        if (has_agc) {
+            if (SoapySDRDevice_setGainMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, 0) != 0) {
+                fprintf(stderr, "soapy: setGainMode failed: %s\n", SoapySDRDevice_lastError());
                 goto error;
             }
         }
-    }
 
-    if (Modes.gain == MODES_DEFAULT_GAIN) {
-        // soapySetGain not called so report on default gain values
-        fprintf(stderr, "soapy: gain is %.1fdB",
-                SoapySDRDevice_getGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel));
-        length = 0;
-        char** gain_elements = SoapySDRDevice_listGains(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
-        for (size_t i = 0; i < length; i++) {
-            fprintf(stderr, ", %s=%.1fdB", gain_elements[i],
-                SoapySDRDevice_getGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain_elements[i]));
+        double gain = (Modes.gain == MODES_DEFAULT_GAIN ? SOAPY.gain_range.maximum : Modes.gain);
+        if (SoapySDRDevice_setGain(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, gain) < 0) {
+            fprintf(stderr, "soapy: setGain(%.1fdB) failed\n", gain);
+            goto error;
         }
-        if (gain_elements)
-            SoapySDRStrings_clear(&gain_elements, length);
-        fprintf(stderr, "\n");
+
+        for (int i = 0; i < SOAPY.num_gain_elements; ++i) {
+            char *element = SOAPY.gain_elements[i];
+            char *sep = strchr(element, ':');
+            if (!sep || !sep[1]) {
+                fprintf(stderr, "soapy: don't understand a gain element setting of '%s' (should be formatted as <element>:<db>)\n", element);
+                goto error;
+            }
+
+            *sep = 0;
+            char *endptr = NULL;
+            double gain = strtod(sep + 1, &endptr);
+
+            if ((gain == 0 && !endptr) || *endptr) {
+                fprintf(stderr, "soapy: don't understand a gain value of '%s' for gain element %s (should be a floating-point gain in dB)\n", sep + 1, element);
+                goto error;
+            }
+
+            if (SoapySDRDevice_setGainElement(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, element, gain) != 0) {
+                fprintf(stderr, "soapy: setGainElement(%s,%.1fdB) failed: %s\n", element, gain, SoapySDRDevice_lastError());
+                goto error;
+            }
+        }
     }
 
 
@@ -466,17 +456,11 @@ void soapyClose()
         SOAPY.converter_state = NULL;
     }
 
-    gain_element_config_t* cfg = SOAPY.gain_element_first;
-    while (cfg != NULL) {
-        if (cfg->gain_element_name != NULL) {
-            free(cfg->gain_element_name);
-        }
-        gain_element_config_t* next = cfg->next;
-        free(cfg);
-        cfg = next;
+    for (int i = 0; i < SOAPY.num_gain_elements; ++i) {
+        free(SOAPY.gain_elements[i]);
     }
-
-    fprintf(stderr, "all done\n");
+    free(SOAPY.gain_elements);
+    SOAPY.gain_elements = NULL;
 }
 
 int soapyGetGain() {
