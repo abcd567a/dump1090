@@ -196,6 +196,10 @@ bool soapyOpen(void)
         SOAPY.bandwidth = 3.0e6;
     }
 
+    //
+    // Configure everything
+    //
+
     if (SOAPY.channel) {
         size_t supported_channels = SoapySDRDevice_getNumChannels(SOAPY.dev, SOAPY_SDR_RX);
         if (SOAPY.channel >= supported_channels) {
@@ -204,19 +208,25 @@ bool soapyOpen(void)
         }
     }
 
-    length = 0;
-    char** available_antennas = SoapySDRDevice_listAntennas(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
-    fprintf(stderr, "soapy: available antennas: ");
-    for (size_t i = 0; i < length; i++) {
-        fprintf(stderr, "%s", available_antennas[i]);
-        if (i+1 < length) fprintf(stderr, ", ");
-    }
-    fprintf(stderr, "\n");
-    if (available_antennas)
-        SoapySDRStrings_clear(&available_antennas, length);
-
     if (SoapySDRDevice_setSampleRate(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, Modes.sample_rate) != 0) {
         fprintf(stderr, "soapy: setSampleRate failed: %s\n", SoapySDRDevice_lastError());
+        goto error;
+    }
+
+    if (SOAPY.antenna && SoapySDRDevice_setAntenna(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, SOAPY.antenna) != 0) {
+        fprintf(stderr, "soapy: setAntenna(%s) failed: %s\n", SOAPY.antenna, SoapySDRDevice_lastError());
+
+        length = 0;
+        char** available_antennas = SoapySDRDevice_listAntennas(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &length);
+        fprintf(stderr, "soapy: available antennas: ");
+        for (size_t i = 0; i < length; i++) {
+            fprintf(stderr, "%s", available_antennas[i]);
+            if (i+1 < length) fprintf(stderr, ", ");
+        }
+        fprintf(stderr, "\n");
+        if (available_antennas)
+            SoapySDRStrings_clear(&available_antennas, length);
+
         goto error;
     }
 
@@ -289,10 +299,6 @@ bool soapyOpen(void)
         goto error;
     }
 
-    if (SOAPY.antenna && SoapySDRDevice_setAntenna(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, SOAPY.antenna) != 0) {
-        fprintf(stderr, "soapy: setAntenna failed: %s\n", SoapySDRDevice_lastError());
-        goto error;
-    }
 
     fprintf(stderr, "soapy: frequency is %.1f MHz\n",
             SoapySDRDevice_getFrequency(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) / 1e6);
