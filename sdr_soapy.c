@@ -21,6 +21,7 @@
 #include "dump1090.h"
 #include "sdr_soapy.h"
 
+#include <SoapySDR/Version.h>
 #include <SoapySDR/Device.h>
 #include <SoapySDR/Formats.h>
 
@@ -42,6 +43,33 @@ static struct {
     SoapySDRRange gain_range;
     int current_gain_step;
 } SOAPY;
+
+// Polyfill some differences between SoapySDR 0.7 and 0.8
+#if !defined(SOAPY_SDR_API_VERSION) || (SOAPY_SDR_API_VERSION < 0x00080000)
+
+static void polyfill_SoapySDR_free(void *ignored)
+{
+}
+
+static SoapySDRStream *polyfill_SoapySDR_setupStream(SoapySDRDevice *device,
+                                                     const int direction,
+                                                     const char *format,
+                                                     const size_t *channels,
+                                                     const size_t numChans,
+                                                     const SoapySDRKwargs *args)
+{
+    SoapySDRStream *result;
+
+    if (SoapySDR_setupStream(device, &result, direction, format, channels, numChans, args) == 0)
+        return result;
+    else
+        return NULL;
+}
+
+#define SoapySDR_free polyfill_SoapySDR_free
+#define SoapySDR_setupStream polyfill_SoapySDR_setupStream
+
+#endif /* pre-0.8 API */
 
 //
 // =============================== SoapySDR handling ==========================
@@ -204,7 +232,7 @@ bool soapyOpen(void)
     if (SOAPY.channel) {
         size_t supported_channels = SoapySDRDevice_getNumChannels(SOAPY.dev, SOAPY_SDR_RX);
         if (SOAPY.channel >= supported_channels) {
-            fprintf(stderr, "soapy: device only supports %ld channels, not %ld\n", supported_channels, SOAPY.channel + 1);
+            fprintf(stderr, "soapy: device only supports %zu channels, not %zu\n", supported_channels, SOAPY.channel + 1);
             goto error;
         }
     }
@@ -349,14 +377,16 @@ bool soapyOpen(void)
     }
 
     if (SoapySDRDevice_hasIQBalance(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
+#ifdef SOAPY_SDR_API_HAS_IQ_BALANCE_MODE
         fprintf(stderr, "soapy: IQ balance mode: %s\n",
                 SoapySDRDevice_getIQBalanceMode(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel) ? "automatic" : "manual");
+#endif
 
-          double balanceI;
-          double balanceQ;
-          if (!SoapySDRDevice_getIQBalance(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &balanceI, &balanceQ)) {
-              fprintf(stderr, "soapy: IQ balance is I=%.1f, Q=%.1f\n", balanceI, balanceQ);
-          }
+        double balanceI;
+        double balanceQ;
+        if (!SoapySDRDevice_getIQBalance(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel, &balanceI, &balanceQ)) {
+            fprintf(stderr, "soapy: IQ balance is I=%.1f, Q=%.1f\n", balanceI, balanceQ);
+        }
     }
 
     if (SoapySDRDevice_hasFrequencyCorrection(SOAPY.dev, SOAPY_SDR_RX, SOAPY.channel)) {
