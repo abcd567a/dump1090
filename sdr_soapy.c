@@ -122,28 +122,54 @@ bool soapyHandleOption(int argc, char **argv, int *jptr)
     return true;
 }
 
-bool soapyOpen(void)
+static void soapyShowDevices(SoapySDRKwargs *results, size_t length)
+{
+    for (size_t i = 0; i < length; ++i) {
+        fprintf(stderr, "  #%zu: ", i);
+        for (size_t j = 0; j < results[i].size; ++j) {
+            if (j) fprintf(stderr, ", ");
+            fprintf(stderr, "%s=%s", results[i].keys[j], results[i].vals[j]);
+        }
+        fprintf(stderr, "\n");
+    }
+}
+
+static void soapyShowAllDevices()
 {
     size_t length = 0;
     SoapySDRKwargs *results = SoapySDRDevice_enumerate(NULL, &length);
-    for (size_t i = 0; i < length; i++)
-    {
-        printf("Found device #%d: ", (int)i);
-        for (size_t j = 0; j < results[i].size; j++)
-        {
-            printf("%s=%s", results[i].keys[j], results[i].vals[j]);
-            if (j+1 < results[i].size) printf(", ");
-            if (!strncmp(results[i].keys[j], "driver", 6)) {
-                if (!strncmp(results[i].vals[j], "sdrplay", 7)) {
-                    SOAPY.dev_sdrplay = 1;
-                }
-            }
-        }
-        printf("\n");
+    soapyShowDevices(results, length);
+    SoapySDRKwargsList_clear(results, length);
+}
+
+bool soapyOpen(void)
+{
+    size_t length = 0;
+    SoapySDRKwargs *results = SoapySDRDevice_enumerateStrArgs(Modes.dev_name ? Modes.dev_name : "", &length);
+
+    if (length == 0) {
+        SoapySDRKwargsList_clear(results, length);
+        fprintf(stderr, "soapy: no matching devices found; available devices:\n");
+        soapyShowAllDevices();
+        return false;
     }
+    if (length > 1) {
+        fprintf(stderr, "soapy: more than one matching device found; matching devices:\n");
+        soapyShowDevices(results, length);
+        SoapySDRKwargsList_clear(results, length);
+        fprintf(stderr, "soapy: please select a single device with --device\n");
+        return false;
+    }
+
+    fprintf(stderr, "soapy: selected device:  ");
+    for (size_t j = 0; j < results[0].size; j++) {
+        if (j) fprintf(stderr, ", ");
+        fprintf(stderr, "%s=%s", results[0].keys[j], results[0].vals[j]);
+    }
+    fprintf(stderr, "\n");
     SoapySDRKwargsList_clear(results, length);
 
-    SOAPY.dev = SoapySDRDevice_makeStrArgs(Modes.dev_name);
+    SOAPY.dev = SoapySDRDevice_makeStrArgs(Modes.dev_name ? Modes.dev_name : "");
     if (!SOAPY.dev) {
         fprintf(stderr, "soapy: failed to create device: %s\n", SoapySDRDevice_lastError());
         return false;
