@@ -944,7 +944,7 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
 
     // navigation accuracy category - position
     if (mm->accuracy.nac_p_valid) {
-        p = safe_snprintf(p, end, "\"NACp\":%d,", mm->accuracy.nac_p);
+        p = safe_snprintf(p, end, "\"NACp\":%u,", mm->accuracy.nac_p);
     } else {
         p = safe_snprintf(p, end, "\"NACp\":null,");
     }
@@ -1819,7 +1819,7 @@ char *generateAircraftJson(const char *url_path, int *len) {
         if (a->adsb_version >= 0)
             p = safe_snprintf(p, end, ",\"version\":%d", a->adsb_version);
         if (trackDataValid(&a->nic_baro_valid))
-            p = safe_snprintf(p, end, ",\"nic_baro\":%u", a->nic_baro);
+            p = safe_snprintf(p, end, ",\"nic_baro\":%u", (unsigned) a->nic_baro);
         if (trackDataValid(&a->nac_p_valid))
             p = safe_snprintf(p, end, ",\"nac_p\":%u", a->nac_p);
         if (trackDataValid(&a->nac_v_valid))
@@ -2788,7 +2788,7 @@ static void writeFATSV()
             p = appendFATSVMeta(p, end, "sil_type",    a, &a->sil_valid,           "%s",       sil_type_enum_string(a->sil_type));
         }
         if (trackDataValid(&a->nic_baro_valid) && (forceEmit || a->nic_baro != a->fatsv_emitted_nic_baro)) {
-            p = appendFATSVMeta(p, end, "nic_baro",    a, &a->nic_baro_valid,      "%u",       a->nic_baro);
+            p = appendFATSVMeta(p, end, "nic_baro",    a, &a->nic_baro_valid,      "%u",       (unsigned) a->nic_baro);
         }
 
         // only emit alt, speed, latlon, track etc if they have been received since the last time
