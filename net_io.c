@@ -846,10 +846,10 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
         is_mlat_str = "true";
 
     p = safe_snprintf(p, end,
-            "{\"Icao_addr\":%d,"
+            "{\"Icao_addr\":%u,"
             "\"DF\":%d,\"CA\":%d,"
-            "\"TypeCode\":%d,"
-            "\"SubtypeCode\":%d,"
+            "\"TypeCode\":%u,"
+            "\"SubtypeCode\":%u,"
             "\"SignalLevel\":%f,"
             "\"Gain\":%f,"
             "\"IsMlat\":%s,",
@@ -977,7 +977,7 @@ static void modesSendStratuxOutput(struct modesMessage *mm, struct aircraft *a) 
     struct tm stTime_receive;
     time_t received = (time_t) (mm->sysTimestampMsg / 1000);
     gmtime_r(&received, &stTime_receive);
-    p = safe_snprintf(p, end, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03dZ\"",
+    p = safe_snprintf(p, end, "\"Timestamp\":\"%04d-%02d-%02dT%02d:%02d:%02d.%03uZ\"",
             (stTime_receive.tm_year+1900),(stTime_receive.tm_mon+1),
             stTime_receive.tm_mday, stTime_receive.tm_hour,
             stTime_receive.tm_min, stTime_receive.tm_sec,
@@ -1917,7 +1917,7 @@ static char * appendStatsJson(char *p,
         if (st->peak_signal_power > 0)
             p = safe_snprintf(p, end, ",\"peak_signal\":%.1f", 10 * log10(st->peak_signal_power));
 
-        p = safe_snprintf(p, end, ",\"strong_signals\":%d", st->strong_signal_count);
+        p = safe_snprintf(p, end, ",\"strong_signals\":%u", st->strong_signal_count);
         if (st->sdr_gain >= 0)
             p = safe_snprintf(p, end, ",\"gain_db\":%.1f", sdrGetGainDb(st->sdr_gain));
         p = safe_snprintf(p, end, "}");

@@ -631,7 +631,7 @@ static void adaptive_control_update()
             break;
 
         default:
-            fprintf(stderr, "adaptive: in a weird state (%d), trying to fix it\n", adaptive_range_state);
+            fprintf(stderr, "adaptive: in a weird state (%u), trying to fix it\n", (unsigned) adaptive_range_state);
             adaptive_range_state = RANGE_SCAN_IDLE;
             adaptive_range_rescan_timer = Modes.adaptive_range_rescan_delay;
             break;

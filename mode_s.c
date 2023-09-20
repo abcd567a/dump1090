@@ -1992,7 +1992,7 @@ void displayModesMessage(struct modesMessage *mm) {
         break;
 
     default:
-        printf("DF:%u", mm->msgtype);
+        printf("DF:%d", mm->msgtype);
         break;
     }
 
@@ -2193,8 +2193,8 @@ void displayModesMessage(struct modesMessage *mm) {
         if (mm->opstatus.cc_uat_in) printf("UATIN ");
         if (mm->opstatus.cc_poa) printf("POA ");
         if (mm->opstatus.cc_b2_low) printf("B2-LOW ");
-        if (mm->opstatus.cc_lw_valid) printf("L/W=%d ", mm->opstatus.cc_lw);
-        if (mm->opstatus.cc_antenna_offset) printf("GPS-OFFSET=%d ", mm->opstatus.cc_antenna_offset);
+        if (mm->opstatus.cc_lw_valid) printf("L/W=%u ", mm->opstatus.cc_lw);
+        if (mm->opstatus.cc_antenna_offset) printf("GPS-OFFSET=%u ", mm->opstatus.cc_antenna_offset);
         printf("\n");
 
         printf("    Operational modes:  ");
