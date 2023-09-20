@@ -167,10 +167,10 @@ struct aircraft {
     float         nav_qnh;        // Altimeter setting (QNH/QFE), millibars
 
     data_validity nav_altitude_mcp_valid;
-    unsigned      nav_altitude_mcp;    // FCU/MCP selected altitude
+    int           nav_altitude_mcp;    // FCU/MCP selected altitude
 
     data_validity nav_altitude_fms_valid;
-    unsigned      nav_altitude_fms;    // FMS selected altitude
+    int           nav_altitude_fms;    // FMS selected altitude
 
     data_validity nav_altitude_src_valid;
     nav_altitude_source_t nav_altitude_src;  // source of altitude used by automation
@@ -259,8 +259,8 @@ struct aircraft {
     unsigned      fatsv_emitted_tas;              //      -"-         TAS
     float         fatsv_emitted_mach;             //      -"-         Mach number
     airground_t   fatsv_emitted_airground;        //      -"-         air/ground state
-    unsigned      fatsv_emitted_nav_altitude_mcp; //      -"-         MCP altitude
-    unsigned      fatsv_emitted_nav_altitude_fms; //      -"-         FMS altitude
+    int           fatsv_emitted_nav_altitude_mcp; //      -"-         MCP altitude
+    int           fatsv_emitted_nav_altitude_fms; //      -"-         FMS altitude
     nav_altitude_source_t fatsv_emitted_nav_altitude_src; // -"-      automation altitude source
     float         fatsv_emitted_nav_heading;      //      -"-         target heading
     nav_modes_t   fatsv_emitted_nav_modes;        //      -"-         enabled navigation modes

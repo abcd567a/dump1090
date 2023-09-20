@@ -2706,8 +2706,8 @@ static void writeFATSV()
             (trackDataValid(&a->mach_valid) && fabs(a->mach - a->fatsv_emitted_mach) >= 0.02);
 
         int immediate =
-            (trackDataValid(&a->nav_altitude_mcp_valid) && unsigned_difference(a->nav_altitude_mcp, a->fatsv_emitted_nav_altitude_mcp) > 50) ||
-            (trackDataValid(&a->nav_altitude_fms_valid) && unsigned_difference(a->nav_altitude_fms, a->fatsv_emitted_nav_altitude_fms) > 50) ||
+            (trackDataValid(&a->nav_altitude_mcp_valid) && abs(a->nav_altitude_mcp - a->fatsv_emitted_nav_altitude_mcp) > 50) ||
+            (trackDataValid(&a->nav_altitude_fms_valid) && abs(a->nav_altitude_fms - a->fatsv_emitted_nav_altitude_fms) > 50) ||
             (trackDataValid(&a->nav_altitude_src_valid) && a->nav_altitude_src != a->fatsv_emitted_nav_altitude_src) ||
             (trackDataValid(&a->nav_heading_valid) && heading_difference(a->nav_heading, a->fatsv_emitted_nav_heading) > 2) ||
             (trackDataValid(&a->nav_modes_valid) && a->nav_modes != a->fatsv_emitted_nav_modes) ||
@@ -2821,8 +2821,8 @@ static void writeFATSV()
         p = appendFATSVMeta(p, end, "roll",        a, &a->roll_valid,           "%.1f", a->roll);
         p = appendFATSVMeta(p, end, "heading_magnetic", a, &a->mag_heading_valid, "%.1f", a->mag_heading);
         p = appendFATSVMeta(p, end, "heading_true", a, &a->true_heading_valid,    "%.1f", a->true_heading);
-        p = appendFATSVMeta(p, end, "nav_alt_mcp", a, &a->nav_altitude_mcp_valid, "%u",   a->nav_altitude_mcp);
-        p = appendFATSVMeta(p, end, "nav_alt_fms", a, &a->nav_altitude_fms_valid, "%u",   a->nav_altitude_fms);
+        p = appendFATSVMeta(p, end, "nav_alt_mcp", a, &a->nav_altitude_mcp_valid, "%d",   a->nav_altitude_mcp);
+        p = appendFATSVMeta(p, end, "nav_alt_fms", a, &a->nav_altitude_fms_valid, "%d",   a->nav_altitude_fms);
         p = appendFATSVMeta(p, end, "nav_alt_src", a, &a->nav_altitude_src_valid, "%s", nav_altitude_source_enum_string(a->nav_altitude_src));
         p = appendFATSVMeta(p, end, "nav_heading", a, &a->nav_heading_valid,    "%.1f", a->nav_heading);
         p = appendFATSVMeta(p, end, "nav_modes",   a, &a->nav_modes_valid,      "{%s}", nav_modes_flags_string(a->nav_modes));

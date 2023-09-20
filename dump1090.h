@@ -628,8 +628,8 @@ struct modesMessage {
 
         float    heading;       // heading, degrees (0-359) (could be magnetic or true heading; magnetic recommended)
         heading_type_t heading_type;
-        unsigned fms_altitude;  // FMS selected altitude
-        unsigned mcp_altitude;  // MCP/FCU selected altitude
+        int      fms_altitude;  // FMS selected altitude
+        int      mcp_altitude;  // MCP/FCU selected altitude
         float    qnh;           // altimeter setting (QFE or QNH/QNE), millibars
 
         nav_altitude_source_t altitude_source;

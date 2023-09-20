@@ -2212,9 +2212,9 @@ void displayModesMessage(struct modesMessage *mm) {
     if (mm->nav.heading_valid)
         printf("  Selected heading:        %.1f\n", mm->nav.heading);
     if (mm->nav.fms_altitude_valid)
-        printf("  FMS selected altitude:   %u ft\n", mm->nav.fms_altitude);
+        printf("  FMS selected altitude:   %d ft\n", mm->nav.fms_altitude);
     if (mm->nav.mcp_altitude_valid)
-        printf("  MCP selected altitude:   %u ft\n", mm->nav.mcp_altitude);
+        printf("  MCP selected altitude:   %d ft\n", mm->nav.mcp_altitude);
     if (mm->nav.qnh_valid)
         printf("  QNH:                     %.1f millibars\n", mm->nav.qnh);
     if (mm->nav.altitude_source != NAV_ALT_INVALID) {
