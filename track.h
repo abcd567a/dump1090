@@ -261,7 +261,7 @@ struct aircraft {
     airground_t   fatsv_emitted_airground;        //      -"-         air/ground state
     unsigned      fatsv_emitted_nav_altitude_mcp; //      -"-         MCP altitude
     unsigned      fatsv_emitted_nav_altitude_fms; //      -"-         FMS altitude
-    unsigned      fatsv_emitted_nav_altitude_src; //      -"-         automation altitude source
+    nav_altitude_source_t fatsv_emitted_nav_altitude_src; // -"-      automation altitude source
     float         fatsv_emitted_nav_heading;      //      -"-         target heading
     nav_modes_t   fatsv_emitted_nav_modes;        //      -"-         enabled navigation modes
     float         fatsv_emitted_nav_qnh;          //      -"-         altimeter setting
