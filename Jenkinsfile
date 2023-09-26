@@ -57,7 +57,7 @@ node(label: 'raspberrypi') {
         }
 
         stage("Test install on ${dist} (${arch})") {
-            sh "BRANCH=${env.BRANCH_NAME} ARCH=${arch} /build/pi-builder/scripts/validate-packages.sh ${dist} ${results}/dump1090-fa_*.deb"
+            sh "BRANCH=${env.BRANCH_NAME} ARCH=${arch} /build/pi-builder/scripts/validate-packages.sh ${dist} ${resultdir}/dump1090-fa_*.deb"
         }
     }
 
