@@ -23,8 +23,7 @@ node(label: 'raspberrypi') {
       ["bookworm", "arm64"],
       ["bullseye", "armhf"],
       ["bullseye", "arm64"],
-      ["buster", "armhf"],
-      ["stretch", "armhf"]
+      ["buster", "armhf"]
     ]
 
     def pkgdirs = [:]
