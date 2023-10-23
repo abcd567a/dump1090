@@ -1,6 +1,9 @@
 dump1090-fa (9.0~dev) UNRELEASED; urgency=medium
 
-  * in progress
+  * dump1090: SoapySDR support (courtesy @bkoehm, PR #209)
+  * dump1090: fix handling of negative FMS altitudes in DO-260A messages
+  * packaging: add bookworm, arm64 support
+  * packaging: discontinue stretch support
 
  -- Oliver Jowett <oliver.jowett@flightaware.com>  Mon, 07 Aug 2023 19:29:07 +0800
 
