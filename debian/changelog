@@ -4,6 +4,7 @@ dump1090-fa (9.0~dev) UNRELEASED; urgency=medium
   * dump1090: fix handling of negative FMS altitudes in DO-260A messages
   * packaging: add bookworm, arm64 support
   * packaging: discontinue stretch support
+  * tools: update tools/csv-to-json.py for Python 3
 
  -- Oliver Jowett <oliver.jowett@flightaware.com>  Mon, 07 Aug 2023 19:29:07 +0800
 
