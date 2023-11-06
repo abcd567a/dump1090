@@ -1,4 +1,4 @@
-dump1090-fa (9.0~dev) UNRELEASED; urgency=medium
+dump1090-fa (9.0) stable; urgency=medium
 
   * dump1090: SoapySDR support (courtesy @bkoehm, PR #209)
   * dump1090: fix handling of negative FMS altitudes in DO-260A messages
@@ -7,7 +7,7 @@ dump1090-fa (9.0~dev) UNRELEASED; urgency=medium
   * packaging: discontinue stretch support
   * tools: update tools/csv-to-json.py for Python 3
 
- -- Oliver Jowett <oliver.jowett@flightaware.com>  Mon, 07 Aug 2023 19:29:07 +0800
+ -- Oliver Jowett <oliver.jowett@flightaware.com>  Mon, 06 Nov 2023 21:34:26 +0800
 
 dump1090-fa (8.2) stable; urgency=medium
 
