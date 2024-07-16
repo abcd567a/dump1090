@@ -113,30 +113,27 @@ function createBaseLayers() {
                 }));
         }
 
-        if (ChartBundleLayers) {
-                var chartbundleTypes = {
-                        sec: "Sectional Charts",
-                        tac: "Terminal Area Charts",
-                        hel: "Helicopter Charts",
-                        enrl: "IFR Enroute Low Charts",
-                        enra: "IFR Area Charts",
-                        enrh: "IFR Enroute High Charts",
-                        secgrids: "Sect. w/ SAR grid"
-                };
+        if (FAALayers) {
+                const faa_tiles = [
+                        { name: 'VFR_Sectional', title: 'FAA VFR Sectional Chart' }, 
+                        { name: 'IFR_AreaLow', title: 'FAA IFR Area Low' },
+                        { name: 'IFR_High', title: 'FAA IFR High'}
+                ]
 
-                for (var type in chartbundleTypes) {
+                faa_tiles.forEach(tile => {
                         us.push(new ol.layer.Tile({
-                                source: new ol.source.TileWMS({
-                                        url: 'http://wms.chartbundle.com/wms',
-                                        params: {LAYERS: type},
-                                        projection: 'EPSG:3857',
-                                        attributions: 'Tiles courtesy of <a href="http://www.chartbundle.com/">ChartBundle</a>'
+                                source: new ol.source.XYZ({
+                                    url: `https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/${tile.name}/MapServer/tile/{z}/{y}/{x}`,
+                                    attributions: 'Tiles courtesy of <a href="http://tiles.arcgis.com/">arcgis.com</a>',
+                                    attributionsCollapsible: false,
+                                    minZoom: 8,
+                                    transition: 0,
                                 }),
-                                name: 'chartbundle_' + type,
-                                title: chartbundleTypes[type],
-                                type: 'base',
-                                group: 'chartbundle'}));
-                }
+                                name: tile.name,
+                                title: tile.title,
+                                type: 'base'
+                        }));
+                });
         }
 
         var nexrad_bottomLeft = ol.proj.fromLonLat([-171.0,9.0]);
