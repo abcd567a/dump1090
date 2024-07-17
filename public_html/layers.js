@@ -117,7 +117,7 @@ function createBaseLayers() {
                 const faa_tiles = [
                         { name: 'VFR_Sectional', title: 'FAA VFR Sectional Chart' }, 
                         { name: 'IFR_AreaLow', title: 'FAA IFR Area Low' },
-                        { name: 'IFR_High', title: 'FAA IFR High'}
+                        { name: 'IFR_High', title: 'FAA IFR High'},
                 ]
 
                 faa_tiles.forEach(tile => {
