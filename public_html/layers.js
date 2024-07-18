@@ -131,7 +131,7 @@ function createBaseLayers() {
                                 }),
                                 name: tile.name,
                                 title: tile.title,
-                                type: 'base'
+                                type: 'overlay'
                         }));
                 });
         }
