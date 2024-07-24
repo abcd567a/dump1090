@@ -3,6 +3,19 @@
 
 // Base layers configuration
 
+const boundsOfUSA = [ [-194.796845, 73.124945] ,[-179.980517, 5.965754], [-62.470849, 20.303418], [-60.017658,48.690960]]
+
+function bound(coords) {
+        let e =  ol.extent.boundingExtent(coords);
+        e = transform(e);
+        return e;
+}
+
+function transform(extent) {
+        return ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
+}
+
+
 function createBaseLayers() {
         var layers = [];
 
@@ -113,25 +126,30 @@ function createBaseLayers() {
                 }));
         }
 
+        let defaultUSAExtent = bound(boundsOfUSA)
         if (FAALayers) {
                 const faa_tiles = [
-                        { name: 'VFR_Sectional', title: 'FAA VFR Sectional Chart' }, 
-                        { name: 'IFR_AreaLow', title: 'FAA IFR Area Low' },
-                        { name: 'IFR_High', title: 'FAA IFR High'},
+                        { name: 'VFR_Sectional', title: 'FAA VFR Sectional Chart' , minZoom: 8, maxZoom: 12, extent: defaultUSAExtent}, 
+                        { name: 'IFR_AreaLow', title: 'FAA IFR Area Low', minZoom: 8, maxZoom: 11, extent: defaultUSAExtent},
+                        { name: 'IFR_High', title: 'FAA IFR High',  minZoom: 7, maxZoom: 11, extent: null},
+                        { name: 'VFR_Terminal', title: 'VFR Terminal Chart', minZoom: 10, maxZoom: 12, extent: defaultUSAExtent}
                 ]
 
                 faa_tiles.forEach(tile => {
                         us.push(new ol.layer.Tile({
+                                extent: defaultUSAExtent,
                                 source: new ol.source.XYZ({
                                     url: `https://tiles.arcgis.com/tiles/ssFJjBXIUyZDrSYZ/arcgis/rest/services/${tile.name}/MapServer/tile/{z}/{y}/{x}`,
-                                    attributions: 'Tiles courtesy of <a href="http://tiles.arcgis.com/">arcgis.com</a>',
+                                    attributions: 'Tiles courtesy of <a href="https://faa.maps.arcgis.com/home/">FAA</a>',
                                     attributionsCollapsible: false,
-                                    minZoom: 8,
                                     transition: 0,
+                                    minZoom: tile.minZoom,
+                                    maxZoom: tile.maxZoom
                                 }),
                                 name: tile.name,
                                 title: tile.title,
-                                type: 'base'
+                                type: 'overlay',
+                                visible: false
                         }));
                 });
         }
