@@ -1,16 +1,14 @@
-<<<<<<< Updated upstream
+dump1090-fa (10.0~dev) UNRELEASED; urgency=medium
+
+  * in development
+
+ -- Nick Wan <nicholas.wan@flightaware.com>  Tue, 03 Dec 2024 21:08:26 +0000
+
 dump1090-fa (9.1~dev) UNRELEASED; urgency=medium
 
   * in development
 
  -- Oliver Jowett <oliver.jowett@flightaware.com>  Fri, 10 Nov 2023 18:04:49 +0800
-=======
-dump1090-fa (10.0~dev) UNRELEASED; urgency=medium
-
-  * No change release for 10.0~dev
-
- -- Nick WAn <nicholas.wan@flightaware.com>  Tue, 03 Dec 2024 21:08:26 +0000
->>>>>>> Stashed changes
 
 dump1090-fa (9.0) stable; urgency=medium
 
