@@ -1,8 +1,9 @@
-dump1090-fa (10.0~dev) UNRELEASED; urgency=medium
+dump1090-fa (10.0) stable; urgency=medium
 
-  * in development
+  [ Nicholas Wan ]
+  * Bookworm Release
 
- -- Nick Wan <nicholas.wan@flightaware.com>  Tue, 03 Dec 2024 21:08:26 +0000
+ -- Nicholas Wan <nicholas.wan@flightaware.com>  Wed, 26 Feb 2025 16:16:10 +0000
 
 dump1090-fa (9.1~dev) UNRELEASED; urgency=medium
 
