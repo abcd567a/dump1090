@@ -1,6 +1,5 @@
 dump1090-fa (10.0) stable; urgency=medium
 
-  [ Nicholas Wan ]
   * Bookworm Release
 
  -- Nicholas Wan <nicholas.wan@flightaware.com>  Wed, 26 Feb 2025 16:16:10 +0000
