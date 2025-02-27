@@ -1,4 +1,4 @@
-dump1090-fa (10.0) UNRELEASED; urgency=medium
+dump1090-fa (10.0) stable; urgency=medium
 
   * Pass options to all SDR drivers for handling
   * soapysdr: --enable-agc doesn't take an option value, don't require one
