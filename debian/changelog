@@ -1,6 +1,6 @@
-dump1090-fa (10.0.2) UNRELEASED; urgency=medium
+dump1090-fa (10.0.2~dev) UNRELEASED; urgency=medium
 
-  * No change release for 10.0.2
+  * In development
 
  -- Eric Tran <eric.tran@flightaware.com>  Tue, 13 May 2025 22:58:00 -0600
 
