@@ -51,6 +51,12 @@ case "$DIST" in
     bookworm)
         ;;
 
+    trixie)
+        ;;
+    
+    forky)
+        ;;
+        
     *)
         echo "Don't know how to build for a distribution named $DIST" >&2
         exit 1
